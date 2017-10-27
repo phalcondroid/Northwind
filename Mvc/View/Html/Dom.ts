@@ -4,6 +4,8 @@ namespace Northwind.Html
 {
     export class Dom
     {
+        private di;
+
         /**
          * 
          */
@@ -28,7 +30,7 @@ namespace Northwind.Html
             let adapter = new Northwind.Tag.TagAdapter(
                 document.getElementById(id)
             );
-            return adapter.get(this);
+            return adapter.get();
         }
 
         /**
@@ -45,9 +47,7 @@ namespace Northwind.Html
                     elements[key]
                 );
                 result.push(
-                    adapter.get(
-                        this
-                    )
+                    adapter.get()
                 );
             }
 
@@ -71,9 +71,7 @@ namespace Northwind.Html
                     elements[key]
                 );
                 result.push(
-                    adapter.get(
-                        this
-                    )
+                    adapter.get()
                 );
             }
             if (result.length == 1) {
@@ -97,6 +95,16 @@ namespace Northwind.Html
         public setElement(element)
         {
             this.element = element;
+        }
+
+        public setDi(di)
+        {
+            this.di = di;
+        }
+
+        public getDi()
+        {
+            return this.di;
         }
     }
 }

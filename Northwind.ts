@@ -2,6 +2,7 @@
 ///<reference path="./Environment/Scope.ts"/>
 ///<reference path="./Environment/Config.ts"/>
 ///<reference path="./Helper/ArrayHelper.ts"/>
+///<reference path="./Service/Container.ts"/>
 
 namespace Northwind
 {
@@ -71,9 +72,8 @@ namespace Northwind
          */
         private resolveConfig(di)
         {
-            var positionArray = new Array();
-
-            var configData = this.config;
+            let positionArray = new Array();
+            let configData = this.config;
 
             for (let key in configData) {
                 switch (key) {
@@ -108,7 +108,7 @@ namespace Northwind
          */
         private resolveUrl(di, urls)
         {
-            var url = new Northwind.Url.Url();
+            let url = new Northwind.Url.Url();
 
             if (Array.isArray(urls)) {
                 for (let key in urls) {
@@ -122,7 +122,7 @@ namespace Northwind
                     }
                 }
             } else if(typeof url == "object") {
-                for (var keyUrlFor in urls) {
+                for (let keyUrlFor in urls) {
                     url.set(
                         keyUrlFor,
                         urls[keyUrlFor]
@@ -154,10 +154,9 @@ namespace Northwind
 
                     if (typeof controllers[key] != "undefined") {
 
-                        var temp = new controllers[key];
+                        let temp = new controllers[key];
 
                         if (temp instanceof Northwind.Mvc.Controller) {
-
                             temp.setDi(di);
                             temp.initialize();
                             this.resolvePropertiesController(
@@ -179,9 +178,12 @@ namespace Northwind
             }
         }
 
+        /**
+         *
+         */
         private resolvePropertiesController(controller : Northwind.Mvc.Controller)
         {
-            var restricted = [
+            let restricted = [
                 "constructor",
                 "initialize",
                 "getById",
@@ -193,29 +195,31 @@ namespace Northwind
                 "setUrl"
             ];
 
-            for (var key in controller) {
+            for (let key in controller) {
                 switch (typeof controller[key]) {
                     case "function":
-                            if (!Northwind.Helper.ArrayHelper.inArray(restricted, key)) {
-                                var component = this.domManager.getById(key);
-                                if (component) {
-                                    controller[key](component);
-                                }
+                        if (!Northwind.Helper.ArrayHelper.inArray(restricted, key)) {
+                            let component = this.domManager.getById(key);
+                            if (component) {
+                                controller[key](component);
                             }
-                        break;
+                        }
+                    break;
                 }
             }
-            controller.inject();
         }
 
         /**
-         *
+         * 
          */
         private resolveServices(di, service)
         {
             new service().initialize(di);
         }
 
+        /**
+         *
+         */
         public catch(fn)
         {
             this.catchErrors = fn;
@@ -223,12 +227,12 @@ namespace Northwind
         }
 
         /**
-         *
+         * 
          */
         public start()
         {
             try {
-                var di = new Northwind.Service.FactoryDefault;
+                let di = new Northwind.Service.Container;
                 this.resolveConfig(di);
             } catch (e) {
                 this.catchErrors(e);

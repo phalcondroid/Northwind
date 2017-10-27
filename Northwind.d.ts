@@ -1,14 +1,4 @@
 declare namespace Northwind.Environment {
-    class Scope {
-        static LOCAL: number;
-        static DEV: number;
-        static TEST: number;
-        static QA: number;
-        static STAGING: number;
-        static PRODUCTION: number;
-    }
-}
-declare namespace Northwind.Environment {
     class Config {
         private config;
         /**
@@ -27,72 +17,14 @@ declare namespace Northwind.Environment {
         getConfig(env?: number): Object;
     }
 }
-declare namespace Northwind.Helper {
-    class ArrayHelper {
-        constructor();
-        static inArray(container: any[], element: any): boolean;
-    }
-}
-declare namespace Northwind {
-    class Application {
-        /**
-         *
-         */
-        private config;
-        /**
-         *
-         */
-        private try;
-        /**
-         *
-         */
-        private env;
-        /**
-         *
-         */
-        private catchErrors;
-        /**
-         *
-         */
-        private domManager;
-        /**
-         *
-         */
-        constructor();
-        /**
-         *
-         */
-        setScope(env: number): void;
-        /**
-         *
-         */
-        setConfig(config: Northwind.Environment.Config): void;
-        /**
-         *
-         */
-        getConfig(): Object;
-        /**
-         *
-         */
-        private resolveConfig(di);
-        /**
-         *
-         */
-        private resolveUrl(di, urls);
-        /**
-         *
-         */
-        private resolveControllers(di, controllers);
-        private resolvePropertiesController(controller);
-        /**
-         *
-         */
-        private resolveServices(di, service);
-        catch(fn: any): this;
-        /**
-         *
-         */
-        start(): void;
+declare namespace Northwind.Environment {
+    class Scope {
+        static LOCAL: number;
+        static DEV: number;
+        static TEST: number;
+        static QA: number;
+        static STAGING: number;
+        static PRODUCTION: number;
     }
 }
 declare namespace Northwind.Errors {
@@ -110,16 +42,6 @@ declare namespace Northwind.Errors {
         static NOT_VALID_OBJECT: number;
     }
 }
-declare namespace Northwind {
-    class EventManager {
-        private events;
-        attach(controller: any, event: any): void;
-        detach(controller: any, event: any): void;
-        detachAll(): void;
-        fire(controller: any, event: any, callback: any): void;
-        getListeners(): void;
-    }
-}
 declare namespace Northwind.Events {
     interface ManagerInterface {
         /**
@@ -128,77 +50,135 @@ declare namespace Northwind.Events {
          * @param string eventType
          * @param object|callable handler
          */
-        attach(controller: any, event: any): any;
+        attach: {
+            (component: Northwind.Html.Component, event: string, fn: Function);
+            (component: Northwind.Html.Component, event: string, other: number, fn: Function);
+        };
         /**
          * Detach the listener from the events manager
          *
          * @param string eventType
          * @param object handler
          */
-        detach(eventType: any, handler: any): any;
+        detach(event: any, handler: any): any;
+        /**
+         *
+         */
+        detachComponent(component: Northwind.Html.Component): any;
         /**
          * Removes all events from the EventsManager
          */
-        detachAll(controller: any): any;
+        detachAll(): any;
         /**
          * Fires an event in the events manager causing the active listeners
          */
-        fire(controller: any, event: any, callback: any): any;
+        trigger(controller: any, event: any, callback: any): any;
+    }
+}
+declare namespace Northwind.Service {
+    class Container {
+        private service;
+        set(serviceName: any, content: any): void;
+        get(serviceName: any): any;
+        hasKey(serviceName: any): boolean;
+        setPersistent(serviceName: any, content: any): void;
+        getPersistent(serviceName: any): any;
+    }
+}
+declare namespace Northwind.Network {
+    class Ajax implements Service.InjectionAwareInterface {
+        di: Service.Container;
+        private httpRequest;
+        private context;
+        private method;
+        private parameters;
+        private error;
+        private url;
+        private container;
+        responseFn: Function;
+        bfSendFn: Function;
         /**
-         * Returns all the attached listeners of a certain type
          *
-         * @param string type
-         * @return array
          */
-        getListeners(type: any): any;
-    }
-}
-declare namespace Northwind.Events {
-    interface EventsAwareInterface {
-        /**
-         * Sets the events manager
-         */
-        setEventsManager(eventsManager: any): any;
-        /**
-         * Returns the internal event manager
-         */
-        getEventsManager(): Northwind.Events.ManagerInterface;
-    }
-}
-declare namespace Northwind.Helper {
-    class MathHelper {
-        constructor();
-        static getRandom(init: any, last: any): number;
-        static getUUID(): string;
-        static getS4(): string;
-    }
-}
-declare namespace Northwind.Helper {
-    class StringHelper {
         constructor();
         /**
-         * [sanitizeString description]
-         * @param  {string} str [description]
-         * @return {[type]}     [description]
+         *
          */
-        static sanitizeString(str: string): string;
+        setContext(ctx: Object): void;
         /**
-         * [capitalize description]
-         * @param  {[type]} str [description]
-         * @return {[type]}     [description]
+         *
          */
-        static capitalize(str: any): any;
-    }
-}
-declare namespace Northwind.Helper {
-    class Uuid {
-        constructor();
-        static get(): string;
-    }
-}
-declare namespace Northwind.Helper {
-    class Validator {
-        static validStructArray(data: any[]): boolean;
+        getContext(): Object;
+        /**
+         *
+         */
+        setUrl(url: any): this;
+        /**
+         *
+         */
+        getUrl(): string;
+        /**
+         *
+         */
+        set(key: any, value: any): void;
+        /**
+         *
+         */
+        get(key: any): any;
+        /**
+         *
+         */
+        setParams(params: any, value?: any): this;
+        /**
+         *
+         */
+        POST(): this;
+        /**
+         *
+         */
+        PUT(): this;
+        /**
+         *
+         */
+        DELETE(): this;
+        /**
+         *
+         */
+        GET(): this;
+        /**
+         *
+         */
+        setMethod(method: string): this;
+        addContext(): void;
+        /**
+         *
+         */
+        response(responseFunction: Function): this;
+        /**
+         *
+         */
+        beforeSend(fn: Function): void;
+        /**
+         *
+         */
+        private setHeaders();
+        /**
+         *
+         */
+        getError(errorFunction: any): void;
+        clear(): void;
+        /**
+         *
+         */
+        send(fn?: any): void;
+        /**
+         *
+         */
+        setDi(di: Service.Container): void;
+        /**
+         *
+         */
+        getDi(): Service.Container;
     }
 }
 declare namespace Northwind.Html {
@@ -206,10 +186,8 @@ declare namespace Northwind.Html {
      *
      * @type
      */
-    class Component implements Northwind.Service.InjectionAwareInterface {
+    class Component extends Northwind.Service.FactoryDefault {
         static NO_CONTEXT: number;
-        di: any;
-        em: Northwind.Persistence.EntityManager;
         /**
          * Node javascript element
          */
@@ -264,14 +242,6 @@ declare namespace Northwind.Html {
         /**
          *
          */
-        getContext(): any;
-        /**
-         *
-         */
-        setContext(ctx: any): void;
-        /**
-         *
-         */
         setElement(element: any): this;
         /**
          *
@@ -281,18 +251,6 @@ declare namespace Northwind.Html {
          *
          */
         hide(): this;
-        /**
-         *
-         */
-        getById(id: string): any;
-        /**
-         *
-         */
-        getByTag(name: string): any;
-        /**
-         *
-         */
-        getByClass(name: string): any;
         /**
          *
          */
@@ -333,47 +291,6 @@ declare namespace Northwind.Html {
          * @return {[type]} [description]
          */
         addChild(element: any): this;
-        /**
-         * [click description]
-         * @param  {Function} fn [description]
-         * @return {[type]}      [description]
-         */
-        click(fn: any): this;
-        /**
-         *
-         */
-        doubleClick(fn: any): this;
-        /**
-         *
-         * @return {[type]} [description]
-         */
-        change(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        keypress(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        keydown(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        keyup(fn: any): this;
-        paste(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        blur(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        focus(fn: any): this;
         destroyEvent(event: any): void;
         /**
          *
@@ -487,27 +404,6 @@ declare namespace Northwind.Html {
          *
          */
         remove(element?: boolean): void;
-        /**
-         *
-         */
-        setId(id: any): this;
-        /**
-         *
-         */
-        getId(): any;
-        /**
-         *
-         */
-        setDi(di: any): void;
-        /**
-         *
-         */
-        getDi(): any;
-    }
-}
-declare namespace Northwind.Interfaces {
-    interface ITagSignature {
-        new (context: any, params?: Object): any;
     }
 }
 declare namespace Northwind.Tag {
@@ -518,7 +414,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, p1?: Object);
+        constructor();
         /**
          * [favIcon description]
          * @return {[type]} [description]
@@ -541,7 +437,19 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, p1?: Object);
+        constructor();
+    }
+}
+declare namespace Northwind.Mvc {
+    class Controller extends Service.Container {
+        private di;
+        constructor();
+        /**
+         *
+         */
+        initialize(): void;
+        setDi(di: any): void;
+        getDi(): any;
     }
 }
 declare namespace Northwind.Tag {
@@ -553,7 +461,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, p1?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -565,7 +473,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -577,7 +485,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -589,7 +497,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -601,7 +509,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -613,7 +521,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -625,7 +533,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -637,7 +545,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -649,7 +557,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -661,7 +569,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -670,7 +578,7 @@ declare namespace Northwind.Tag {
      * @type {[type]}
      */
     class Body extends Northwind.Html.Component {
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -682,7 +590,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -693,7 +601,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         /**
          *
          * @param
@@ -746,7 +654,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -758,7 +666,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -770,7 +678,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -782,7 +690,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -794,7 +702,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -806,7 +714,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -818,7 +726,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -830,7 +738,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -842,7 +750,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -854,7 +762,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, p1?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -866,7 +774,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -878,7 +786,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -890,7 +798,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -902,7 +810,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -914,7 +822,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -926,7 +834,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -938,7 +846,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -950,7 +858,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -962,7 +870,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -974,7 +882,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -986,7 +894,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -998,7 +906,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1010,7 +918,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1022,7 +930,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1034,7 +942,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1046,7 +954,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1058,7 +966,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1070,7 +978,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1082,7 +990,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1094,7 +1002,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1106,7 +1014,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1118,7 +1026,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1130,7 +1038,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         width(width: any): this;
         height(height: any): this;
         src(src: any): this;
@@ -1145,7 +1053,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         /**
          *
          */
@@ -1171,7 +1079,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1183,7 +1091,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1195,7 +1103,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1207,7 +1115,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1219,7 +1127,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1231,7 +1139,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1243,7 +1151,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1255,7 +1163,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1267,7 +1175,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1279,7 +1187,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1291,7 +1199,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1303,7 +1211,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1315,7 +1223,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1327,7 +1235,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1339,7 +1247,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1351,7 +1259,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1363,7 +1271,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1375,7 +1283,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1387,7 +1295,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         setValue(val: any): this;
         /**
          *
@@ -1412,7 +1320,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1424,7 +1332,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1436,7 +1344,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1448,7 +1356,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1460,7 +1368,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1472,7 +1380,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1484,7 +1392,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1496,7 +1404,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1508,7 +1416,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1520,7 +1428,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1532,7 +1440,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1544,7 +1452,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1556,7 +1464,13 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
+    }
+}
+declare namespace Northwind.Helper {
+    class Uuid {
+        constructor();
+        static get(): string;
     }
 }
 declare namespace Northwind.Mvc {
@@ -1585,7 +1499,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         /**
          *
          */
@@ -1620,7 +1534,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1632,7 +1546,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1644,7 +1558,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1656,7 +1570,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1668,7 +1582,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1680,7 +1594,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1703,7 +1617,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         /**
          *
          */
@@ -1776,7 +1690,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1788,7 +1702,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         /**
          *
          * @param  {[type]} num [description]
@@ -1812,7 +1726,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1824,7 +1738,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1836,7 +1750,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
         colspan(cols: any): this;
         /**
          *
@@ -1855,7 +1769,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1867,7 +1781,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1879,7 +1793,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1891,7 +1805,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1903,7 +1817,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1915,7 +1829,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1927,7 +1841,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1939,7 +1853,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1951,7 +1865,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1963,7 +1877,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -1979,272 +1893,216 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        get(context: any): any;
+        get(): any;
+    }
+}
+declare namespace Northwind.Html {
+    class Dom {
+        private di;
+        /**
+         *
+         */
+        private element;
+        /**
+         *
+         * @param element
+         */
+        constructor(element?: any);
+        /**
+         *
+         * @param id
+         */
+        getById(id: string, context?: any): any;
+        /**
+         *
+         */
+        getByTag(name: string, context?: any): any;
+        /**
+         *
+         */
+        getByClass(name: string, context?: any): any;
+        /**
+         *
+         */
+        getElement(): any;
+        /**
+         *
+         * @param element
+         */
+        setElement(element: any): void;
+        setDi(di: any): void;
+        getDi(): any;
+    }
+}
+declare namespace Northwind.Tag {
+    class FactoryTag {
+        /**
+         *
+         */
+        private context;
+        /**
+         *
+         */
+        constructor(ctx: any);
+        /**
+         *
+         */
+        get(tagName: any): Html.Component;
     }
 }
 declare namespace Northwind.Service {
-    class Injectable implements Northwind.Service.InjectionAwareInterface {
-        di: any;
+    class FactoryDefault extends Northwind.Service.Container {
+        private di;
         constructor();
-        inject(): void;
+        getDom(): any;
+        getAjax(): any;
+        getEntityManager(): any;
+        getContainer(): any;
+        getTag(name: string): any;
+        getEvent(): any;
+        setDi(di: any): this;
+        getDi(): this;
+    }
+}
+declare namespace Northwind {
+    class Events {
+        private events;
+        private params;
+        private others;
+        private element;
+        private static AFTER;
+        private static BEFORE;
+        private static ONCREATE;
+        private static ONDELETE;
+        private static ONCHANGE;
+        private nativeEvents;
+        contructor(): void;
         /**
          *
          */
-        getDi(): Northwind.Service.Container;
+        attach(component: Northwind.Html.Component, event: string, fn: any): this;
         /**
          *
          */
-        setDi(di: Northwind.Service.Container): void;
+        add(otherEvent: number): this;
+        /**
+         *
+         */
+        detachComponent(component: Northwind.Html.Component): this;
+        /**
+         *
+         */
+        detach(component: any, event: any, params?: boolean): this;
+        /**
+         *
+         */
+        trigger(controller: any, event: any, callback: any, params?: {}): this;
+        /**
+         *
+         */
+        detachAll(): this;
+        /**
+         *
+         */
+        tag(component: any): this;
+        /**
+         *
+         * @param  {Function} fn [description]
+         * @return {[type]}      [description]
+         */
+        click(fn: any): this;
+        /**
+         *
+         */
+        doubleClick(fn: any): this;
+        /**
+         *
+         * @return {[type]} [description]
+         */
+        change(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        keypress(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        keydown(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        keyup(fn: any): this;
+        paste(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        blur(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        focus(fn: any): this;
+    }
+}
+declare namespace Northwind.Events {
+    interface EventsAwareInterface {
+        /**
+         * Sets the events manager
+         */
+        setEventsManager(eventsManager: any): any;
+        /**
+         * Returns the internal event manager
+         */
+        getEventsManager(): Northwind.Events.ManagerInterface;
+    }
+}
+declare namespace Northwind.Helper {
+    class ArrayHelper {
+        constructor();
+        static inArray(container: any[], element: any): boolean;
+    }
+}
+declare namespace Northwind.Helper {
+    class MathHelper {
+        constructor();
+        static getRandom(init: any, last: any): number;
+        static getUUID(): string;
+        static getS4(): string;
+    }
+}
+declare namespace Northwind.Helper {
+    class StringHelper {
+        constructor();
+        /**
+         * [sanitizeString description]
+         * @param  {string} str [description]
+         * @return {[type]}     [description]
+         */
+        static sanitizeString(str: string): string;
+        /**
+         * [capitalize description]
+         * @param  {[type]} str [description]
+         * @return {[type]}     [description]
+         */
+        static capitalize(str: any): any;
+    }
+}
+declare namespace Northwind.Helper {
+    class Validator {
+        static validStructArray(data: any[]): boolean;
+    }
+}
+declare namespace Northwind.Loader {
+    interface DiConstructorInjection {
+        initialize(di: Northwind.Service.Container): any;
     }
 }
 declare namespace Northwind.Mvc {
-    class Controller extends Northwind.Service.Injectable {
-        /**
-         *
-         */
-        initialize(): void;
-    }
-}
-declare namespace Northwind.Builder {
-    class DataType {
-        static BOOLEAN: number;
-        static INTEGER: number;
-        static STRING: number;
-        static OBJECT: number;
-        static ARRAY: number;
-        static CLASS: number;
-        static BOOLEAN_TYPE: string;
-        static INTEGER_TYPE: string;
-        static STRING_TYPE: string;
-        static OBJECT_TYPE: string;
-        /**
-         *
-         */
-        static getValueByType(value: any): any;
-    }
-}
-declare namespace Northwind.Builder {
-    class ComparisonOperators {
-        static AND: string;
-        static OR: string;
-        static EQUAL: string;
-        static DIFFERENT: string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Operators {
-        static OR: string;
-        static AND: string;
-        static SORT: string;
-        static IS_NOT: string;
-        static LIMIT: string;
-        static COLUMNS: string;
-        static CONDITIONAL: string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Transaction {
-        constructor();
-        get(row: any): void;
-    }
-}
-declare namespace Northwind.Builder {
-    class Gt extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Gte extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Lt extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Lte extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class And extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class NotIn extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private conditions;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: Object);
-        get(): string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Not extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class In extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private conditions;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: Object);
-        get(): string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Sort {
-        static ASC: number;
-        static DESC: number;
-        static sortByField(data: any, field: any): any[];
-    }
-}
-declare namespace Northwind.Mvc {
-    class Query {
-        private lim;
-        private sort;
-        private data;
-        private cols;
-        private conds;
-        private sortConds;
-        private transactions;
-        private negativeConds;
-        private negativeTransactions;
-        /**
-         *
-         * @param data
-         */
-        constructor(data?: any);
-        /**
-         *
-         */
-        columns(cols: any): this;
-        /**
-         *
-         */
-        getColumns(): string[];
-        /**
-         *
-         * @param row
-         */
-        private resolveColumns(row);
-        /**
-         *
-         * @param condClass
-         */
-        where(conditions: any): this;
-        limit(limit: any): this;
-        private addOperator(length, operator);
-        /**
-         *
-         * @param conditions
-         */
-        orderBy(sortContent: Object): void;
-        /**
-         *
-         */
-        private resolveSort(results);
-        /**
-         *
-         * @param row
-         */
-        private miniChecksum(row);
-        /**
-         *
-         * @param result
-         * @param row
-         */
-        private ifExistOnResult(result, row);
-        /**
-         *
-         */
-        get(): any[];
+    class Application {
     }
 }
 declare namespace Northwind.Mvc {
@@ -2351,6 +2209,226 @@ declare namespace Northwind.Mvc {
         getMethod(): string;
     }
 }
+declare namespace Northwind.Builder {
+    class Transaction {
+        constructor();
+        get(row: any): void;
+    }
+}
+declare namespace Northwind.Builder {
+    class And extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class ComparisonOperators {
+        static AND: string;
+        static OR: string;
+        static EQUAL: string;
+        static DIFFERENT: string;
+    }
+}
+declare namespace Northwind.Builder {
+    class DataType {
+        static BOOLEAN: number;
+        static INTEGER: number;
+        static STRING: number;
+        static OBJECT: number;
+        static ARRAY: number;
+        static CLASS: number;
+        static BOOLEAN_TYPE: string;
+        static INTEGER_TYPE: string;
+        static STRING_TYPE: string;
+        static OBJECT_TYPE: string;
+        /**
+         *
+         */
+        static getValueByType(value: any): any;
+    }
+}
+declare namespace Northwind.Builder {
+    class Group extends Northwind.Builder.Transaction {
+        constructor();
+        get(): void;
+    }
+}
+declare namespace Northwind.Builder {
+    class Gt extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Gte extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class In extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private conditions;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: Object);
+        get(): string;
+    }
+}
+declare namespace Northwind.Builder {
+    class Like extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Lt extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Lte extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Not extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class NotIn extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private conditions;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: Object);
+        get(): string;
+    }
+}
+declare namespace Northwind.Builder {
+    class Operators {
+        static OR: string;
+        static AND: string;
+        static SORT: string;
+        static IS_NOT: string;
+        static LIMIT: string;
+        static COLUMNS: string;
+        static CONDITIONAL: string;
+    }
+}
+declare namespace Northwind.Builder {
+    class Or extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Sort {
+        static ASC: number;
+        static DESC: number;
+        static sortByField(data: any, field: any): any[];
+    }
+}
 declare namespace Northwind.Mvc {
     class Deny {
         static getDeny(): string[];
@@ -2375,79 +2453,66 @@ declare namespace Northwind.Mvc {
         getDeleteUrl(): string;
     }
 }
-declare namespace Northwind.Builder {
-    class Group extends Northwind.Builder.Transaction {
-        constructor();
-        get(): void;
-    }
-}
-declare namespace Northwind.Builder {
-    class Like extends Northwind.Builder.Transaction {
+declare namespace Northwind.Mvc {
+    class Query {
+        private lim;
+        private sort;
+        private data;
+        private cols;
+        private conds;
+        private sortConds;
+        private transactions;
+        private negativeConds;
+        private negativeTransactions;
+        /**
+         *
+         * @param data
+         */
+        constructor(data?: any);
         /**
          *
          */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
+        columns(cols: any): this;
         /**
          *
          */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Or extends Northwind.Builder.Transaction {
+        getColumns(): string[];
+        /**
+         *
+         * @param row
+         */
+        private resolveColumns(row);
+        /**
+         *
+         * @param condClass
+         */
+        where(conditions: any): this;
+        limit(limit: any): this;
+        private addOperator(length, operator);
+        /**
+         *
+         * @param conditions
+         */
+        orderBy(sortContent: Object): void;
         /**
          *
          */
-        private condition;
+        private resolveSort(results);
         /**
          *
-         * @param condition
+         * @param row
          */
-        constructor(condition: any);
+        private miniChecksum(row);
         /**
          *
+         * @param result
+         * @param row
          */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Html {
-    class Dom {
-        /**
-         *
-         */
-        private element;
-        /**
-         *
-         * @param element
-         */
-        constructor(element?: any);
-        /**
-         *
-         * @param id
-         */
-        getById(id: string, context?: any): any;
+        private ifExistOnResult(result, row);
         /**
          *
          */
-        getByTag(name: string, context?: any): any;
-        /**
-         *
-         */
-        getByClass(name: string, context?: any): any;
-        /**
-         *
-         */
-        getElement(): any;
-        /**
-         *
-         * @param element
-         */
-        setElement(element: any): void;
+        get(): any[];
     }
 }
 declare namespace Northwind.Tag {
@@ -2459,7 +2524,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -2471,7 +2536,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
 declare namespace Northwind.Tag {
@@ -2483,103 +2548,12 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        constructor(ctx: any, parameters?: Object);
+        constructor();
     }
 }
-declare namespace Northwind.Network {
-    class Ajax implements Service.InjectionAwareInterface {
-        di: Service.Container;
-        private httpRequest;
-        private context;
-        private method;
-        private parameters;
-        private error;
-        private url;
-        private container;
-        responseFn: Function;
-        bfSendFn: Function;
-        /**
-         *
-         */
-        constructor();
-        /**
-         *
-         */
-        setContext(ctx: Object): void;
-        /**
-         *
-         */
-        getContext(): Object;
-        /**
-         *
-         */
-        setUrl(url: any): this;
-        /**
-         *
-         */
-        getUrl(): string;
-        /**
-         *
-         */
-        set(key: any, value: any): void;
-        /**
-         *
-         */
-        get(key: any): any;
-        /**
-         *
-         */
-        setParams(params: any, value?: any): this;
-        /**
-         *
-         */
-        POST(): this;
-        /**
-         *
-         */
-        PUT(): this;
-        /**
-         *
-         */
-        DELETE(): this;
-        /**
-         *
-         */
-        GET(): this;
-        /**
-         *
-         */
-        setMethod(method: string): this;
-        addContext(): void;
-        /**
-         *
-         */
-        response(responseFunction: Function): this;
-        /**
-         *
-         */
-        beforeSend(fn: Function): void;
-        /**
-         *
-         */
-        private setHeaders();
-        /**
-         *
-         */
-        getError(errorFunction: any): void;
-        clear(): void;
-        /**
-         *
-         */
-        send(fn?: any): void;
-        /**
-         *
-         */
-        setDi(di: Service.Container): void;
-        /**
-         *
-         */
-        getDi(): Service.Container;
+declare namespace Northwind.Interfaces {
+    interface ITagSignature {
+        new (context: any, params?: Object): any;
     }
 }
 declare namespace Northwind.Network {
@@ -2590,7 +2564,77 @@ declare namespace Northwind.Network {
         static DELETE: string;
     }
 }
-declare namespace Eval {
+declare namespace Northwind {
+    class Application {
+        /**
+         *
+         */
+        private config;
+        /**
+         *
+         */
+        private try;
+        /**
+         *
+         */
+        private env;
+        /**
+         *
+         */
+        private catchErrors;
+        /**
+         *
+         */
+        private domManager;
+        /**
+         *
+         */
+        constructor();
+        /**
+         *
+         */
+        setScope(env: number): void;
+        /**
+         *
+         */
+        setConfig(config: Northwind.Environment.Config): void;
+        /**
+         *
+         */
+        getConfig(): Object;
+        /**
+         *
+         */
+        private resolveConfig(di);
+        /**
+         *
+         */
+        private resolveUrl(di, urls);
+        /**
+         *
+         */
+        private resolveControllers(di, controllers);
+        /**
+         *
+         */
+        private resolvePropertiesController(controller);
+        /**
+         *
+         */
+        private resolveServices(di, service);
+        /**
+         *
+         */
+        catch(fn: any): this;
+        /**
+         *
+         */
+        start(): void;
+    }
+}
+declare namespace Lexer {
+}
+declare namespace Tokenizer {
 }
 declare namespace Northwind.Persistence {
     class ComparisonOperators {
@@ -2598,6 +2642,17 @@ declare namespace Northwind.Persistence {
         static OR: string;
         static EQUAL: string;
         static DIFFERENT: string;
+    }
+}
+declare namespace Northwind.Persistence {
+    class DatamapperOperators {
+        static OR: string;
+        static AND: string;
+        static SORT: string;
+        static IS_NOT: string;
+        static LIMIT: string;
+        static COLUMNS: string;
+        static CONDITIONAL: string;
     }
 }
 declare namespace Northwind.Persistence {
@@ -2616,17 +2671,6 @@ declare namespace Northwind.Persistence {
          *
          */
         static getValueByType(value: any): any;
-    }
-}
-declare namespace Northwind.Persistence {
-    class DatamapperOperators {
-        static OR: string;
-        static AND: string;
-        static SORT: string;
-        static IS_NOT: string;
-        static LIMIT: string;
-        static COLUMNS: string;
-        static CONDITIONAL: string;
     }
 }
 declare namespace Northwind.Reflection {
@@ -2648,16 +2692,6 @@ declare namespace Northwind.Reflection {
          *
          */
         getAttributes(): any[];
-    }
-}
-declare namespace Northwind.Service {
-    class Container {
-        private service;
-        set(serviceName: any, content: any): void;
-        get(serviceName: any): any;
-        hasKey(serviceName: any): boolean;
-        setPersistent(serviceName: any, content: any): void;
-        getPersistent(serviceName: any): any;
     }
 }
 declare namespace Northwind.Persistence {
@@ -2838,11 +2872,6 @@ declare namespace Northwind.Reflection {
          *
          */
         getChecksum(): Object;
-    }
-}
-declare namespace Northwind.Service {
-    class FactoryDefault extends Northwind.Service.Container {
-        constructor();
     }
 }
 declare namespace Northwind.Service {

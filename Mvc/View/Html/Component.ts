@@ -1,5 +1,6 @@
+
+///<reference path="../../../Service/FactoryDefault.ts"/>
 ///<reference path="./TagAdapter.ts"/>
-///<reference path="../../Controller.ts"/>
 
 namespace Northwind.Html
 {
@@ -7,12 +8,9 @@ namespace Northwind.Html
      *
      * @type
      */
-    export class Component implements Northwind.Service.InjectionAwareInterface
+    export class Component extends Northwind.Service.FactoryDefault
     {
-        public static NO_CONTEXT = 1; 
-
-        di;
-        public em : Northwind.Persistence.EntityManager;
+        public static NO_CONTEXT = 1;
 
         /**
          * Node javascript element
@@ -57,11 +55,15 @@ namespace Northwind.Html
          */
         public constructor(name: any = "", newClone = false)
         {
+            super();
             if (typeof name.nodeName != "undefined") {
                 this.id      = name.getAttribute("id");
                 this.element = this.init(name.nodeName, this.id);
             } else if (typeof name.target != "undefined") {
                 this.element = name.target;
+            } else if (typeof name == "string") {
+                this.id      = name;
+                this.element = this.init(name, name);
             } else {
                 this.id      = name;
                 this.element = this.init(this.getClassName(), name);
@@ -83,8 +85,8 @@ namespace Northwind.Html
         public getArguments(args)
         {
             if (typeof args == "object") {
-                var argsTemp = new Array();
-                for (var i = 0; i < args.length; i++) {
+                let argsTemp = new Array();
+                for (let i = 0; i < args.length; i++) {
                     if (args[i] != "atmpnil" && !(args[i] instanceof Northwind.Mvc.Controller)) {
                         argsTemp.push(args[i]);
                     }
@@ -115,22 +117,6 @@ namespace Northwind.Html
         /**
          *
          */
-        public getContext()
-        {
-            return this.context;
-        }
-
-        /**
-         *
-         */
-        public setContext(ctx)
-        {
-            this.context = ctx;
-        }
-
-        /**
-         *
-         */
         public setElement(element)
         {
             this.element = element;
@@ -155,9 +141,7 @@ namespace Northwind.Html
             return this;
         }
 
-        /**
-         *
-         */
+        /*
         public getById(id : string)
         {
             if (document.getElementById(id)) {
@@ -175,15 +159,12 @@ namespace Northwind.Html
             }
         }
 
-        /**
-         *
-         */
         public getByTag(name : string)
         {
-            var elements = document.getElementsByTagName(
+            let elements = document.getElementsByTagName(
                 name
             );
-            var result = new Array();
+            let result = new Array();
             for (let key in elements) {
                 let adapter = new Northwind.Tag.TagAdapter(elements[key]);
                 result.push(
@@ -199,15 +180,12 @@ namespace Northwind.Html
             return result;
         }
 
-        /**
-         *
-         */
         public getByClass(name : string)
         {
-            var elements = document.getElementsByClassName(
+            let elements = document.getElementsByClassName(
                 name
             );
-            var result = new Array();
+            let result = new Array();
             for (let key in elements) {
                 let adapter = new Northwind.Tag.TagAdapter(elements[key]);
                 result.push(
@@ -222,6 +200,7 @@ namespace Northwind.Html
             }
             return this;
         }
+        */
 
         /**
          *
@@ -281,7 +260,7 @@ namespace Northwind.Html
          */
         public addClass(attrClass : string)
         {
-            var strClass = this.element.getAttribute("class");
+            let strClass = this.element.getAttribute("class");
             strClass += " " + attrClass;
             this.element.setAttribute("class", strClass);
             return this;
@@ -322,121 +301,13 @@ namespace Northwind.Html
         }
         */
 
-        /**
-         * [click description]
-         * @param  {Function} fn [description]
-         * @return {[type]}      [description]
-         */
-        public click(fn)
-        {
-            this.element.addEventListener(
-                "click",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        /**
-         *
-         */
-        public doubleClick(fn)
-        {
-            this.element.addEventListener(
-                "dblclick",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        /**
-         *
-         * @return {[type]} [description]
-         */
-        public change(fn)
-        {
-            this.element.addEventListener(
-                "change",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        public keypress(fn)
-        {
-            this.element.addEventListener(
-                "keypress",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        public keydown(fn) {
-            this.element.addEventListener(
-                "keydown",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        public keyup(fn) {
-            this.element.addEventListener(
-                "keyup",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        public paste(fn)
-        {
-            this.element.addEventListener(
-                "paste",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        public blur(fn)
-        {
-            this.element.addEventListener(
-                "blur",
-                fn.bind(this)
-            );
-            return this;
-        }
-
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        public focus(fn)
-        {
-            this.element.addEventListener(
-                "focus",
-                fn.bind(this)
-            );
-            return this;
-        }
-
         public destroyEvent(event)
         {
-            var nameEvent = "on" + event;
-            this.element.removeEventListener("click", this.element.nameEvent);
+            let nameEvent = "on" + event;
+            this.element.removeEventListener(
+                "click",
+                this.element.nameEvent
+            );
         }
 
         /**
@@ -554,7 +425,7 @@ namespace Northwind.Html
         public verifyElement(append, type : string = "append")
         {
             if (this.element instanceof HTMLCollection) {
-                for (var key in this.element) {
+                for (let key in this.element) {
                     if (typeof this.element[key].nodeType != "undefined") {
                         if (this.element[key].nodeType == 1) {
                             this.element[key].appendChild(
@@ -734,17 +605,17 @@ namespace Northwind.Html
          */
         public getChilds()
         {
-            var childNodes = this.element.childNodes;
-            var childs = new Array();
+            let childNodes = this.element.childNodes;
+            let childs = new Array();
             for (let key in childNodes) {
                 if (childNodes[key].nodeType == 1) {
                     let adapter = new Northwind.Tag.TagAdapter(
                         childNodes[key]
                     );
+                    let tagObject = adapter.get();
+                    tagObject.setDi(this.getDi());
                     childs.push(
-                        adapter.get(
-                            this.getContext()
-                        )
+                        tagObject
                     );
                 }
             }
@@ -753,14 +624,14 @@ namespace Northwind.Html
 
         public getParent()
         {
-            var parent = this.element.parentElement;
+            let parent = this.element.parentElement;
             if (parent.nodeType == 1) {
                 let adapter = new Northwind.Tag.TagAdapter(
                     parent
                 );
-                return adapter.get(
-                    this.getContext()
-                );
+                let tagObject = adapter.get();
+                tagObject.setDi(this.getDi());
+                return tagObject;
             }
             return false;
         }
@@ -770,8 +641,8 @@ namespace Northwind.Html
          */
         public getAsObject() : any[]
         {
-            var childs = this.element.childNodes;
-            var obj    = new Array();
+            let childs = this.element.childNodes;
+            let obj    = new Array();
 
             if (childs instanceof NodeList) {
                 for (let key in childs) {
@@ -781,8 +652,9 @@ namespace Northwind.Html
                                     let adapter = new Northwind.Tag.TagAdapter(
                                         childs[key]
                                     );
-                                    let auxElement = adapter.get(
-                                        this.getContext()
+                                    let auxElement = adapter.get();
+                                    auxElement.setDi(
+                                        this.getDi()
                                     );
                                     let finalObj  = {};
                                     let auxObject = auxElement.getAsObject();
@@ -819,7 +691,7 @@ namespace Northwind.Html
          */
         public getRandomString()
         {
-            var randomStr = Helper.MathHelper.getUUID();
+            let randomStr = Helper.MathHelper.getUUID();
             return btoa(randomStr);
         }
 
@@ -837,39 +709,6 @@ namespace Northwind.Html
                     this.getElement()
                 );
             }
-        }
-
-        /**
-         *
-         */
-        public setId(id)
-        {
-            this.attr("id", "id");
-            return this;
-        }
-
-        /**
-         *
-         */
-        public getId()
-        {
-            return this.attr("id");
-        }
-
-        /**
-         *
-         */
-        public setDi(di)
-        {
-            this.di = di;
-        }
-
-        /**
-         *
-         */
-        public getDi()
-        {
-            return this.di;
         }
     }
 }

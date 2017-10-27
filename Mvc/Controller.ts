@@ -1,5 +1,5 @@
-///<reference path="./View/Html/TagAdapter.ts"/>
-///<reference path="../Service/Injectable.ts"/>
+
+///<reference path="../Service/Container.ts"/>
 
 /*
 function sealed(constructor: Function) {
@@ -11,14 +11,30 @@ function sealed(constructor: Function) {
 namespace Northwind.Mvc
 {
     //@sealed
-    export class Controller extends Northwind.Service.Injectable
+    export class Controller extends Service.Container
     {
-        
+        private di;
+        public constructor()
+        {
+            super();
+        }
+
         /**
          *
          */
         public initialize()
         {
+
+        }
+
+        public setDi(di)
+        {
+            this.di = di;
+        }
+
+        public getDi()
+        {
+            return this.di;
         }
     }
 }

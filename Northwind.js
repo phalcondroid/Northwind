@@ -1,31 +1,8 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = Object.setPrototypeOf ||
-        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
-    return function (d, b) {
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var Northwind;
-(function (Northwind) {
-    var Environment;
-    (function (Environment) {
-        var Scope = (function () {
-            function Scope() {
-            }
-            Scope.LOCAL = 0;
-            Scope.DEV = 1;
-            Scope.TEST = 2;
-            Scope.QA = 3;
-            Scope.STAGING = 4;
-            Scope.PRODUCTION = 5;
-            return Scope;
-        }());
-        Environment.Scope = Scope;
-    })(Environment = Northwind.Environment || (Northwind.Environment = {}));
-})(Northwind || (Northwind = {}));
+var __extends = (this && this.__extends) || function (d, b) {
+    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
+    function __() { this.constructor = d; }
+    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+};
 var Northwind;
 (function (Northwind) {
     var Environment;
@@ -61,210 +38,21 @@ var Northwind;
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var ArrayHelper = (function () {
-            function ArrayHelper() {
+    var Environment;
+    (function (Environment) {
+        var Scope = (function () {
+            function Scope() {
             }
-            ArrayHelper.inArray = function (container, element) {
-                for (var key in container) {
-                    if (container[key] == element) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-            return ArrayHelper;
+            return Scope;
         }());
-        Helper.ArrayHelper = ArrayHelper;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="./Environment/Scope.ts"/>
-///<reference path="./Environment/Config.ts"/>
-///<reference path="./Helper/ArrayHelper.ts"/>
-var Northwind;
-///<reference path="./Environment/Scope.ts"/>
-///<reference path="./Environment/Config.ts"/>
-///<reference path="./Helper/ArrayHelper.ts"/>
-(function (Northwind) {
-    var Application = (function () {
-        /**
-         *
-         */
-        function Application() {
-            /**
-             *
-             */
-            this.config = {};
-            /**
-             *
-             */
-            this.try = 0;
-            /**
-             *
-             */
-            this.env = Northwind.Environment.Scope.LOCAL;
-            /**
-             *
-             */
-            this.catchErrors = function () { };
-            /**
-             *
-             */
-            this.domManager = new Northwind.Html.Dom;
-            window.onbeforeunload = function () {
-                sessionStorage.clear();
-            };
-        }
-        /**
-         *
-         */
-        Application.prototype.setScope = function (env) {
-            this.env = env;
-        };
-        /**
-         *
-         */
-        Application.prototype.setConfig = function (config) {
-            this.config = config.getConfig(this.env);
-        };
-        /**
-         *
-         */
-        Application.prototype.getConfig = function () {
-            return this.config;
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveConfig = function (di) {
-            var positionArray = new Array();
-            var configData = this.config;
-            for (var key in configData) {
-                switch (key) {
-                    case "urls":
-                        this.resolveUrl(di, configData[key]);
-                        break;
-                    case "services":
-                        this.resolveServices(di, configData[key]);
-                        break;
-                }
-            }
-            //controllers executed in the final section
-            if (configData.hasOwnProperty("controllers")) {
-                this.resolveControllers(di, configData["controllers"]);
-            }
-            else {
-                throw "Config must have controllers item attached";
-            }
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveUrl = function (di, urls) {
-            var url = new Northwind.Url.Url();
-            if (Array.isArray(urls)) {
-                for (var key in urls) {
-                    if (typeof urls[key] == "string") {
-                        url.set(key, urls[key]);
-                    }
-                    else {
-                        throw "Url must be string : " + urls[key];
-                    }
-                }
-            }
-            else if (typeof url == "object") {
-                for (var keyUrlFor in urls) {
-                    url.set(keyUrlFor, urls[keyUrlFor]);
-                }
-            }
-            else {
-                throw "Url data unrecognized";
-            }
-            di.set("url", url);
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveControllers = function (di, controllers) {
-            if (controllers.length == 0) {
-                throw "You must load your controllers";
-            }
-            if (Array.isArray(controllers)) {
-                var i = 1;
-                for (var key in controllers) {
-                    if (typeof controllers[key] != "undefined") {
-                        var temp = new controllers[key];
-                        if (temp instanceof Northwind.Mvc.Controller) {
-                            temp.setDi(di);
-                            temp.initialize();
-                            this.resolvePropertiesController(temp);
-                        }
-                        else {
-                            throw "Controller #" + i + " must be extend from View.Controller class";
-                        }
-                        i++;
-                    }
-                    else {
-                        throw "Config => Controller => 'name' must be initialized with View.Controller class";
-                    }
-                }
-            }
-            else {
-                throw "Config => controllers must be array";
-            }
-        };
-        Application.prototype.resolvePropertiesController = function (controller) {
-            var restricted = [
-                "constructor",
-                "initialize",
-                "getById",
-                "getByTag",
-                "getByClass",
-                "getDi",
-                "setDi",
-                "getUrl",
-                "setUrl"
-            ];
-            for (var key in controller) {
-                switch (typeof controller[key]) {
-                    case "function":
-                        if (!Northwind.Helper.ArrayHelper.inArray(restricted, key)) {
-                            var component = this.domManager.getById(key);
-                            if (component) {
-                                controller[key](component);
-                            }
-                        }
-                        break;
-                }
-            }
-            controller.inject();
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveServices = function (di, service) {
-            new service().initialize(di);
-        };
-        Application.prototype.catch = function (fn) {
-            this.catchErrors = fn;
-            return this;
-        };
-        /**
-         *
-         */
-        Application.prototype.start = function () {
-            try {
-                var di = new Northwind.Service.FactoryDefault;
-                this.resolveConfig(di);
-            }
-            catch (e) {
-                this.catchErrors(e);
-            }
-        };
-        return Application;
-    }());
-    Northwind.Application = Application;
+        Scope.LOCAL = 0;
+        Scope.DEV = 1;
+        Scope.TEST = 2;
+        Scope.QA = 3;
+        Scope.STAGING = 4;
+        Scope.PRODUCTION = 5;
+        Environment.Scope = Scope;
+    })(Environment = Northwind.Environment || (Northwind.Environment = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
@@ -284,11 +72,11 @@ var Northwind;
                         return Message.NOT_VALID_OBJECT + custom;
                 }
             };
-            Message.NOT_VALID_ARRAY = "The object returned in the transaction is not array";
-            Message.NOT_VALID_ARRAY_OBJECT = "The objects returned in the transaction into array are not objects, every row must be object key, value";
-            Message.NOT_VALID_OBJECT = "The received variable is not an object";
             return Message;
         }());
+        Message.NOT_VALID_ARRAY = "The object returned in the transaction is not array";
+        Message.NOT_VALID_ARRAY_OBJECT = "The objects returned in the transaction into array are not objects, every row must be object key, value";
+        Message.NOT_VALID_OBJECT = "The received variable is not an object";
         Errors.Message = Message;
     })(Errors = Northwind.Errors || (Northwind.Errors = {}));
 })(Northwind || (Northwind = {}));
@@ -299,150 +87,250 @@ var Northwind;
         var MessageCode = (function () {
             function MessageCode() {
             }
-            MessageCode.NOT_VALID_ARRAY = 1;
-            MessageCode.NOT_VALID_ARRAY_OBJECT = 2;
-            MessageCode.NOT_VALID_OBJECT = 3;
             return MessageCode;
         }());
+        MessageCode.NOT_VALID_ARRAY = 1;
+        MessageCode.NOT_VALID_ARRAY_OBJECT = 2;
+        MessageCode.NOT_VALID_OBJECT = 3;
         Errors.MessageCode = MessageCode;
     })(Errors = Northwind.Errors || (Northwind.Errors = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var EventManager = (function () {
-        function EventManager() {
-            this.events = {};
-        }
-        EventManager.prototype.attach = function (controller, event) {
-            this.events[controller][event];
-        };
-        EventManager.prototype.detach = function (controller, event) {
-            this.events[controller][event];
-        };
-        EventManager.prototype.detachAll = function () {
-        };
-        EventManager.prototype.fire = function (controller, event, callback) {
-        };
-        EventManager.prototype.getListeners = function () {
-        };
-        return EventManager;
-    }());
-    Northwind.EventManager = EventManager;
-})(Northwind || (Northwind = {}));
-/// <reference path="./EventManagerInterface.ts"/>
-var Northwind;
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var MathHelper = (function () {
-            function MathHelper() {
+    var Service;
+    (function (Service) {
+        var Container = (function () {
+            function Container() {
+                this.service = [];
             }
-            MathHelper.getRandom = function (init, last) {
-                return Math.floor((Math.random() * last) + init);
+            Container.prototype.set = function (serviceName, content) {
+                this.service[serviceName] = content;
             };
-            MathHelper.getUUID = function () {
-                return this.getS4() + this.getS4() + '-' +
-                    this.getS4() + '-' + this.getS4() + '-' +
-                    this.getS4() + '-' + this.getS4() +
-                    this.getS4() + this.getS4();
+            Container.prototype.get = function (serviceName) {
+                return this.service[serviceName];
             };
-            MathHelper.getS4 = function () {
-                return Math.floor((1 + Math.random()) * 0x10000)
-                    .toString(16)
-                    .substring(1);
+            Container.prototype.hasKey = function (serviceName) {
+                if (typeof this.service[serviceName] == "undefined") {
+                    return false;
+                }
+                return true;
             };
-            return MathHelper;
+            Container.prototype.setPersistent = function (serviceName, content) {
+                sessionStorage.setItem(serviceName, content);
+            };
+            Container.prototype.getPersistent = function (serviceName) {
+                return sessionStorage.getItem(serviceName);
+            };
+            return Container;
         }());
-        Helper.MathHelper = MathHelper;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+        Service.Container = Container;
+    })(Service = Northwind.Service || (Northwind.Service = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var StringHelper = (function () {
-            function StringHelper() {
+    var Network;
+    (function (Network) {
+        var Ajax = (function () {
+            /**
+             *
+             */
+            function Ajax() {
+                this.context = {};
+                this.method = "POST";
+                this.parameters = "";
+                this.container = [];
+                this.responseFn = function () { };
+                this.bfSendFn = function () { }.bind(this);
+                this.httpRequest = new XMLHttpRequest();
             }
             /**
-             * [sanitizeString description]
-             * @param  {string} str [description]
-             * @return {[type]}     [description]
+             *
              */
-            StringHelper.sanitizeString = function (str) {
-                var idTr = str.replace(/[`~!@#$%^&*()_|+\-=?;:"",.<>\{\}\[\]\\\/]/gi, "").toLowerCase();
-                idTr = idTr.toString().replace(/\s/g, "");
-                return idTr;
+            Ajax.prototype.setContext = function (ctx) {
+                this.context = ctx;
             };
             /**
-             * [capitalize description]
-             * @param  {[type]} str [description]
-             * @return {[type]}     [description]
+             *
              */
-            StringHelper.capitalize = function (str) {
-                return str.charAt(0).toUpperCase() + str.slice(1);
+            Ajax.prototype.getContext = function () {
+                return this.context;
             };
-            return StringHelper;
-        }());
-        Helper.StringHelper = StringHelper;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var Uuid = (function () {
-            function Uuid() {
-            }
-            Uuid.get = function () {
-                var helper = Northwind.Helper;
-                return helper.MathHelper.getS4() + helper.MathHelper.getS4() + '-' +
-                    helper.MathHelper.getS4() + '-' + helper.MathHelper.getS4() + '-' +
-                    helper.MathHelper.getS4() + '-' + Helper.MathHelper.getS4() +
-                    helper.MathHelper.getS4() + helper.MathHelper.getS4();
+            /**
+             *
+             */
+            Ajax.prototype.setUrl = function (url) {
+                this.url = url;
+                return this;
             };
-            return Uuid;
-        }());
-        Helper.Uuid = Uuid;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
-/// <reference path="../Errors/Message.ts"/>
-var Northwind;
-/// <reference path="../Errors/Message.ts"/>
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var Validator = (function () {
-            function Validator() {
-            }
-            Validator.validStructArray = function (data) {
-                var message = Northwind.Errors.Message;
+            /**
+             *
+             */
+            Ajax.prototype.getUrl = function () {
+                return this.url;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.set = function (key, value) {
+                this.container[key] = value;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.get = function (key) {
+                return this.container[key];
+            };
+            /**
+             *
+             */
+            Ajax.prototype.setParams = function (params, value) {
+                if (value === void 0) { value = false; }
+                if (typeof params == "object") {
+                    var i = 0;
+                    for (var key in params) {
+                        var ampersand = "";
+                        if (i < Object.keys(params).length) {
+                            ampersand = "&";
+                        }
+                        this.parameters += key + "=" + encodeURIComponent(params[key]) + ampersand;
+                        i++;
+                    }
+                }
+                else if (value) {
+                    this.parameters = params + "=" + encodeURIComponent(value);
+                }
+                return this;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.POST = function () {
+                this.setMethod("POST");
+                return this;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.PUT = function () {
+                this.setMethod("PUT");
+                return this;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.DELETE = function () {
+                this.setMethod("DELETE");
+                return this;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.GET = function () {
+                this.setMethod("GET");
+                return this;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.setMethod = function (method) {
+                this.method = method;
+                return this;
+            };
+            Ajax.prototype.addContext = function () {
+                this.httpRequest.context = this.getContext();
+                this.httpRequest.getContext = function () {
+                    return this.context;
+                };
+            };
+            /**
+             *
+             */
+            Ajax.prototype.response = function (responseFunction) {
+                this.responseFn = responseFunction;
                 try {
-                    if (Array.isArray(data)) {
-                        var firstPosition = data[0];
-                        if (typeof firstPosition == "object") {
-                            return true;
+                    this.bfSendFn();
+                    this.addContext();
+                    this.httpRequest.onreadystatechange = function () {
+                        if (this.httpRequest.readyState === this.httpRequest.DONE) {
+                            if (this.httpRequest.status === 200) {
+                                if (typeof this.httpRequest.response != "undefined") {
+                                    if (typeof this.responseFn != "undefined") {
+                                        this.responseFn(this.httpRequest.response);
+                                    }
+                                }
+                            }
+                            else {
+                                this.error = "ajax status" + this.httpRequest.status + " " + this.httpRequest.statusText;
+                            }
                         }
-                        else {
-                            throw message.NOT_VALID_ARRAY_OBJECT;
-                        }
-                    }
-                    else {
-                        throw message.NOT_VALID_ARRAY;
-                    }
+                    }.bind(this);
                 }
                 catch (e) {
+                    console.log("Network.AJax.Exception", e);
                 }
+                return this;
             };
-            return Validator;
+            /**
+             *
+             */
+            Ajax.prototype.beforeSend = function (fn) {
+                this.bfSendFn = fn;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.setHeaders = function () {
+                this.httpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            };
+            /**
+             *
+             */
+            Ajax.prototype.getError = function (errorFunction) {
+                errorFunction(this.error);
+            };
+            Ajax.prototype.clear = function () {
+                this.method = "GET";
+                this.parameters = "";
+                this.error = null;
+                this.url = "";
+                this.bfSendFn = function () { };
+                this.responseFn = function () { };
+                this.container = [];
+            };
+            /**
+             *
+             */
+            Ajax.prototype.send = function (fn) {
+                if (fn === void 0) { fn = false; }
+                if (typeof fn == "function") {
+                    this.response(fn.bind(this));
+                }
+                this.httpRequest.open(this.method, this.url);
+                this.setHeaders();
+                this.httpRequest.send(this.parameters);
+            };
+            /**
+             *
+             */
+            Ajax.prototype.setDi = function (di) {
+                this.di = di;
+            };
+            /**
+             *
+             */
+            Ajax.prototype.getDi = function () {
+                return this.di;
+            };
+            return Ajax;
         }());
-        Helper.Validator = Validator;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+        Network.Ajax = Ajax;
+    })(Network = Northwind.Network || (Northwind.Network = {}));
 })(Northwind || (Northwind = {}));
+///<reference path="../../../Service/FactoryDefault.ts"/>
 ///<reference path="./TagAdapter.ts"/>
-///<reference path="../../Controller.ts"/>
 var Northwind;
+///<reference path="../../../Service/FactoryDefault.ts"/>
 ///<reference path="./TagAdapter.ts"/>
-///<reference path="../../Controller.ts"/>
 (function (Northwind) {
     var Html;
     (function (Html) {
@@ -450,7 +338,8 @@ var Northwind;
          *
          * @type
          */
-        var Component = (function () {
+        var Component = (function (_super) {
+            __extends(Component, _super);
             /**
              *
              * @param
@@ -459,27 +348,32 @@ var Northwind;
             function Component(name, newClone) {
                 if (name === void 0) { name = ""; }
                 if (newClone === void 0) { newClone = false; }
+                var _this = _super.call(this) || this;
                 /**
                  *
                  */
-                this.deny = ["Table", "Td", "Div", "Thead", "Tbody", "Tfoot", "Tr", "Td", "Th", "Label", "Span", "I", "A"];
+                _this.deny = ["Table", "Td", "Div", "Thead", "Tbody", "Tfoot", "Tr", "Td", "Th", "Label", "Span", "I", "A"];
                 /**
                  *
                  * @type
                  */
-                this.url = "";
+                _this.url = "";
                 if (typeof name.nodeName != "undefined") {
-                    this.id = name.getAttribute("id");
-                    this.element = this.init(name.nodeName, this.id);
+                    _this.id = name.getAttribute("id");
+                    _this.element = _this.init(name.nodeName, _this.id);
                 }
                 else if (typeof name.target != "undefined") {
-                    this.element = name.target;
+                    _this.element = name.target;
+                }
+                else if (typeof name == "string") {
+                    _this.id = name;
+                    _this.element = _this.init(name, name);
                 }
                 else {
-                    this.id = name;
-                    this.element = this.init(this.getClassName(), name);
+                    _this.id = name;
+                    _this.element = _this.init(_this.getClassName(), name);
                 }
-                return this;
+                return _this;
             }
             /**
              *
@@ -519,18 +413,6 @@ var Northwind;
             /**
              *
              */
-            Component.prototype.getContext = function () {
-                return this.context;
-            };
-            /**
-             *
-             */
-            Component.prototype.setContext = function (ctx) {
-                this.context = ctx;
-            };
-            /**
-             *
-             */
             Component.prototype.setElement = function (element) {
                 this.element = element;
                 return this;
@@ -549,51 +431,66 @@ var Northwind;
                 this.element.style.display = "none";
                 return this;
             };
-            /**
-             *
-             */
-            Component.prototype.getById = function (id) {
+            /*
+            public getById(id : string)
+            {
                 if (document.getElementById(id)) {
-                    var adapter = new Northwind.Tag.TagAdapter(document.getElementById(id));
+                    let adapter = new Northwind.Tag.TagAdapter(
+                        document.getElementById(id)
+                    );
                     if (!adapter) {
                         return false;
                     }
-                    return adapter.get(this.getContext());
-                }
-                else {
+                    return adapter.get(
+                        this.getContext()
+                    );
+                } else {
                     return false;
                 }
-            };
-            /**
-             *
-             */
-            Component.prototype.getByTag = function (name) {
-                var elements = document.getElementsByTagName(name);
-                var result = new Array();
-                for (var key in elements) {
-                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    result.push(adapter.get(this.getContext()));
+            }
+    
+            public getByTag(name : string)
+            {
+                let elements = document.getElementsByTagName(
+                    name
+                );
+                let result = new Array();
+                for (let key in elements) {
+                    let adapter = new Northwind.Tag.TagAdapter(elements[key]);
+                    result.push(
+                        adapter.get(
+                            this.getContext()
+                        )
+                    );
                 }
+    
                 if (result.length == 1) {
                     return result[0];
                 }
                 return result;
-            };
-            /**
-             *
-             */
-            Component.prototype.getByClass = function (name) {
-                var elements = document.getElementsByClassName(name);
-                var result = new Array();
-                for (var key in elements) {
-                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    result.push(adapter.get(this.getContext()));
+            }
+    
+            public getByClass(name : string)
+            {
+                let elements = document.getElementsByClassName(
+                    name
+                );
+                let result = new Array();
+                for (let key in elements) {
+                    let adapter = new Northwind.Tag.TagAdapter(elements[key]);
+                    result.push(
+                        adapter.get(
+                            this.getContext()
+                        )
+                    );
                 }
+    
                 if (result.length == 1) {
                     return result[0];
                 }
                 return this;
-            };
+            }
+            */
             /**
              *
              */
@@ -675,74 +572,6 @@ var Northwind;
                 return this;
             }
             */
-            /**
-             * [click description]
-             * @param  {Function} fn [description]
-             * @return {[type]}      [description]
-             */
-            Component.prototype.click = function (fn) {
-                this.element.addEventListener("click", fn.bind(this));
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.doubleClick = function (fn) {
-                this.element.addEventListener("dblclick", fn.bind(this));
-                return this;
-            };
-            /**
-             *
-             * @return {[type]} [description]
-             */
-            Component.prototype.change = function (fn) {
-                this.element.addEventListener("change", fn.bind(this));
-                return this;
-            };
-            /**
-             * [change description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.keypress = function (fn) {
-                this.element.addEventListener("keypress", fn.bind(this));
-                return this;
-            };
-            /**
-             * [change description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.keydown = function (fn) {
-                this.element.addEventListener("keydown", fn.bind(this));
-                return this;
-            };
-            /**
-             * [change description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.keyup = function (fn) {
-                this.element.addEventListener("keyup", fn.bind(this));
-                return this;
-            };
-            Component.prototype.paste = function (fn) {
-                this.element.addEventListener("paste", fn.bind(this));
-                return this;
-            };
-            /**
-             * [change description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.blur = function (fn) {
-                this.element.addEventListener("blur", fn.bind(this));
-                return this;
-            };
-            /**
-             * [change description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.focus = function (fn) {
-                this.element.addEventListener("focus", fn.bind(this));
-                return this;
-            };
             Component.prototype.destroyEvent = function (event) {
                 var nameEvent = "on" + event;
                 this.element.removeEventListener("click", this.element.nameEvent);
@@ -1002,7 +831,9 @@ var Northwind;
                 for (var key in childNodes) {
                     if (childNodes[key].nodeType == 1) {
                         var adapter = new Northwind.Tag.TagAdapter(childNodes[key]);
-                        childs.push(adapter.get(this.getContext()));
+                        var tagObject = adapter.get();
+                        tagObject.setDi(this.getDi());
+                        childs.push(tagObject);
                     }
                 }
                 return childs;
@@ -1011,7 +842,9 @@ var Northwind;
                 var parent = this.element.parentElement;
                 if (parent.nodeType == 1) {
                     var adapter = new Northwind.Tag.TagAdapter(parent);
-                    return adapter.get(this.getContext());
+                    var tagObject = adapter.get();
+                    tagObject.setDi(this.getDi());
+                    return tagObject;
                 }
                 return false;
             };
@@ -1027,7 +860,8 @@ var Northwind;
                             switch (childs[key].nodeType) {
                                 case Node.ELEMENT_NODE:
                                     var adapter = new Northwind.Tag.TagAdapter(childs[key]);
-                                    var auxElement = adapter.get(this.getContext());
+                                    var auxElement = adapter.get();
+                                    auxElement.setDi(this.getDi());
                                     var finalObj = {};
                                     var auxObject = auxElement.getAsObject();
                                     finalObj[auxElement.getClassName().toLowerCase()] = auxObject;
@@ -1070,44 +904,15 @@ var Northwind;
                     this.getElement().parentElement.removeChild(this.getElement());
                 }
             };
-            /**
-             *
-             */
-            Component.prototype.setId = function (id) {
-                this.attr("id", "id");
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.getId = function () {
-                return this.attr("id");
-            };
-            /**
-             *
-             */
-            Component.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            /**
-             *
-             */
-            Component.prototype.getDi = function () {
-                return this.di;
-            };
-            Component.NO_CONTEXT = 1;
             return Component;
-        }());
+        }(Northwind.Service.FactoryDefault));
+        Component.NO_CONTEXT = 1;
         Html.Component = Component;
     })(Html = Northwind.Html || (Northwind.Html = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="../Component.ts"/>
-///<reference path="../../../Controller.ts"/>
-///<reference path="../../Interfaces/ITagSignature.ts"/>
 var Northwind;
 ///<reference path="../Component.ts"/>
-///<reference path="../../../Controller.ts"/>
-///<reference path="../../Interfaces/ITagSignature.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1119,16 +924,9 @@ var Northwind;
             /**
              *
              */
-            function A(ctx, p1) {
-                if (p1 === void 0) { p1 = {}; }
+            function A() {
                 var _this = _super.call(this) || this;
                 _this.create("a");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.href("");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
@@ -1139,7 +937,7 @@ var Northwind;
              * @return {[type]} [description]
              */
             A.prototype.favIcon = function (favIcon) {
-                var icon = new Northwind.Tag.I(this.getContext())
+                var icon = new Northwind.Tag.I()
                     .class(favIcon);
                 this.append(icon.getElement());
                 return this;
@@ -1173,15 +971,9 @@ var Northwind;
             /**
              *
              */
-            function Abbr(ctx, p1) {
-                if (p1 === void 0) { p1 = {}; }
+            function Abbr() {
                 var _this = _super.call(this) || this;
                 _this.create("abbr");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1190,6 +982,46 @@ var Northwind;
         }(Northwind.Html.Component));
         Tag.Abbr = Abbr;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../Service/Container.ts"/>
+/*
+function sealed(constructor: Function) {
+    Object.seal(constructor);
+    Object.seal(constructor.prototype);
+}
+*/
+var Northwind;
+///<reference path="../Service/Container.ts"/>
+/*
+function sealed(constructor: Function) {
+    Object.seal(constructor);
+    Object.seal(constructor.prototype);
+}
+*/
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        //@sealed
+        var Controller = (function (_super) {
+            __extends(Controller, _super);
+            function Controller() {
+                return _super.call(this) || this;
+            }
+            /**
+             *
+             */
+            Controller.prototype.initialize = function () {
+            };
+            Controller.prototype.setDi = function (di) {
+                this.di = di;
+            };
+            Controller.prototype.getDi = function () {
+                return this.di;
+            };
+            return Controller;
+        }(Northwind.Service.Container));
+        Mvc.Controller = Controller;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="../Component.ts"/>
 ///<reference path="../../../Controller.ts"/>
@@ -1208,16 +1040,9 @@ var Northwind;
             /**
              *
              */
-            function Address(ctx, p1) {
-                if (p1 === void 0) { p1 = {}; }
+            function Address() {
                 var _this = _super.call(this) || this;
                 _this.create("address");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1244,16 +1069,9 @@ var Northwind;
             /**
              *
              */
-            function Area(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Area() {
                 var _this = _super.call(this) || this;
                 _this.create("area");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1280,16 +1098,9 @@ var Northwind;
             /**
              *
              */
-            function Article(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Article() {
                 var _this = _super.call(this) || this;
                 _this.create("article");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1316,16 +1127,9 @@ var Northwind;
             /**
              *
              */
-            function Aside(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Aside() {
                 var _this = _super.call(this) || this;
                 _this.create("aside");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1352,16 +1156,9 @@ var Northwind;
             /**
              *
              */
-            function Audio(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Audio() {
                 var _this = _super.call(this) || this;
                 _this.create("aside");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1388,16 +1185,9 @@ var Northwind;
             /**
              *
              */
-            function B(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function B() {
                 var _this = _super.call(this) || this;
                 _this.create("b");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1424,16 +1214,9 @@ var Northwind;
             /**
              *
              */
-            function Base(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Base() {
                 var _this = _super.call(this) || this;
                 _this.create("base");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1460,16 +1243,9 @@ var Northwind;
             /**
              *
              */
-            function Bdi(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Bdi() {
                 var _this = _super.call(this) || this;
                 _this.create("bdi");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1496,16 +1272,9 @@ var Northwind;
             /**
              *
              */
-            function Bdo(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Bdo() {
                 var _this = _super.call(this) || this;
                 _this.create("bdo");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1532,16 +1301,9 @@ var Northwind;
             /**
              *
              */
-            function Blockquote(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Blockquote() {
                 var _this = _super.call(this) || this;
                 _this.create("blockquote");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1565,15 +1327,8 @@ var Northwind;
          */
         var Body = (function (_super) {
             __extends(Body, _super);
-            function Body(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Body() {
                 var _this = _super.call(this) || this;
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.element = document.body;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
@@ -1601,16 +1356,9 @@ var Northwind;
             /**
              *
              */
-            function Br(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Br() {
                 var _this = _super.call(this) || this;
                 _this.create("br");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1636,17 +1384,10 @@ var Northwind;
             /**
              *
              */
-            function Button(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Button() {
                 var _this = _super.call(this) || this;
                 _this.create("button");
                 _this.attr("type", "button");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1665,7 +1406,7 @@ var Northwind;
              * @return
              */
             Button.prototype.favIcon = function (favIcon) {
-                var icon = new Northwind.Tag.I(this.getContext())
+                var icon = new Northwind.Tag.I()
                     .class(favIcon);
                 this.append(icon);
                 return this;
@@ -1740,16 +1481,9 @@ var Northwind;
             /**
              *
              */
-            function Canvas(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Canvas() {
                 var _this = _super.call(this) || this;
                 _this.create("canvas");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1776,16 +1510,9 @@ var Northwind;
             /**
              *
              */
-            function Caption(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Caption() {
                 var _this = _super.call(this) || this;
                 _this.create("caption");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1812,16 +1539,9 @@ var Northwind;
             /**
              *
              */
-            function Cite(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Cite() {
                 var _this = _super.call(this) || this;
                 _this.create("cite");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1848,16 +1568,9 @@ var Northwind;
             /**
              *
              */
-            function Code(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Code() {
                 var _this = _super.call(this) || this;
                 _this.create("code");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1884,16 +1597,9 @@ var Northwind;
             /**
              *
              */
-            function Col(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Col() {
                 var _this = _super.call(this) || this;
                 _this.create("col");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1920,16 +1626,9 @@ var Northwind;
             /**
              *
              */
-            function ColGroup(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function ColGroup() {
                 var _this = _super.call(this) || this;
                 _this.create("colgroup");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1956,16 +1655,9 @@ var Northwind;
             /**
              *
              */
-            function Datalist(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Datalist() {
                 var _this = _super.call(this) || this;
                 _this.create("datalist");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1992,16 +1684,9 @@ var Northwind;
             /**
              *
              */
-            function Db(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Db() {
                 var _this = _super.call(this) || this;
                 _this.create("db");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2028,16 +1713,9 @@ var Northwind;
             /**
              *
              */
-            function Del(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Del() {
                 var _this = _super.call(this) || this;
                 _this.create("del");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2064,15 +1742,9 @@ var Northwind;
             /**
              *
              */
-            function Details(ctx, p1) {
+            function Details() {
                 var _this = _super.call(this) || this;
                 _this.create("details");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2099,16 +1771,9 @@ var Northwind;
             /**
              *
              */
-            function Dfn(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Dfn() {
                 var _this = _super.call(this) || this;
                 _this.create("dfn");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2135,16 +1800,9 @@ var Northwind;
             /**
              *
              */
-            function Dialog(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Dialog() {
                 var _this = _super.call(this) || this;
                 _this.create("dialog");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2171,16 +1829,9 @@ var Northwind;
             /**
              *
              */
-            function Div(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Div() {
                 var _this = _super.call(this) || this;
                 _this.create("div");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2207,16 +1858,9 @@ var Northwind;
             /**
              *
              */
-            function Dl(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Dl() {
                 var _this = _super.call(this) || this;
                 _this.create("dl");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2243,16 +1887,9 @@ var Northwind;
             /**
              *
              */
-            function Dt(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Dt() {
                 var _this = _super.call(this) || this;
                 _this.create("dt");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2279,16 +1916,9 @@ var Northwind;
             /**
              *
              */
-            function Em(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Em() {
                 var _this = _super.call(this) || this;
                 _this.create("em");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2315,16 +1945,9 @@ var Northwind;
             /**
              *
              */
-            function Embed(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Embed() {
                 var _this = _super.call(this) || this;
                 _this.create("embed");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2351,16 +1974,9 @@ var Northwind;
             /**
              *
              */
-            function Fieldset(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Fieldset() {
                 var _this = _super.call(this) || this;
                 _this.create("fieldset");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2387,16 +2003,9 @@ var Northwind;
             /**
              *
              */
-            function Figcaption(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Figcaption() {
                 var _this = _super.call(this) || this;
                 _this.create("figcaption");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2423,16 +2032,9 @@ var Northwind;
             /**
              *
              */
-            function Figure(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Figure() {
                 var _this = _super.call(this) || this;
                 _this.create("figure");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2459,16 +2061,9 @@ var Northwind;
             /**
              *
              */
-            function Footer(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Footer() {
                 var _this = _super.call(this) || this;
                 _this.create("footer");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2495,16 +2090,9 @@ var Northwind;
             /**
              *
              */
-            function Form(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Form() {
                 var _this = _super.call(this) || this;
                 _this.create("form");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2531,16 +2119,9 @@ var Northwind;
             /**
              *
              */
-            function H1(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function H1() {
                 var _this = _super.call(this) || this;
                 _this.create("h1");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2567,16 +2148,9 @@ var Northwind;
             /**
              *
              */
-            function H2(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function H2() {
                 var _this = _super.call(this) || this;
                 _this.create("h2");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2603,16 +2177,9 @@ var Northwind;
             /**
              *
              */
-            function H3(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function H3() {
                 var _this = _super.call(this) || this;
                 _this.create("h3");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2639,16 +2206,9 @@ var Northwind;
             /**
              *
              */
-            function H4(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function H4() {
                 var _this = _super.call(this) || this;
                 _this.create("h4");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2675,16 +2235,9 @@ var Northwind;
             /**
              *
              */
-            function H5(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function H5() {
                 var _this = _super.call(this) || this;
                 _this.create("h5");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2711,16 +2264,9 @@ var Northwind;
             /**
              *
              */
-            function H6(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function H6() {
                 var _this = _super.call(this) || this;
                 _this.create("h6");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2747,16 +2293,9 @@ var Northwind;
             /**
              *
              */
-            function Head(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Head() {
                 var _this = _super.call(this) || this;
                 _this.create("head");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2783,16 +2322,9 @@ var Northwind;
             /**
              *
              */
-            function Header(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Header() {
                 var _this = _super.call(this) || this;
                 _this.create("header");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2819,16 +2351,9 @@ var Northwind;
             /**
              *
              */
-            function I(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function I() {
                 var _this = _super.call(this) || this;
                 _this.create("i");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2855,16 +2380,9 @@ var Northwind;
             /**
              *
              */
-            function Iframe(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Iframe() {
                 var _this = _super.call(this) || this;
                 _this.create("iframe");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2891,16 +2409,9 @@ var Northwind;
             /**
              *
              */
-            function Img(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Img() {
                 var _this = _super.call(this) || this;
                 _this.create("img");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2939,16 +2450,9 @@ var Northwind;
             /**
              *
              */
-            function Input(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Input() {
                 var _this = _super.call(this) || this;
                 _this.create("input");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2997,16 +2501,9 @@ var Northwind;
             /**
              *
              */
-            function Ins(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Ins() {
                 var _this = _super.call(this) || this;
                 _this.create("ins");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3033,16 +2530,9 @@ var Northwind;
             /**
              *
              */
-            function Kbd(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Kbd() {
                 var _this = _super.call(this) || this;
                 _this.create("kbd");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3069,16 +2559,9 @@ var Northwind;
             /**
              *
              */
-            function Keygen(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Keygen() {
                 var _this = _super.call(this) || this;
                 _this.create("keygen");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3105,16 +2588,9 @@ var Northwind;
             /**
              *
              */
-            function Label(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Label() {
                 var _this = _super.call(this) || this;
                 _this.create("label");
-                _this.setDi(ctx.getDi());
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3141,16 +2617,9 @@ var Northwind;
             /**
              *
              */
-            function Leyend(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Leyend() {
                 var _this = _super.call(this) || this;
                 _this.create("leyend");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "Context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3177,16 +2646,9 @@ var Northwind;
             /**
              *
              */
-            function Li(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Li() {
                 var _this = _super.call(this) || this;
                 _this.create("li");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3213,16 +2675,9 @@ var Northwind;
             /**
              *
              */
-            function Link(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Link() {
                 var _this = _super.call(this) || this;
                 _this.create("li");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3249,16 +2704,9 @@ var Northwind;
             /**
              *
              */
-            function Main(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Main() {
                 var _this = _super.call(this) || this;
                 _this.create("main");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3285,16 +2733,9 @@ var Northwind;
             /**
              *
              */
-            function Map(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Map() {
                 var _this = _super.call(this) || this;
                 _this.create("map");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3321,16 +2762,9 @@ var Northwind;
             /**
              *
              */
-            function Menu(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Menu() {
                 var _this = _super.call(this) || this;
                 _this.create("menu");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3357,16 +2791,9 @@ var Northwind;
             /**
              *
              */
-            function Menuitem(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Menuitem() {
                 var _this = _super.call(this) || this;
                 _this.create("menuitem");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3393,16 +2820,9 @@ var Northwind;
             /**
              *
              */
-            function Meta(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Meta() {
                 var _this = _super.call(this) || this;
                 _this.create("meta");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3429,16 +2849,9 @@ var Northwind;
             /**
              *
              */
-            function Meter(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Meter() {
                 var _this = _super.call(this) || this;
                 _this.create("meter");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3465,16 +2878,9 @@ var Northwind;
             /**
              *
              */
-            function Nav(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Nav() {
                 var _this = _super.call(this) || this;
                 _this.create("nav");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3501,16 +2907,9 @@ var Northwind;
             /**
              *
              */
-            function Noscrip(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Noscrip() {
                 var _this = _super.call(this) || this;
                 _this.create("noscrip");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3537,16 +2936,9 @@ var Northwind;
             /**
              *
              */
-            function Obj(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Obj() {
                 var _this = _super.call(this) || this;
                 _this.create("object");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3573,16 +2965,9 @@ var Northwind;
             /**
              *
              */
-            function Ol(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Ol() {
                 var _this = _super.call(this) || this;
                 _this.create("ol");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3609,16 +2994,9 @@ var Northwind;
             /**
              *
              */
-            function Optgroup(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Optgroup() {
                 var _this = _super.call(this) || this;
                 _this.create("optgroup");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3645,16 +3023,9 @@ var Northwind;
             /**
              *
              */
-            function Option(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Option() {
                 var _this = _super.call(this) || this;
                 _this.create("option");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3704,16 +3075,9 @@ var Northwind;
             /**
              *
              */
-            function Output(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Output() {
                 var _this = _super.call(this) || this;
                 _this.create("output");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3740,16 +3104,9 @@ var Northwind;
             /**
              *
              */
-            function P(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function P() {
                 var _this = _super.call(this) || this;
                 _this.create("p");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3776,16 +3133,9 @@ var Northwind;
             /**
              *
              */
-            function Param(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Param() {
                 var _this = _super.call(this) || this;
                 _this.create("param");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3812,16 +3162,9 @@ var Northwind;
             /**
              *
              */
-            function Pre(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Pre() {
                 var _this = _super.call(this) || this;
                 _this.create("pre");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3848,16 +3191,9 @@ var Northwind;
             /**
              *
              */
-            function Progress(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Progress() {
                 var _this = _super.call(this) || this;
                 _this.create("progress");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3884,16 +3220,9 @@ var Northwind;
             /**
              *
              */
-            function Q(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Q() {
                 var _this = _super.call(this) || this;
                 _this.create("q");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3920,16 +3249,9 @@ var Northwind;
             /**
              *
              */
-            function Rp(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Rp() {
                 var _this = _super.call(this) || this;
                 _this.create("rp");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3956,16 +3278,9 @@ var Northwind;
             /**
              *
              */
-            function Rt(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Rt() {
                 var _this = _super.call(this) || this;
                 _this.create("rt");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3992,16 +3307,9 @@ var Northwind;
             /**
              *
              */
-            function Ruby(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Ruby() {
                 var _this = _super.call(this) || this;
                 _this.create("ruby");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4028,16 +3336,9 @@ var Northwind;
             /**
              *
              */
-            function S(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function S() {
                 var _this = _super.call(this) || this;
                 _this.create("s");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4064,16 +3365,9 @@ var Northwind;
             /**
              *
              */
-            function Samp(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Samp() {
                 var _this = _super.call(this) || this;
                 _this.create("samp");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4100,16 +3394,9 @@ var Northwind;
             /**
              *
              */
-            function Script(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Script() {
                 var _this = _super.call(this) || this;
                 _this.create("script");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4136,16 +3423,9 @@ var Northwind;
             /**
              *
              */
-            function Section(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Section() {
                 var _this = _super.call(this) || this;
                 _this.create("section");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4154,6 +3434,25 @@ var Northwind;
         }(Northwind.Html.Component));
         Tag.Section = Section;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var Uuid = (function () {
+            function Uuid() {
+            }
+            Uuid.get = function () {
+                var helper = Northwind.Helper;
+                return helper.MathHelper.getS4() + helper.MathHelper.getS4() + '-' +
+                    helper.MathHelper.getS4() + '-' + helper.MathHelper.getS4() + '-' +
+                    helper.MathHelper.getS4() + '-' + Helper.MathHelper.getS4() +
+                    helper.MathHelper.getS4() + helper.MathHelper.getS4();
+            };
+            return Uuid;
+        }());
+        Helper.Uuid = Uuid;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
 })(Northwind || (Northwind = {}));
 /// <reference path="../../Helper/Uuid.ts" />
 var Northwind;
@@ -4211,17 +3510,10 @@ var Northwind;
             /**
              *
              */
-            function Select(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Select() {
                 var _this = _super.call(this, "") || this;
                 _this.choose = "Choose...";
                 _this.create("select");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4230,7 +3522,7 @@ var Northwind;
              *
              */
             Select.prototype.getSelected = function () {
-                var option = new Northwind.Tag.Option(this.getContext());
+                var option = new Northwind.Tag.Option();
                 option.setElement(this.getElement().options[this.getElement().selectedIndex]);
                 return option;
             };
@@ -4273,7 +3565,7 @@ var Northwind;
                 }
                 var i = 0;
                 for (var key in content) {
-                    var option = new Northwind.Tag.Option(this.getContext());
+                    var option = new Northwind.Tag.Option();
                     var id = content[key][fields[0]];
                     if (id === "") {
                         id = content[key][fields[1]];
@@ -4311,16 +3603,9 @@ var Northwind;
             /**
              *
              */
-            function Small(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Small() {
                 var _this = _super.call(this) || this;
                 _this.create("small");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4347,16 +3632,9 @@ var Northwind;
             /**
              *
              */
-            function Source(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Source() {
                 var _this = _super.call(this) || this;
                 _this.create("source");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4383,16 +3661,9 @@ var Northwind;
             /**
              *
              */
-            function Span(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Span() {
                 var _this = _super.call(this) || this;
                 _this.create("span");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4419,16 +3690,9 @@ var Northwind;
             /**
              *
              */
-            function Strong(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Strong() {
                 var _this = _super.call(this) || this;
                 _this.create("strong");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4455,16 +3719,9 @@ var Northwind;
             /**
              *
              */
-            function Style(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Style() {
                 var _this = _super.call(this) || this;
                 _this.create("style");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4491,16 +3748,9 @@ var Northwind;
             /**
              *
              */
-            function Sub(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Sub() {
                 var _this = _super.call(this) || this;
                 _this.create("sub");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4527,20 +3777,13 @@ var Northwind;
             /**
              *
              */
-            function Table(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Table() {
                 var _this = _super.call(this) || this;
                 _this.header = false;
                 _this.create("table");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
-                _this.thead = new Northwind.Tag.Thead(_this.getContext());
-                _this.tbody = new Northwind.Tag.Tbody(_this.getContext());
-                _this.tfoot = new Northwind.Tag.Tfoot(_this.getContext());
+                _this.thead = new Northwind.Tag.Thead();
+                _this.tbody = new Northwind.Tag.Tbody();
+                _this.tfoot = new Northwind.Tag.Tfoot();
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4569,7 +3812,7 @@ var Northwind;
              *
              */
             Table.prototype.toHeadTr = function (component) {
-                var tr = new Northwind.Tag.Tr(this.getContext());
+                var tr = new Northwind.Tag.Tr();
                 tr.append(component);
                 this.thead.append(tr);
                 this.append(this.thead);
@@ -4595,7 +3838,7 @@ var Northwind;
              *
              */
             Table.prototype.toBodyTr = function (component) {
-                var tr = new Northwind.Tag.Tr(this.getContext());
+                var tr = new Northwind.Tag.Tr();
                 tr.append(component);
                 this.tbody.append(tr);
                 this.append(this.tbody);
@@ -4605,7 +3848,7 @@ var Northwind;
              *
              */
             Table.prototype.toFootTr = function (component) {
-                var tr = new Northwind.Tag.Tr(this.getContext());
+                var tr = new Northwind.Tag.Tr();
                 tr.append(component);
                 this.tfoot.append(tr);
                 this.append(this.tfoot);
@@ -4617,10 +3860,10 @@ var Northwind;
              */
             Table.prototype.setHeader = function (columns) {
                 this.header = true;
-                this.tr = new Northwind.Tag.Tr(this.getContext());
+                this.tr = new Northwind.Tag.Tr();
                 var i = 0;
                 for (var key in columns) {
-                    var th = new Northwind.Tag.Th(this.context);
+                    var th = new Northwind.Tag.Th();
                     if (typeof columns[key] == "object") {
                         th.append(columns[key]);
                     }
@@ -4657,16 +3900,16 @@ var Northwind;
                 var i = 0;
                 for (var key in content) {
                     var trIdentify = Northwind.Helper.StringHelper.sanitizeString(key) + this.id;
-                    var tr = new Northwind.Tag.Tr(this.getContext());
+                    var tr = new Northwind.Tag.Tr();
                     var header = new Array();
                     var j = 0;
                     for (var row in content[key]) {
                         header[j] = row;
                         var trIdentify2 = Northwind.Helper.StringHelper.sanitizeString(key) + Northwind.Helper.StringHelper.sanitizeString(row) + this.id;
-                        var td = new Northwind.Tag.Td(this.getContext());
+                        var td = new Northwind.Tag.Td();
                         if (!this.validateSystemKeys(row)) {
                             var contentRow = content[key][row];
-                            var finalContent;
+                            var finalContent = void 0;
                             if (contentRow instanceof Northwind.Html.Component) {
                                 finalContent = contentRow.getElement();
                             }
@@ -4760,16 +4003,9 @@ var Northwind;
             /**
              *
              */
-            function Tbody(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Tbody() {
                 var _this = _super.call(this) || this;
                 _this.create("tbody");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4796,16 +4032,9 @@ var Northwind;
             /**
              *
              */
-            function Td(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Td() {
                 var _this = _super.call(this) || this;
                 _this.create("td");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4854,16 +4083,9 @@ var Northwind;
             /**
              *
              */
-            function Textarea(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Textarea() {
                 var _this = _super.call(this) || this;
                 _this.create("textarea");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4890,16 +4112,9 @@ var Northwind;
             /**
              *
              */
-            function Tfoot(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Tfoot() {
                 var _this = _super.call(this) || this;
                 _this.create("tfoot");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4926,16 +4141,9 @@ var Northwind;
             /**
              *
              */
-            function Th(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Th() {
                 var _this = _super.call(this) || this;
                 _this.create("th");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4984,16 +4192,9 @@ var Northwind;
             /**
              *
              */
-            function Thead(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Thead() {
                 var _this = _super.call(this) || this;
                 _this.create("thead");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5020,16 +4221,9 @@ var Northwind;
             /**
              *
              */
-            function Time(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Time() {
                 var _this = _super.call(this) || this;
                 _this.create("time");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5056,16 +4250,9 @@ var Northwind;
             /**
              *
              */
-            function Title(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Title() {
                 var _this = _super.call(this) || this;
                 _this.create("title");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5092,16 +4279,9 @@ var Northwind;
             /**
              *
              */
-            function Tr(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Tr() {
                 var _this = _super.call(this) || this;
                 _this.create("tr");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5128,16 +4308,9 @@ var Northwind;
             /**
              *
              */
-            function Track(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Track() {
                 var _this = _super.call(this) || this;
                 _this.create("track");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5164,16 +4337,9 @@ var Northwind;
             /**
              *
              */
-            function U(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function U() {
                 var _this = _super.call(this) || this;
                 _this.create("u");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5200,16 +4366,9 @@ var Northwind;
             /**
              *
              */
-            function Ul(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Ul() {
                 var _this = _super.call(this) || this;
                 _this.create("ul");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5236,16 +4395,9 @@ var Northwind;
             /**
              *
              */
-            function Var(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Var() {
                 var _this = _super.call(this) || this;
                 _this.create("var");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5272,16 +4424,9 @@ var Northwind;
             /**
              *
              */
-            function Video(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Video() {
                 var _this = _super.call(this) || this;
                 _this.create("video");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5308,16 +4453,9 @@ var Northwind;
             /**
              *
              */
-            function Wbr(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Wbr() {
                 var _this = _super.call(this) || this;
                 _this.create("wbr");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -5327,7 +4465,6 @@ var Northwind;
         Tag.Wbr = Wbr;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="./Component.ts"/>
 ///<reference path="./Elements/A.ts"/>
 ///<reference path="./Elements/Abbr.ts"/>
 ///<reference path="./Elements/Address.ts"/>
@@ -5433,7 +4570,6 @@ var Northwind;
 ///<reference path="./Elements/Video.ts"/>
 ///<reference path="./Elements/Wbr.ts"/>
 var Northwind;
-///<reference path="./Component.ts"/>
 ///<reference path="./Elements/A.ts"/>
 ///<reference path="./Elements/Abbr.ts"/>
 ///<reference path="./Elements/Address.ts"/>
@@ -5551,329 +4687,329 @@ var Northwind;
             /**
              *
              */
-            TagAdapter.prototype.get = function (context) {
+            TagAdapter.prototype.get = function () {
                 var instance;
                 if (this.element) {
                     if (typeof this.element.nodeName != "undefined") {
                         switch (this.element.nodeName) {
                             case "A":
-                                instance = new Northwind.Tag.A(context);
+                                instance = new Northwind.Tag.A();
                                 break;
                             case "ABBR":
-                                instance = new Northwind.Tag.Abbr(context);
+                                instance = new Northwind.Tag.Abbr();
                                 break;
                             case "ADDRESS":
-                                instance = new Northwind.Tag.Address(context);
+                                instance = new Northwind.Tag.Address();
                                 break;
                             case "AREA":
-                                instance = new Northwind.Tag.Area(context);
+                                instance = new Northwind.Tag.Area();
                                 break;
                             case "ARTICLE":
-                                instance = new Northwind.Tag.Article(context);
+                                instance = new Northwind.Tag.Article();
                                 break;
                             case "ASIDE":
-                                instance = new Northwind.Tag.Aside(context);
+                                instance = new Northwind.Tag.Aside();
                                 break;
                             case "AUDIO":
-                                instance = new Northwind.Tag.Audio(context);
+                                instance = new Northwind.Tag.Audio();
                                 break;
                             case "B":
-                                instance = new Northwind.Tag.B(context);
+                                instance = new Northwind.Tag.B();
                                 break;
                             case "BASE":
-                                instance = new Northwind.Tag.Base(context);
+                                instance = new Northwind.Tag.Base();
                                 break;
                             case "BDI":
-                                instance = new Northwind.Tag.Bdi(context);
+                                instance = new Northwind.Tag.Bdi();
                                 break;
                             case "BDO":
-                                instance = new Northwind.Tag.Bdo(context);
+                                instance = new Northwind.Tag.Bdo();
                                 break;
                             case "BLOCKQUOTE":
-                                instance = new Northwind.Tag.Blockquote(context);
+                                instance = new Northwind.Tag.Blockquote();
                                 break;
                             case "BODY":
-                                instance = new Northwind.Tag.Body(context);
+                                instance = new Northwind.Tag.Body();
                                 break;
                             case "BR":
-                                instance = new Northwind.Tag.Br(context);
+                                instance = new Northwind.Tag.Br();
                                 break;
                             case "BUTTON":
-                                instance = new Northwind.Tag.Button(context);
+                                instance = new Northwind.Tag.Button();
                                 break;
                             case "CANVAS":
-                                instance = new Northwind.Tag.Canvas(context);
+                                instance = new Northwind.Tag.Canvas();
                                 break;
                             case "CAPTION":
-                                instance = new Northwind.Tag.Caption(context);
+                                instance = new Northwind.Tag.Caption();
                                 break;
                             case "CITE":
-                                instance = new Northwind.Tag.Cite(context);
+                                instance = new Northwind.Tag.Cite();
                                 break;
                             case "CODE":
-                                instance = new Northwind.Tag.Code(context);
+                                instance = new Northwind.Tag.Code();
                                 break;
                             case "COL":
-                                instance = new Northwind.Tag.Col(context);
+                                instance = new Northwind.Tag.Col();
                                 break;
                             case "COLGROUP":
-                                instance = new Northwind.Tag.ColGroup(context);
+                                instance = new Northwind.Tag.ColGroup();
                                 break;
                             case "DATALIST":
-                                instance = new Northwind.Tag.Datalist(context);
+                                instance = new Northwind.Tag.Datalist();
                                 break;
                             case "DB":
-                                instance = new Northwind.Tag.Db(context);
+                                instance = new Northwind.Tag.Db();
                                 break;
                             case "DEL":
-                                instance = new Northwind.Tag.Del(context);
+                                instance = new Northwind.Tag.Del();
                                 break;
                             case "DETAILS":
-                                instance = new Northwind.Tag.Details(context);
+                                instance = new Northwind.Tag.Details();
                                 break;
                             case "DFN":
-                                instance = new Northwind.Tag.Dfn(context);
+                                instance = new Northwind.Tag.Dfn();
                                 break;
                             case "DIALOG":
-                                instance = new Northwind.Tag.Dialog(context);
+                                instance = new Northwind.Tag.Dialog();
                                 break;
                             case "DIV":
-                                instance = new Northwind.Tag.Div(context);
+                                instance = new Northwind.Tag.Div();
                                 break;
                             case "DL":
-                                instance = new Northwind.Tag.Dl(context);
+                                instance = new Northwind.Tag.Dl();
                                 break;
                             case "DT":
-                                instance = new Northwind.Tag.Dt(context);
+                                instance = new Northwind.Tag.Dt();
                                 break;
                             case "EM":
-                                instance = new Northwind.Tag.Em(context);
+                                instance = new Northwind.Tag.Em();
                                 break;
                             case "EMBED":
-                                instance = new Northwind.Tag.Embed(context);
+                                instance = new Northwind.Tag.Embed();
                                 break;
                             case "FIELDSET":
-                                instance = new Northwind.Tag.Fieldset(context);
+                                instance = new Northwind.Tag.Fieldset();
                                 break;
                             case "FIGCAPTION":
-                                instance = new Northwind.Tag.Figcaption(context);
+                                instance = new Northwind.Tag.Figcaption();
                                 break;
                             case "FIGURE":
-                                instance = new Northwind.Tag.Figure(context);
+                                instance = new Northwind.Tag.Figure();
                                 break;
                             case "FOOTER":
-                                instance = new Northwind.Tag.Footer(context);
+                                instance = new Northwind.Tag.Footer();
                                 break;
                             case "FORM":
-                                instance = new Northwind.Tag.Form(context);
+                                instance = new Northwind.Tag.Form();
                                 break;
                             case "H1":
-                                instance = new Northwind.Tag.H1(context);
+                                instance = new Northwind.Tag.H1();
                                 break;
                             case "H2":
-                                instance = new Northwind.Tag.H2(context);
+                                instance = new Northwind.Tag.H2();
                                 break;
                             case "H3":
-                                instance = new Northwind.Tag.H3(context);
+                                instance = new Northwind.Tag.H3();
                                 break;
                             case "H4":
-                                instance = new Northwind.Tag.H4(context);
+                                instance = new Northwind.Tag.H4();
                                 break;
                             case "H5":
-                                instance = new Northwind.Tag.H5(context);
+                                instance = new Northwind.Tag.H5();
                                 break;
                             case "H6":
-                                instance = new Northwind.Tag.H6(context);
+                                instance = new Northwind.Tag.H6();
                                 break;
                             case "HEAD":
-                                instance = new Northwind.Tag.Head(context);
+                                instance = new Northwind.Tag.Head();
                                 break;
                             case "HEADER":
-                                instance = new Northwind.Tag.Header(context);
+                                instance = new Northwind.Tag.Header();
                                 break;
                             case "I":
-                                instance = new Northwind.Tag.I(context);
+                                instance = new Northwind.Tag.I();
                                 break;
                             case "IFRAME":
-                                instance = new Northwind.Tag.Iframe(context);
+                                instance = new Northwind.Tag.Iframe();
                                 break;
                             case "IMG":
-                                instance = new Northwind.Tag.Img(context);
+                                instance = new Northwind.Tag.Img();
                                 break;
                             case "INPUT":
-                                instance = new Northwind.Tag.Input(context);
+                                instance = new Northwind.Tag.Input();
                                 break;
                             case "INS":
-                                instance = new Northwind.Tag.Ins(context);
+                                instance = new Northwind.Tag.Ins();
                                 break;
                             case "KBD":
-                                instance = new Northwind.Tag.Kbd(context);
+                                instance = new Northwind.Tag.Kbd();
                                 break;
                             case "KEYGEN":
-                                instance = new Northwind.Tag.Keygen(context);
+                                instance = new Northwind.Tag.Keygen();
                                 break;
                             case "LABEL":
-                                instance = new Northwind.Tag.Label(context);
+                                instance = new Northwind.Tag.Label();
                                 break;
                             case "LEYEND":
-                                instance = new Northwind.Tag.Leyend(context);
+                                instance = new Northwind.Tag.Leyend();
                                 break;
                             case "LI":
-                                instance = new Northwind.Tag.Li(context);
+                                instance = new Northwind.Tag.Li();
                                 break;
                             case "LINK":
-                                instance = new Northwind.Tag.Link(context);
+                                instance = new Northwind.Tag.Link();
                                 break;
                             case "MAIN":
-                                instance = new Northwind.Tag.Main(context);
+                                instance = new Northwind.Tag.Main();
                                 break;
                             case "MAP":
-                                instance = new Northwind.Tag.Map(context);
+                                instance = new Northwind.Tag.Map();
                                 break;
                             case "MENU":
-                                instance = new Northwind.Tag.Menu(context);
+                                instance = new Northwind.Tag.Menu();
                                 break;
                             case "MENUITEM":
-                                instance = new Northwind.Tag.Menuitem(context);
+                                instance = new Northwind.Tag.Menuitem();
                                 break;
                             case "META":
-                                instance = new Northwind.Tag.Meta(context);
+                                instance = new Northwind.Tag.Meta();
                                 break;
                             case "META":
-                                instance = new Northwind.Tag.Meta(context);
+                                instance = new Northwind.Tag.Meta();
                                 break;
                             case "METER":
-                                instance = new Northwind.Tag.Meter(context);
+                                instance = new Northwind.Tag.Meter();
                                 break;
                             case "NAV":
-                                instance = new Northwind.Tag.Nav(context);
+                                instance = new Northwind.Tag.Nav();
                                 break;
                             case "NOSCRIP":
-                                instance = new Northwind.Tag.Noscrip(context);
+                                instance = new Northwind.Tag.Noscrip();
                                 break;
                             case "OBJECT":
-                                instance = new Northwind.Tag.Obj(context);
+                                instance = new Northwind.Tag.Obj();
                                 break;
                             case "OL":
-                                instance = new Northwind.Tag.Ol(context);
+                                instance = new Northwind.Tag.Ol();
                                 break;
                             case "OPTGROUP":
-                                instance = new Northwind.Tag.Optgroup(context);
+                                instance = new Northwind.Tag.Optgroup();
                                 break;
                             case "P":
-                                instance = new Northwind.Tag.P(context);
+                                instance = new Northwind.Tag.P();
                                 break;
                             case "PARAM":
-                                instance = new Northwind.Tag.Param(context);
+                                instance = new Northwind.Tag.Param();
                                 break;
                             case "PRE":
-                                instance = new Northwind.Tag.Pre(context);
+                                instance = new Northwind.Tag.Pre();
                                 break;
                             case "PROGRESS":
-                                instance = new Northwind.Tag.Progress(context);
+                                instance = new Northwind.Tag.Progress();
                                 break;
                             case "Q":
-                                instance = new Northwind.Tag.Q(context);
+                                instance = new Northwind.Tag.Q();
                                 break;
                             case "RP":
-                                instance = new Northwind.Tag.Rp(context);
+                                instance = new Northwind.Tag.Rp();
                                 break;
                             case "RT":
-                                instance = new Northwind.Tag.Rt(context);
+                                instance = new Northwind.Tag.Rt();
                                 break;
                             case "RUBY":
-                                instance = new Northwind.Tag.Ruby(context);
+                                instance = new Northwind.Tag.Ruby();
                                 break;
                             case "S":
-                                instance = new Northwind.Tag.S(context);
+                                instance = new Northwind.Tag.S();
                                 break;
                             case "SAMP":
-                                instance = new Northwind.Tag.Samp(context);
+                                instance = new Northwind.Tag.Samp();
                                 break;
                             case "SCRIPT":
-                                instance = new Northwind.Tag.Script(context);
+                                instance = new Northwind.Tag.Script();
                                 break;
                             case "SECTION":
-                                instance = new Northwind.Tag.Section(context);
+                                instance = new Northwind.Tag.Section();
                                 break;
                             case "SELECT":
-                                instance = new Northwind.Tag.Select(context);
+                                instance = new Northwind.Tag.Select();
                                 break;
                             case "SMALL":
-                                instance = new Northwind.Tag.Small(context);
+                                instance = new Northwind.Tag.Small();
                                 break;
                             case "SOURCE":
-                                instance = new Northwind.Tag.Source(context);
+                                instance = new Northwind.Tag.Source();
                                 break;
                             case "SPAN":
-                                instance = new Northwind.Tag.Span(context);
+                                instance = new Northwind.Tag.Span();
                                 break;
                             case "STRONG":
-                                instance = new Northwind.Tag.Strong(context);
+                                instance = new Northwind.Tag.Strong();
                                 break;
                             case "STYLE":
-                                instance = new Northwind.Tag.Style(context);
+                                instance = new Northwind.Tag.Style();
                                 break;
                             case "SUB":
-                                instance = new Northwind.Tag.Sub(context);
+                                instance = new Northwind.Tag.Sub();
                                 break;
                             case "SUMMARY":
-                                instance = new Northwind.Tag.Summary(context);
+                                instance = new Northwind.Tag.Summary();
                                 break;
                             case "SUP":
-                                instance = new Northwind.Tag.Sup(context);
+                                instance = new Northwind.Tag.Sup();
                                 break;
                             case "TABLE":
-                                instance = new Northwind.Tag.Table(context);
+                                instance = new Northwind.Tag.Table();
                                 break;
                             case "TBODY":
-                                instance = new Northwind.Tag.Tbody(context);
+                                instance = new Northwind.Tag.Tbody();
                                 break;
                             case "TD":
-                                instance = new Northwind.Tag.Td(context);
+                                instance = new Northwind.Tag.Td();
                                 break;
                             case "TEXTAREA":
-                                instance = new Northwind.Tag.Textarea(context);
+                                instance = new Northwind.Tag.Textarea();
                                 break;
                             case "TFOOT":
-                                instance = new Northwind.Tag.Tfoot(context);
+                                instance = new Northwind.Tag.Tfoot();
                                 break;
                             case "TH":
-                                instance = new Northwind.Tag.Th(context);
+                                instance = new Northwind.Tag.Th();
                                 break;
                             case "THEAD":
-                                instance = new Northwind.Tag.Thead(context);
+                                instance = new Northwind.Tag.Thead();
                                 break;
                             case "TIME":
-                                instance = new Northwind.Tag.Time(context);
+                                instance = new Northwind.Tag.Time();
                                 break;
                             case "TITLE":
-                                instance = new Northwind.Tag.Title(context);
+                                instance = new Northwind.Tag.Title();
                                 break;
                             case "TR":
-                                instance = new Northwind.Tag.Tr(context);
+                                instance = new Northwind.Tag.Tr();
                                 break;
                             case "TRACK":
-                                instance = new Northwind.Tag.Track(context);
+                                instance = new Northwind.Tag.Track();
                                 break;
                             case "U":
-                                instance = new Northwind.Tag.U(context);
+                                instance = new Northwind.Tag.U();
                                 break;
                             case "UL":
-                                instance = new Northwind.Tag.Ul(context);
+                                instance = new Northwind.Tag.Ul();
                                 break;
                             case "VAR":
-                                instance = new Northwind.Tag.Var(context);
+                                instance = new Northwind.Tag.Var();
                                 break;
                             case "VIDEO":
-                                instance = new Northwind.Tag.Video(context);
+                                instance = new Northwind.Tag.Video();
                                 break;
                             case "WBR":
-                                instance = new Northwind.Tag.Wbr(context);
+                                instance = new Northwind.Tag.Wbr();
                                 break;
                             default:
                                 instance = new Northwind.Html.Component();
-                                instance.create(this.element.nodeName);
+                                instance.create(this.element);
                                 break;
                         }
                         instance.setElement(this.element);
@@ -5892,37 +5028,1072 @@ var Northwind;
         Tag.TagAdapter = TagAdapter;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
+///<reference path="./TagAdapter.ts"/>
 var Northwind;
+///<reference path="./TagAdapter.ts"/>
+(function (Northwind) {
+    var Html;
+    (function (Html) {
+        var Dom = (function () {
+            /**
+             *
+             * @param element
+             */
+            function Dom(element) {
+                if (element === void 0) { element = null; }
+                if (element != null)
+                    this.element = element;
+            }
+            /**
+             *
+             * @param id
+             */
+            Dom.prototype.getById = function (id, context) {
+                if (context === void 0) { context = null; }
+                var adapter = new Northwind.Tag.TagAdapter(document.getElementById(id));
+                return adapter.get();
+            };
+            /**
+             *
+             */
+            Dom.prototype.getByTag = function (name, context) {
+                if (context === void 0) { context = null; }
+                var elements = document.getElementsByTagName(name);
+                var result = new Array();
+                for (var key in elements) {
+                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
+                    result.push(adapter.get());
+                }
+                if (result.length == 1) {
+                    return result[0];
+                }
+                return result;
+            };
+            /**
+             *
+             */
+            Dom.prototype.getByClass = function (name, context) {
+                if (context === void 0) { context = null; }
+                var elements = document.getElementsByClassName(name);
+                var result = new Array();
+                for (var key in elements) {
+                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
+                    result.push(adapter.get());
+                }
+                if (result.length == 1) {
+                    return result[0];
+                }
+                return this;
+            };
+            /**
+             *
+             */
+            Dom.prototype.getElement = function () {
+                return this.element;
+            };
+            /**
+             *
+             * @param element
+             */
+            Dom.prototype.setElement = function (element) {
+                this.element = element;
+            };
+            Dom.prototype.setDi = function (di) {
+                this.di = di;
+            };
+            Dom.prototype.getDi = function () {
+                return this.di;
+            };
+            return Dom;
+        }());
+        Html.Dom = Dom;
+    })(Html = Northwind.Html || (Northwind.Html = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="./Component.ts"/>
+///<reference path="./Elements/A.ts"/>
+///<reference path="./Elements/Abbr.ts"/>
+///<reference path="./Elements/Address.ts"/>
+///<reference path="./Elements/Area.ts"/>
+///<reference path="./Elements/Article.ts"/>
+///<reference path="./Elements/Aside.ts"/>
+///<reference path="./Elements/Audio.ts"/>
+///<reference path="./Elements/B.ts"/>
+///<reference path="./Elements/Base.ts"/>
+///<reference path="./Elements/Bdi.ts"/>
+///<reference path="./Elements/Bdo.ts"/>
+///<reference path="./Elements/Blockquote.ts"/>
+///<reference path="./Elements/Body.ts"/>
+///<reference path="./Elements/Br.ts"/>
+///<reference path="./Elements/Button.ts"/>
+///<reference path="./Elements/Canvas.ts"/>
+///<reference path="./Elements/Caption.ts"/>
+///<reference path="./Elements/Cite.ts"/>
+///<reference path="./Elements/Code.ts"/>
+///<reference path="./Elements/Col.ts"/>
+///<reference path="./Elements/ColGroup.ts"/>
+///<reference path="./Elements/Datalist.ts"/>
+///<reference path="./Elements/Db.ts"/>
+///<reference path="./Elements/Del.ts"/>
+///<reference path="./Elements/Details.ts"/>
+///<reference path="./Elements/Dfn.ts"/>
+///<reference path="./Elements/Dialog.ts"/>
+///<reference path="./Elements/Div.ts"/>
+///<reference path="./Elements/Dl.ts"/>
+///<reference path="./Elements/Dt.ts"/>
+///<reference path="./Elements/Em.ts"/>
+///<reference path="./Elements/Embed.ts"/>
+///<reference path="./Elements/Fieldset.ts"/>
+///<reference path="./Elements/Figcaption.ts"/>
+///<reference path="./Elements/Figure.ts"/>
+///<reference path="./Elements/Footer.ts"/>
+///<reference path="./Elements/Form.ts"/>
+///<reference path="./Elements/H1.ts"/>
+///<reference path="./Elements/H2.ts"/>
+///<reference path="./Elements/H3.ts"/>
+///<reference path="./Elements/H4.ts"/>
+///<reference path="./Elements/H5.ts"/>
+///<reference path="./Elements/H6.ts"/>
+///<reference path="./Elements/Head.ts"/>
+///<reference path="./Elements/Header.ts"/>
+///<reference path="./Elements/I.ts"/>
+///<reference path="./Elements/Iframe.ts"/>
+///<reference path="./Elements/Img.ts"/>
+///<reference path="./Elements/Input.ts"/>
+///<reference path="./Elements/Ins.ts"/>
+///<reference path="./Elements/Kbd.ts"/>
+///<reference path="./Elements/Keygen.ts"/>
+///<reference path="./Elements/Label.ts"/>
+///<reference path="./Elements/Leyend.ts"/>
+///<reference path="./Elements/Li.ts"/>
+///<reference path="./Elements/Link.ts"/>
+///<reference path="./Elements/Main.ts"/>
+///<reference path="./Elements/Map.ts"/>
+///<reference path="./Elements/Menu.ts"/>
+///<reference path="./Elements/MenuItem.ts"/>
+///<reference path="./Elements/Meta.ts"/>
+///<reference path="./Elements/Meter.ts"/>
+///<reference path="./Elements/Nav.ts"/>
+///<reference path="./Elements/Noscrip.ts"/>
+///<reference path="./Elements/Obj.ts"/>
+///<reference path="./Elements/Ol.ts"/>
+///<reference path="./Elements/Optgroup.ts"/>
+///<reference path="./Elements/Option.ts"/>
+///<reference path="./Elements/Output.ts"/>
+///<reference path="./Elements/P.ts"/>
+///<reference path="./Elements/Param.ts"/>
+///<reference path="./Elements/Pre.ts"/>
+///<reference path="./Elements/Progress.ts"/>
+///<reference path="./Elements/Q.ts"/>
+///<reference path="./Elements/Rp.ts"/>
+///<reference path="./Elements/Rt.ts"/>
+///<reference path="./Elements/Ruby.ts"/>
+///<reference path="./Elements/S.ts"/>
+///<reference path="./Elements/Samp.ts"/>
+///<reference path="./Elements/Script.ts"/>
+///<reference path="./Elements/Section.ts"/>
+///<reference path="./Elements/Select.ts"/>
+///<reference path="./Elements/Small.ts"/>
+///<reference path="./Elements/Source.ts"/>
+///<reference path="./Elements/Span.ts"/>
+///<reference path="./Elements/Strong.ts"/>
+///<reference path="./Elements/Style.ts"/>
+///<reference path="./Elements/Sub.ts"/>
+///<reference path="./Elements/Table.ts"/>
+///<reference path="./Elements/Tbody.ts"/>
+///<reference path="./Elements/Td.ts"/>
+///<reference path="./Elements/Textarea.ts"/>
+///<reference path="./Elements/Tfoot.ts"/>
+///<reference path="./Elements/Th.ts"/>
+///<reference path="./Elements/Thead.ts"/>
+///<reference path="./Elements/Time.ts"/>
+///<reference path="./Elements/Title.ts"/>
+///<reference path="./Elements/Tr.ts"/>
+///<reference path="./Elements/Track.ts"/>
+///<reference path="./Elements/U.ts"/>
+///<reference path="./Elements/Ul.ts"/>
+///<reference path="./Elements/Var.ts"/>
+///<reference path="./Elements/Video.ts"/>
+///<reference path="./Elements/Wbr.ts"/>
+var Northwind;
+///<reference path="./Component.ts"/>
+///<reference path="./Elements/A.ts"/>
+///<reference path="./Elements/Abbr.ts"/>
+///<reference path="./Elements/Address.ts"/>
+///<reference path="./Elements/Area.ts"/>
+///<reference path="./Elements/Article.ts"/>
+///<reference path="./Elements/Aside.ts"/>
+///<reference path="./Elements/Audio.ts"/>
+///<reference path="./Elements/B.ts"/>
+///<reference path="./Elements/Base.ts"/>
+///<reference path="./Elements/Bdi.ts"/>
+///<reference path="./Elements/Bdo.ts"/>
+///<reference path="./Elements/Blockquote.ts"/>
+///<reference path="./Elements/Body.ts"/>
+///<reference path="./Elements/Br.ts"/>
+///<reference path="./Elements/Button.ts"/>
+///<reference path="./Elements/Canvas.ts"/>
+///<reference path="./Elements/Caption.ts"/>
+///<reference path="./Elements/Cite.ts"/>
+///<reference path="./Elements/Code.ts"/>
+///<reference path="./Elements/Col.ts"/>
+///<reference path="./Elements/ColGroup.ts"/>
+///<reference path="./Elements/Datalist.ts"/>
+///<reference path="./Elements/Db.ts"/>
+///<reference path="./Elements/Del.ts"/>
+///<reference path="./Elements/Details.ts"/>
+///<reference path="./Elements/Dfn.ts"/>
+///<reference path="./Elements/Dialog.ts"/>
+///<reference path="./Elements/Div.ts"/>
+///<reference path="./Elements/Dl.ts"/>
+///<reference path="./Elements/Dt.ts"/>
+///<reference path="./Elements/Em.ts"/>
+///<reference path="./Elements/Embed.ts"/>
+///<reference path="./Elements/Fieldset.ts"/>
+///<reference path="./Elements/Figcaption.ts"/>
+///<reference path="./Elements/Figure.ts"/>
+///<reference path="./Elements/Footer.ts"/>
+///<reference path="./Elements/Form.ts"/>
+///<reference path="./Elements/H1.ts"/>
+///<reference path="./Elements/H2.ts"/>
+///<reference path="./Elements/H3.ts"/>
+///<reference path="./Elements/H4.ts"/>
+///<reference path="./Elements/H5.ts"/>
+///<reference path="./Elements/H6.ts"/>
+///<reference path="./Elements/Head.ts"/>
+///<reference path="./Elements/Header.ts"/>
+///<reference path="./Elements/I.ts"/>
+///<reference path="./Elements/Iframe.ts"/>
+///<reference path="./Elements/Img.ts"/>
+///<reference path="./Elements/Input.ts"/>
+///<reference path="./Elements/Ins.ts"/>
+///<reference path="./Elements/Kbd.ts"/>
+///<reference path="./Elements/Keygen.ts"/>
+///<reference path="./Elements/Label.ts"/>
+///<reference path="./Elements/Leyend.ts"/>
+///<reference path="./Elements/Li.ts"/>
+///<reference path="./Elements/Link.ts"/>
+///<reference path="./Elements/Main.ts"/>
+///<reference path="./Elements/Map.ts"/>
+///<reference path="./Elements/Menu.ts"/>
+///<reference path="./Elements/MenuItem.ts"/>
+///<reference path="./Elements/Meta.ts"/>
+///<reference path="./Elements/Meter.ts"/>
+///<reference path="./Elements/Nav.ts"/>
+///<reference path="./Elements/Noscrip.ts"/>
+///<reference path="./Elements/Obj.ts"/>
+///<reference path="./Elements/Ol.ts"/>
+///<reference path="./Elements/Optgroup.ts"/>
+///<reference path="./Elements/Option.ts"/>
+///<reference path="./Elements/Output.ts"/>
+///<reference path="./Elements/P.ts"/>
+///<reference path="./Elements/Param.ts"/>
+///<reference path="./Elements/Pre.ts"/>
+///<reference path="./Elements/Progress.ts"/>
+///<reference path="./Elements/Q.ts"/>
+///<reference path="./Elements/Rp.ts"/>
+///<reference path="./Elements/Rt.ts"/>
+///<reference path="./Elements/Ruby.ts"/>
+///<reference path="./Elements/S.ts"/>
+///<reference path="./Elements/Samp.ts"/>
+///<reference path="./Elements/Script.ts"/>
+///<reference path="./Elements/Section.ts"/>
+///<reference path="./Elements/Select.ts"/>
+///<reference path="./Elements/Small.ts"/>
+///<reference path="./Elements/Source.ts"/>
+///<reference path="./Elements/Span.ts"/>
+///<reference path="./Elements/Strong.ts"/>
+///<reference path="./Elements/Style.ts"/>
+///<reference path="./Elements/Sub.ts"/>
+///<reference path="./Elements/Table.ts"/>
+///<reference path="./Elements/Tbody.ts"/>
+///<reference path="./Elements/Td.ts"/>
+///<reference path="./Elements/Textarea.ts"/>
+///<reference path="./Elements/Tfoot.ts"/>
+///<reference path="./Elements/Th.ts"/>
+///<reference path="./Elements/Thead.ts"/>
+///<reference path="./Elements/Time.ts"/>
+///<reference path="./Elements/Title.ts"/>
+///<reference path="./Elements/Tr.ts"/>
+///<reference path="./Elements/Track.ts"/>
+///<reference path="./Elements/U.ts"/>
+///<reference path="./Elements/Ul.ts"/>
+///<reference path="./Elements/Var.ts"/>
+///<reference path="./Elements/Video.ts"/>
+///<reference path="./Elements/Wbr.ts"/>
+(function (Northwind) {
+    var Tag;
+    (function (Tag) {
+        var FactoryTag = (function () {
+            /**
+             *
+             */
+            function FactoryTag(ctx) {
+                this.context = ctx;
+            }
+            /**
+             *
+             */
+            FactoryTag.prototype.get = function (tagName) {
+                var instance;
+                switch (tagName) {
+                    case "A":
+                        instance = new Northwind.Tag.A();
+                        ;
+                        break;
+                    case "ABBR":
+                        instance = new Northwind.Tag.Abbr();
+                        ;
+                        break;
+                    case "ADDRESS":
+                        instance = new Northwind.Tag.Address();
+                        ;
+                        break;
+                    case "AREA":
+                        instance = new Northwind.Tag.Area();
+                        ;
+                        break;
+                    case "ARTICLE":
+                        instance = new Northwind.Tag.Article();
+                        ;
+                        break;
+                    case "ASIDE":
+                        instance = new Northwind.Tag.Aside();
+                        ;
+                        break;
+                    case "AUDIO":
+                        instance = new Northwind.Tag.Audio();
+                        ;
+                        break;
+                    case "B":
+                        instance = new Northwind.Tag.B();
+                        ;
+                        break;
+                    case "BASE":
+                        instance = new Northwind.Tag.Base();
+                        ;
+                        break;
+                    case "BDI":
+                        instance = new Northwind.Tag.Bdi();
+                        ;
+                        break;
+                    case "BDO":
+                        instance = new Northwind.Tag.Bdo();
+                        ;
+                        break;
+                    case "BLOCKQUOTE":
+                        instance = new Northwind.Tag.Blockquote();
+                        ;
+                        break;
+                    case "BODY":
+                        instance = new Northwind.Tag.Body();
+                        ;
+                        break;
+                    case "BR":
+                        instance = new Northwind.Tag.Br();
+                        ;
+                        break;
+                    case "BUTTON":
+                        instance = new Northwind.Tag.Button();
+                        ;
+                        break;
+                    case "CANVAS":
+                        instance = new Northwind.Tag.Canvas();
+                        ;
+                        break;
+                    case "CAPTION":
+                        instance = new Northwind.Tag.Caption();
+                        ;
+                        break;
+                    case "CITE":
+                        instance = new Northwind.Tag.Cite();
+                        ;
+                        break;
+                    case "CODE":
+                        instance = new Northwind.Tag.Code();
+                        ;
+                        break;
+                    case "COL":
+                        instance = new Northwind.Tag.Col();
+                        ;
+                        break;
+                    case "COLGROUP":
+                        instance = new Northwind.Tag.ColGroup();
+                        ;
+                        break;
+                    case "DATALIST":
+                        instance = new Northwind.Tag.Datalist();
+                        ;
+                        break;
+                    case "DB":
+                        instance = new Northwind.Tag.Db();
+                        ;
+                        break;
+                    case "DEL":
+                        instance = new Northwind.Tag.Del();
+                        ;
+                        break;
+                    case "DETAILS":
+                        instance = new Northwind.Tag.Details();
+                        break;
+                    case "DFN":
+                        instance = new Northwind.Tag.Dfn();
+                        ;
+                        break;
+                    case "DIALOG":
+                        instance = new Northwind.Tag.Dialog();
+                        ;
+                        break;
+                    case "DIV":
+                        instance = new Northwind.Tag.Div();
+                        ;
+                        break;
+                    case "DL":
+                        instance = new Northwind.Tag.Dl();
+                        ;
+                        break;
+                    case "DT":
+                        instance = new Northwind.Tag.Dt();
+                        ;
+                        break;
+                    case "EM":
+                        instance = new Northwind.Tag.Em();
+                        ;
+                        break;
+                    case "EMBED":
+                        instance = new Northwind.Tag.Embed();
+                        ;
+                        break;
+                    case "FIELDSET":
+                        instance = new Northwind.Tag.Fieldset();
+                        ;
+                        break;
+                    case "FIGCAPTION":
+                        instance = new Northwind.Tag.Figcaption();
+                        ;
+                        break;
+                    case "FIGURE":
+                        instance = new Northwind.Tag.Figure();
+                        ;
+                        break;
+                    case "FOOTER":
+                        instance = new Northwind.Tag.Footer();
+                        ;
+                        break;
+                    case "FORM":
+                        instance = new Northwind.Tag.Form();
+                        ;
+                        break;
+                    case "H1":
+                        instance = new Northwind.Tag.H1();
+                        ;
+                        break;
+                    case "H2":
+                        instance = new Northwind.Tag.H2();
+                        ;
+                        break;
+                    case "H3":
+                        instance = new Northwind.Tag.H3();
+                        ;
+                        break;
+                    case "H4":
+                        instance = new Northwind.Tag.H4();
+                        ;
+                        break;
+                    case "H5":
+                        instance = new Northwind.Tag.H5();
+                        ;
+                        break;
+                    case "H6":
+                        instance = new Northwind.Tag.H6();
+                        ;
+                        break;
+                    case "HEAD":
+                        instance = new Northwind.Tag.Head();
+                        ;
+                        break;
+                    case "HEADER":
+                        instance = new Northwind.Tag.Header();
+                        ;
+                        break;
+                    case "I":
+                        instance = new Northwind.Tag.I();
+                        ;
+                        break;
+                    case "IFRAME":
+                        instance = new Northwind.Tag.Iframe();
+                        ;
+                        break;
+                    case "IMG":
+                        instance = new Northwind.Tag.Img();
+                        ;
+                        break;
+                    case "INPUT":
+                        instance = new Northwind.Tag.Input();
+                        ;
+                        break;
+                    case "INS":
+                        instance = new Northwind.Tag.Ins();
+                        ;
+                        break;
+                    case "KBD":
+                        instance = new Northwind.Tag.Kbd();
+                        ;
+                        break;
+                    case "KEYGEN":
+                        instance = new Northwind.Tag.Keygen();
+                        ;
+                        break;
+                    case "LABEL":
+                        instance = new Northwind.Tag.Label();
+                        ;
+                        break;
+                    case "LEYEND":
+                        instance = new Northwind.Tag.Leyend();
+                        ;
+                        break;
+                    case "LI":
+                        instance = new Northwind.Tag.Li();
+                        ;
+                        break;
+                    case "LINK":
+                        instance = new Northwind.Tag.Link();
+                        ;
+                        break;
+                    case "MAIN":
+                        instance = new Northwind.Tag.Main();
+                        ;
+                        break;
+                    case "MAP":
+                        instance = new Northwind.Tag.Map();
+                        ;
+                        break;
+                    case "MENU":
+                        instance = new Northwind.Tag.Menu();
+                        ;
+                        break;
+                    case "MENUITEM":
+                        instance = new Northwind.Tag.Menuitem();
+                        ;
+                        break;
+                    case "META":
+                        instance = new Northwind.Tag.Meta();
+                        ;
+                        break;
+                    case "META":
+                        instance = new Northwind.Tag.Meta();
+                        ;
+                        break;
+                    case "METER":
+                        instance = new Northwind.Tag.Meter();
+                        ;
+                        break;
+                    case "NAV":
+                        instance = new Northwind.Tag.Nav();
+                        ;
+                        break;
+                    case "NOSCRIP":
+                        instance = new Northwind.Tag.Noscrip();
+                        ;
+                        break;
+                    case "OBJECT":
+                        instance = new Northwind.Tag.Obj();
+                        ;
+                        break;
+                    case "OL":
+                        instance = new Northwind.Tag.Ol();
+                        ;
+                        break;
+                    case "OPTGROUP":
+                        instance = new Northwind.Tag.Optgroup();
+                        ;
+                        break;
+                    case "P":
+                        instance = new Northwind.Tag.P();
+                        ;
+                        break;
+                    case "PARAM":
+                        instance = new Northwind.Tag.Param();
+                        ;
+                        break;
+                    case "PRE":
+                        instance = new Northwind.Tag.Pre();
+                        ;
+                        break;
+                    case "PROGRESS":
+                        instance = new Northwind.Tag.Progress();
+                        ;
+                        break;
+                    case "Q":
+                        instance = new Northwind.Tag.Q();
+                        ;
+                        break;
+                    case "RP":
+                        instance = new Northwind.Tag.Rp();
+                        ;
+                        break;
+                    case "RT":
+                        instance = new Northwind.Tag.Rt();
+                        ;
+                        break;
+                    case "RUBY":
+                        instance = new Northwind.Tag.Ruby();
+                        ;
+                        break;
+                    case "S":
+                        instance = new Northwind.Tag.S();
+                        ;
+                        break;
+                    case "SAMP":
+                        instance = new Northwind.Tag.Samp();
+                        ;
+                        break;
+                    case "SCRIPT":
+                        instance = new Northwind.Tag.Script();
+                        ;
+                        break;
+                    case "SECTION":
+                        instance = new Northwind.Tag.Section();
+                        ;
+                        break;
+                    case "SELECT":
+                        instance = new Northwind.Tag.Select();
+                        ;
+                        break;
+                    case "SMALL":
+                        instance = new Northwind.Tag.Small();
+                        ;
+                        break;
+                    case "SOURCE":
+                        instance = new Northwind.Tag.Source();
+                        ;
+                        break;
+                    case "SPAN":
+                        instance = new Northwind.Tag.Span();
+                        ;
+                        break;
+                    case "STRONG":
+                        instance = new Northwind.Tag.Strong();
+                        ;
+                        break;
+                    case "STYLE":
+                        instance = new Northwind.Tag.Style();
+                        ;
+                        break;
+                    case "SUB":
+                        instance = new Northwind.Tag.Sub();
+                        ;
+                        break;
+                    case "SUMMARY":
+                        instance = new Northwind.Tag.Summary();
+                        ;
+                        break;
+                    case "SUP":
+                        instance = new Northwind.Tag.Sup();
+                        ;
+                        break;
+                    case "TABLE":
+                        instance = new Northwind.Tag.Table();
+                        ;
+                        break;
+                    case "TBODY":
+                        instance = new Northwind.Tag.Tbody();
+                        ;
+                        break;
+                    case "TD":
+                        instance = new Northwind.Tag.Td();
+                        ;
+                        break;
+                    case "TEXTAREA":
+                        instance = new Northwind.Tag.Textarea();
+                        ;
+                        break;
+                    case "TFOOT":
+                        instance = new Northwind.Tag.Tfoot();
+                        ;
+                        break;
+                    case "TH":
+                        instance = new Northwind.Tag.Th();
+                        ;
+                        break;
+                    case "THEAD":
+                        instance = new Northwind.Tag.Thead();
+                        ;
+                        break;
+                    case "TIME":
+                        instance = new Northwind.Tag.Time();
+                        ;
+                        break;
+                    case "TITLE":
+                        instance = new Northwind.Tag.Title();
+                        ;
+                        break;
+                    case "TR":
+                        instance = new Northwind.Tag.Tr();
+                        ;
+                        break;
+                    case "TRACK":
+                        instance = new Northwind.Tag.Track();
+                        ;
+                        break;
+                    case "U":
+                        instance = new Northwind.Tag.U();
+                        ;
+                        break;
+                    case "UL":
+                        instance = new Northwind.Tag.Ul();
+                        ;
+                        break;
+                    case "VAR":
+                        instance = new Northwind.Tag.Var();
+                        ;
+                        break;
+                    case "VIDEO":
+                        instance = new Northwind.Tag.Video();
+                        ;
+                        break;
+                    case "WBR":
+                        instance = new Northwind.Tag.Wbr();
+                        ;
+                        break;
+                    default:
+                        instance = new Northwind.Html.Component();
+                        instance.create(tagName);
+                        break;
+                }
+                return instance;
+            };
+            return FactoryTag;
+        }());
+        Tag.FactoryTag = FactoryTag;
+    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="./Container.ts"/>
+/// <reference path="../Network/Ajax.ts" />
+/// <reference path="../Mvc/View/Html/Dom.ts"/>
+/// <reference path="../Mvc/View/Html/FactoryTag.ts"/>
+var Northwind;
+/// <reference path="./Container.ts"/>
+/// <reference path="../Network/Ajax.ts" />
+/// <reference path="../Mvc/View/Html/Dom.ts"/>
+/// <reference path="../Mvc/View/Html/FactoryTag.ts"/>
 (function (Northwind) {
     var Service;
     (function (Service) {
-        var Injectable = (function () {
-            function Injectable() {
+        var FactoryDefault = (function (_super) {
+            __extends(FactoryDefault, _super);
+            function FactoryDefault() {
+                var _this = _super.call(this) || this;
+                _this.set("ajax", new Northwind.Network.Ajax);
+                _this.set("container", new Northwind.Service.Container);
+                _this.set("dom", new Northwind.Html.Dom);
+                var em = new Northwind.Persistence.EntityManager;
+                em.setDi(_this);
+                _this.set("em", em);
+                var dom = new Northwind.Html.Dom;
+                _this.set("dom", dom);
+                var tag = new Northwind.Tag.FactoryTag(_this);
+                _this.set("tag", tag);
+                var eventManager = new Northwind.Events;
+                _this.set("events", eventManager);
+                return _this;
             }
-            Injectable.prototype.inject = function () {
-                for (var key in this.getDi()) {
-                    this[key] = this.getDi()[key];
-                }
+            FactoryDefault.prototype.getDom = function () {
+                return this.get("dom");
             };
-            /**
-             *
-             */
-            Injectable.prototype.getDi = function () {
-                return this.di;
+            FactoryDefault.prototype.getAjax = function () {
+                return this.get("ajax");
             };
-            /**
-             *
-             */
-            Injectable.prototype.setDi = function (di) {
+            FactoryDefault.prototype.getEntityManager = function () {
+                return this.get("em");
+            };
+            FactoryDefault.prototype.getContainer = function () {
+                return this.get("container");
+            };
+            FactoryDefault.prototype.getTag = function (name) {
+                var tag = this.get("tag");
+                return tag.get(name);
+            };
+            FactoryDefault.prototype.getEvent = function () {
+                var events = this.get("events");
+                return events;
+            };
+            FactoryDefault.prototype.setDi = function (di) {
                 this.di = di;
+                return this;
             };
-            return Injectable;
-        }());
-        Service.Injectable = Injectable;
+            FactoryDefault.prototype.getDi = function () {
+                return this;
+            };
+            return FactoryDefault;
+        }(Northwind.Service.Container));
+        Service.FactoryDefault = FactoryDefault;
     })(Service = Northwind.Service || (Northwind.Service = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="./View/Html/TagAdapter.ts"/>
-///<reference path="../Service/Injectable.ts"/>
+///<reference path="../Service/FactoryDefault.ts"/>
+var Northwind;
+///<reference path="../Service/FactoryDefault.ts"/>
+(function (Northwind) {
+    var Events = (function () {
+        function Events() {
+            this.events = {};
+            this.params = {};
+            this.others = {};
+            this.nativeEvents = [];
+        }
+        Events.prototype.contructor = function () {
+            this.nativeEvents = [
+                "click",
+                "doubleClick",
+                "change",
+                "keypress",
+                "keydown",
+                "keyup",
+                "paste",
+                "blur",
+                "focus"
+            ];
+        };
+        /**
+         *
+         */
+        Events.prototype.attach = function (component, event, fn) {
+            this.events[component.getClassName()][event][fn];
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.add = function (otherEvent) {
+            this.others[otherEvent];
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.detachComponent = function (component) {
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.detach = function (component, event, params) {
+            if (params === void 0) { params = false; }
+            this.events[component][event];
+            this.params[component][event] = params;
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.trigger = function (controller, event, callback, params) {
+            if (params === void 0) { params = {}; }
+            var result = this.events[controller][event](params);
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.detachAll = function () {
+            this.events = {};
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.tag = function (component) {
+            if (component instanceof Northwind.Html.Component) {
+                this.element = component;
+                return this;
+            }
+            throw "Component must be a instance of Northwind.Html.Component or Northwind.Tag";
+        };
+        /**
+         *
+         * @param  {Function} fn [description]
+         * @return {[type]}      [description]
+         */
+        Events.prototype.click = function (fn) {
+            this.element.getElement().addEventListener("click", fn.bind(this));
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.doubleClick = function (fn) {
+            this.element.getElement().addEventListener("dblclick", fn.bind(this));
+            return this;
+        };
+        /**
+         *
+         * @return {[type]} [description]
+         */
+        Events.prototype.change = function (fn) {
+            this.element.getElement().addEventListener("change", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.keypress = function (fn) {
+            this.element.getElement().addEventListener("keypress", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.keydown = function (fn) {
+            this.element.getElement().addEventListener("keydown", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.keyup = function (fn) {
+            this.element.getElement().addEventListener("keyup", fn.bind(this));
+            return this;
+        };
+        Events.prototype.paste = function (fn) {
+            this.element.getElement().addEventListener("paste", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.blur = function (fn) {
+            this.element.getElement().addEventListener("blur", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.focus = function (fn) {
+            this.element.getElement().addEventListener("focus", fn.bind(this));
+            return this;
+        };
+        return Events;
+    }());
+    Events.AFTER = 1;
+    Events.BEFORE = 2;
+    Events.ONCREATE = 3;
+    Events.ONDELETE = 4;
+    Events.ONCHANGE = 5;
+    Northwind.Events = Events;
+})(Northwind || (Northwind = {}));
+/// <reference path="./EventManagerInterface.ts"/>
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var ArrayHelper = (function () {
+            function ArrayHelper() {
+            }
+            ArrayHelper.inArray = function (container, element) {
+                for (var key in container) {
+                    if (container[key] == element) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            return ArrayHelper;
+        }());
+        Helper.ArrayHelper = ArrayHelper;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var MathHelper = (function () {
+            function MathHelper() {
+            }
+            MathHelper.getRandom = function (init, last) {
+                return Math.floor((Math.random() * last) + init);
+            };
+            MathHelper.getUUID = function () {
+                return this.getS4() + this.getS4() + '-' +
+                    this.getS4() + '-' + this.getS4() + '-' +
+                    this.getS4() + '-' + this.getS4() +
+                    this.getS4() + this.getS4();
+            };
+            MathHelper.getS4 = function () {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            };
+            return MathHelper;
+        }());
+        Helper.MathHelper = MathHelper;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var StringHelper = (function () {
+            function StringHelper() {
+            }
+            /**
+             * [sanitizeString description]
+             * @param  {string} str [description]
+             * @return {[type]}     [description]
+             */
+            StringHelper.sanitizeString = function (str) {
+                var idTr = str.replace(/[`~!@#$%^&*()_|+\-=?;:"",.<>\{\}\[\]\\\/]/gi, "").toLowerCase();
+                idTr = idTr.toString().replace(/\s/g, "");
+                return idTr;
+            };
+            /**
+             * [capitalize description]
+             * @param  {[type]} str [description]
+             * @return {[type]}     [description]
+             */
+            StringHelper.capitalize = function (str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            };
+            return StringHelper;
+        }());
+        Helper.StringHelper = StringHelper;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="../Errors/Message.ts"/>
+var Northwind;
+/// <reference path="../Errors/Message.ts"/>
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var Validator = (function () {
+            function Validator() {
+            }
+            Validator.validStructArray = function (data) {
+                var message = Northwind.Errors.Message;
+                try {
+                    if (Array.isArray(data)) {
+                        var firstPosition = data[0];
+                        if (typeof firstPosition == "object") {
+                            return true;
+                        }
+                        else {
+                            throw message.NOT_VALID_ARRAY_OBJECT;
+                        }
+                    }
+                    else {
+                        throw message.NOT_VALID_ARRAY;
+                    }
+                }
+                catch (e) {
+                }
+            };
+            return Validator;
+        }());
+        Helper.Validator = Validator;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
 /*
 function sealed(constructor: Function) {
     Object.seal(constructor);
@@ -5930,8 +6101,6 @@ function sealed(constructor: Function) {
 }
 */
 var Northwind;
-///<reference path="./View/Html/TagAdapter.ts"/>
-///<reference path="../Service/Injectable.ts"/>
 /*
 function sealed(constructor: Function) {
     Object.seal(constructor);
@@ -5942,20 +6111,319 @@ function sealed(constructor: Function) {
     var Mvc;
     (function (Mvc) {
         //@sealed
-        var Controller = (function (_super) {
-            __extends(Controller, _super);
-            function Controller() {
-                return _super !== null && _super.apply(this, arguments) || this;
+        var Application = (function () {
+            function Application() {
+            }
+            return Application;
+        }());
+        Mvc.Application = Application;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="./RawModel.ts"/>
+var Northwind;
+/// <reference path="./RawModel.ts"/>
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var AjaxModel = (function (_super) {
+            __extends(AjaxModel, _super);
+            function AjaxModel() {
+                var _this = _super.call(this) || this;
+                _this.insertUrl = null;
+                _this.deleteUrl = null;
+                _this.updateUrl = null;
+                _this.findUrl = null;
+                _this.findOneUrl = null;
+                _this.countUrl = null;
+                _this.method = "POST";
+                _this.initialize();
+                return _this;
+            }
+            AjaxModel.prototype.setSource = function (data) {
+                this.setInsertUrl(data.insert);
+                this.setUpdateUrl(data.update);
+                this.setInsertUrl(data.insert);
+                this.setCountUrl(data.count);
+                this.setFindOneUrl(data.findOne);
+                this.setFindUrl(data.find);
+            };
+            AjaxModel.prototype.setInsertUrl = function (url) {
+                this.insertUrl = url;
+            };
+            AjaxModel.prototype.setFindUrl = function (url) {
+                this.findUrl = url;
+            };
+            AjaxModel.prototype.setFindOneUrl = function (url) {
+                this.findOneUrl = url;
+            };
+            AjaxModel.prototype.setCountUrl = function (url) {
+                this.countUrl = url;
+            };
+            AjaxModel.prototype.setDeleteUrl = function (url) {
+                this.deleteUrl = url;
+            };
+            AjaxModel.prototype.setUpdateUrl = function (url) {
+                this.updateUrl = url;
+            };
+            AjaxModel.prototype.getInsertUrl = function () {
+                return this.insertUrl;
+            };
+            AjaxModel.prototype.getFindUrl = function () {
+                return this.findUrl;
+            };
+            AjaxModel.prototype.getDeleteUrl = function () {
+                return this.deleteUrl;
+            };
+            AjaxModel.prototype.getUpdateUrl = function () {
+                return this.updateUrl;
+            };
+            AjaxModel.prototype.setParams = function (params) {
+                this.params = params;
+            };
+            AjaxModel.prototype.getParams = function () {
+                return this.params;
+            };
+            AjaxModel.prototype.setMethod = function (method) {
+                this.method = method;
+            };
+            AjaxModel.prototype.getMethod = function () {
+                return this.method;
+            };
+            return AjaxModel;
+        }(Northwind.Mvc.RawModel));
+        Mvc.AjaxModel = AjaxModel;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="./RawModel.ts"/>
+var Northwind;
+/// <reference path="./RawModel.ts"/>
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var StaticModel = (function (_super) {
+            __extends(StaticModel, _super);
+            /**
+             *
+             */
+            function StaticModel(di) {
+                var _this = _super.call(this) || this;
+                _this.setContainer(new Northwind.Service.Container());
+                _this.initialize();
+                return _this;
             }
             /**
              *
              */
-            Controller.prototype.initialize = function () {
+            StaticModel.prototype.setData = function (data) {
+                this.getContainer().setPersistent("Models_Identify_" + this.getClassName(), JSON.stringify(data));
             };
-            return Controller;
-        }(Northwind.Service.Injectable));
-        Mvc.Controller = Controller;
+            /**
+             *
+             */
+            StaticModel.prototype.getData = function () {
+                var data = this.getContainer().getPersistent("Models_Identify_" + this.getClassName());
+                if (typeof data == "string") {
+                }
+                return data;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getObjectData = function () {
+                return JSON.parse(this.getContainer().getPersistent("Models_Identify_" + this.getClassName()));
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.setDi = function (di) {
+                this.di = di;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getDi = function () {
+                return this.di;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.setIndex = function (index) {
+                this.index = index;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getIndex = function () {
+                return this.index;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.setContainer = function (container) {
+                this.container = container;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getContainer = function () {
+                return this.container;
+            };
+            return StaticModel;
+        }(Northwind.Mvc.RawModel));
+        Mvc.StaticModel = StaticModel;
     })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="./StaticModel.ts"/>
+var Northwind;
+/// <reference path="./StaticModel.ts"/>
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var AjaxModelPersistent = (function (_super) {
+            __extends(AjaxModelPersistent, _super);
+            function AjaxModelPersistent() {
+                var _this = _super.apply(this, arguments) || this;
+                _this.insertUrl = null;
+                _this.deleteUrl = null;
+                _this.updateUrl = null;
+                _this.findUrl = null;
+                _this.method = "POST";
+                return _this;
+            }
+            AjaxModelPersistent.prototype.setSource = function (data) {
+                this.setInsertUrl(data.find);
+                this.setUpdateUrl(data.update);
+                this.setInsertUrl(data.insert);
+                this.setFindUrl(data.insert);
+            };
+            AjaxModelPersistent.prototype.setAjaxInit = function (value) {
+                this.getContainer().setPersistent("ajaxInit_" + this.getClassName(), value);
+            };
+            AjaxModelPersistent.prototype.getAjaxInit = function () {
+                return this.getContainer().getPersistent("ajaxInit_" + this.getClassName());
+            };
+            AjaxModelPersistent.prototype.setInsertUrl = function (url) {
+                this.insertUrl = url;
+            };
+            AjaxModelPersistent.prototype.setFindUrl = function (url) {
+                this.findUrl = url;
+            };
+            AjaxModelPersistent.prototype.setDeleteUrl = function (url) {
+                this.deleteUrl = url;
+            };
+            AjaxModelPersistent.prototype.setUpdateUrl = function (url) {
+                this.updateUrl = url;
+            };
+            AjaxModelPersistent.prototype.getInsertUrl = function () {
+                return this.insertUrl;
+            };
+            AjaxModelPersistent.prototype.getFindUrl = function () {
+                return this.findUrl;
+            };
+            AjaxModelPersistent.prototype.getDeleteUrl = function () {
+                return this.deleteUrl;
+            };
+            AjaxModelPersistent.prototype.getUpdateUrl = function () {
+                return this.updateUrl;
+            };
+            AjaxModelPersistent.prototype.setParams = function (params) {
+                this.params = params;
+            };
+            AjaxModelPersistent.prototype.getParams = function () {
+                return this.params;
+            };
+            AjaxModelPersistent.prototype.setMethod = function (method) {
+                this.method = method;
+            };
+            AjaxModelPersistent.prototype.getMethod = function () {
+                return this.method;
+            };
+            return AjaxModelPersistent;
+        }(Northwind.Mvc.StaticModel));
+        Mvc.AjaxModelPersistent = AjaxModelPersistent;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Transaction = (function () {
+            function Transaction() {
+            }
+            Transaction.prototype.get = function (row) {
+            };
+            return Transaction;
+        }());
+        Builder.Transaction = Transaction;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="Transaction.ts"/>
+var Northwind;
+///<reference path="Transaction.ts"/>
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var And = (function (_super) {
+            __extends(And, _super);
+            /**
+             *
+             * @param condition
+             */
+            function And(condition) {
+                var _this = _super.call(this) || this;
+                /**
+                 *
+                 */
+                _this.condition = {};
+                if (typeof condition == "object") {
+                    _this.condition = condition;
+                }
+                else {
+                    throw "And condition must be an object";
+                }
+                return _this;
+            }
+            /**
+             *
+             */
+            And.prototype.get = function (row) {
+                var result = new Array();
+                var size = Object.keys(this.condition).length;
+                for (var key in row) {
+                    if (row[key] == this.condition[key]) {
+                        result.push(true);
+                    }
+                }
+                if (result.length != size) {
+                    return false;
+                }
+                for (var i = 1; i <= size; i++) {
+                    if (result[i] == false) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            return And;
+        }(Northwind.Builder.Transaction));
+        Builder.And = And;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var ComparisonOperators = (function () {
+            function ComparisonOperators() {
+            }
+            return ComparisonOperators;
+        }());
+        ComparisonOperators.AND = "&&";
+        ComparisonOperators.OR = "||";
+        ComparisonOperators.EQUAL = "==";
+        ComparisonOperators.DIFFERENT = "!=";
+        Builder.ComparisonOperators = ComparisonOperators;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
@@ -5976,68 +6444,37 @@ var Northwind;
                 }
                 return value;
             };
-            DataType.BOOLEAN = 1;
-            DataType.INTEGER = 2;
-            DataType.STRING = 3;
-            DataType.OBJECT = 4;
-            DataType.ARRAY = 5;
-            DataType.CLASS = 6;
-            DataType.BOOLEAN_TYPE = "boolean";
-            DataType.INTEGER_TYPE = "number";
-            DataType.STRING_TYPE = "string";
-            DataType.OBJECT_TYPE = "object";
             return DataType;
         }());
+        DataType.BOOLEAN = 1;
+        DataType.INTEGER = 2;
+        DataType.STRING = 3;
+        DataType.OBJECT = 4;
+        DataType.ARRAY = 5;
+        DataType.CLASS = 6;
+        DataType.BOOLEAN_TYPE = "boolean";
+        DataType.INTEGER_TYPE = "number";
+        DataType.STRING_TYPE = "string";
+        DataType.OBJECT_TYPE = "object";
         Builder.DataType = DataType;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
+///<reference path="Transaction.ts"/>
 var Northwind;
+///<reference path="Transaction.ts"/>
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var ComparisonOperators = (function () {
-            function ComparisonOperators() {
+        var Group = (function (_super) {
+            __extends(Group, _super);
+            function Group() {
+                return _super.call(this) || this;
             }
-            ComparisonOperators.AND = "&&";
-            ComparisonOperators.OR = "||";
-            ComparisonOperators.EQUAL = "==";
-            ComparisonOperators.DIFFERENT = "!=";
-            return ComparisonOperators;
-        }());
-        Builder.ComparisonOperators = ComparisonOperators;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Operators = (function () {
-            function Operators() {
-            }
-            Operators.OR = "$or";
-            Operators.AND = "$and";
-            Operators.SORT = "$sort";
-            Operators.IS_NOT = "$isNot";
-            Operators.LIMIT = "$limit";
-            Operators.COLUMNS = "$columns";
-            Operators.CONDITIONAL = "$conditions";
-            return Operators;
-        }());
-        Builder.Operators = Operators;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Transaction = (function () {
-            function Transaction() {
-            }
-            Transaction.prototype.get = function (row) {
+            Group.prototype.get = function () {
             };
-            return Transaction;
-        }());
-        Builder.Transaction = Transaction;
+            return Group;
+        }(Northwind.Builder.Transaction));
+        Builder.Group = Group;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="DataType.ts" />
@@ -6144,6 +6581,99 @@ var Northwind;
             return Gte;
         }(Northwind.Builder.Transaction));
         Builder.Gte = Gte;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="Transaction.ts"/>
+var Northwind;
+///<reference path="Transaction.ts"/>
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var In = (function (_super) {
+            __extends(In, _super);
+            /**
+             *
+             * @param condition
+             */
+            function In(condition) {
+                var _this = _super.call(this) || this;
+                /**
+                 *
+                 */
+                _this.conditions = new Array;
+                if (typeof condition == "object") {
+                    for (var key in condition) {
+                        if (condition[key] instanceof Array) {
+                            var row = condition[key];
+                            for (var key2 in row) {
+                                var value2 = Builder.DataType.getValueByType(row[key2]);
+                                _this.conditions.push("row[\"" + key + "\"]" + " == " + value2);
+                            }
+                        }
+                        else {
+                            throw "Not in value should be array";
+                        }
+                    }
+                }
+                else {
+                    throw "Not condition must be an object";
+                }
+                return _this;
+            }
+            In.prototype.get = function () {
+                return "(" + this.conditions.join(" || ") + ")";
+            };
+            return In;
+        }(Northwind.Builder.Transaction));
+        Builder.In = In;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="Transaction.ts"/>
+var Northwind;
+///<reference path="Transaction.ts"/>
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Like = (function (_super) {
+            __extends(Like, _super);
+            /**
+             *
+             * @param condition
+             */
+            function Like(condition) {
+                var _this = _super.call(this) || this;
+                /**
+                 *
+                 */
+                _this.condition = {};
+                if (typeof condition == "object") {
+                    _this.condition = condition;
+                    return _this;
+                }
+                throw "And condition must be an object";
+                return _this;
+            }
+            /**
+             *
+             */
+            Like.prototype.get = function (row) {
+                var result = new Array();
+                var size = Object.keys(this.condition).length;
+                for (var key in this.condition) {
+                    if (this.condition[key] != "" && typeof row[key] == "string") {
+                        //console.log("->", row[key], this.condition[key], this.condition[key].replace(/[^A-Za-z0-9\s]/g, ""));
+                        var regexp = new RegExp(this.condition[key], "i");
+                        if (regexp.test(row[key].replace(/([^a-z_0-9\s]+)/gi, ''))) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+                return false;
+            };
+            return Like;
+        }(Northwind.Builder.Transaction));
+        Builder.Like = Like;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="DataType.ts" />
@@ -6256,13 +6786,13 @@ var Northwind;
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var And = (function (_super) {
-            __extends(And, _super);
+        var Not = (function (_super) {
+            __extends(Not, _super);
             /**
              *
              * @param condition
              */
-            function And(condition) {
+            function Not(condition) {
                 var _this = _super.call(this) || this;
                 /**
                  *
@@ -6279,7 +6809,7 @@ var Northwind;
             /**
              *
              */
-            And.prototype.get = function (row) {
+            Not.prototype.get = function (row) {
                 var result = new Array();
                 var size = Object.keys(this.condition).length;
                 for (var key in row) {
@@ -6287,19 +6817,16 @@ var Northwind;
                         result.push(true);
                     }
                 }
-                if (result.length != size) {
-                    return false;
-                }
-                for (var i = 1; i <= size; i++) {
-                    if (result[i] == false) {
+                for (var i = 0; i < size; i++) {
+                    if (result[i] == true) {
                         return false;
                     }
                 }
                 return true;
             };
-            return And;
+            return Not;
         }(Northwind.Builder.Transaction));
-        Builder.And = And;
+        Builder.Not = Not;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="DataType.ts" />
@@ -6347,19 +6874,38 @@ var Northwind;
         Builder.NotIn = NotIn;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
 var Northwind;
-///<reference path="Transaction.ts"/>
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Not = (function (_super) {
-            __extends(Not, _super);
+        var Operators = (function () {
+            function Operators() {
+            }
+            return Operators;
+        }());
+        Operators.OR = "$or";
+        Operators.AND = "$and";
+        Operators.SORT = "$sort";
+        Operators.IS_NOT = "$isNot";
+        Operators.LIMIT = "$limit";
+        Operators.COLUMNS = "$columns";
+        Operators.CONDITIONAL = "$conditions";
+        Builder.Operators = Operators;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="DataType.ts" />
+var Northwind;
+///<reference path="DataType.ts" />
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Or = (function (_super) {
+            __extends(Or, _super);
             /**
              *
              * @param condition
              */
-            function Not(condition) {
+            function Or(condition) {
                 var _this = _super.call(this) || this;
                 /**
                  *
@@ -6376,69 +6922,32 @@ var Northwind;
             /**
              *
              */
-            Not.prototype.get = function (row) {
+            Or.prototype.get = function (row) {
                 var result = new Array();
                 var size = Object.keys(this.condition).length;
+                if (this.condition instanceof Builder.Transaction) {
+                    result.push(this.condition.get(row));
+                }
                 for (var key in row) {
-                    if (row[key] == this.condition[key]) {
-                        result.push(true);
+                    if (this.condition[key] instanceof Builder.Transaction) {
+                        result.push(this.condition[key].get(row));
+                    }
+                    else {
+                        if (row[key] == this.condition[key]) {
+                            result.push(true);
+                        }
                     }
                 }
                 for (var i = 0; i < size; i++) {
                     if (result[i] == true) {
-                        return false;
+                        return true;
                     }
                 }
-                return true;
+                return false;
             };
-            return Not;
+            return Or;
         }(Northwind.Builder.Transaction));
-        Builder.Not = Not;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
-var Northwind;
-///<reference path="Transaction.ts"/>
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var In = (function (_super) {
-            __extends(In, _super);
-            /**
-             *
-             * @param condition
-             */
-            function In(condition) {
-                var _this = _super.call(this) || this;
-                /**
-                 *
-                 */
-                _this.conditions = new Array;
-                if (typeof condition == "object") {
-                    for (var key in condition) {
-                        if (condition[key] instanceof Array) {
-                            var row = condition[key];
-                            for (var key2 in row) {
-                                var value2 = Builder.DataType.getValueByType(row[key2]);
-                                _this.conditions.push("row[\"" + key + "\"]" + " == " + value2);
-                            }
-                        }
-                        else {
-                            throw "Not in value should be array";
-                        }
-                    }
-                }
-                else {
-                    throw "Not condition must be an object";
-                }
-                return _this;
-            }
-            In.prototype.get = function () {
-                return "(" + this.conditions.join(" || ") + ")";
-            };
-            return In;
-        }(Northwind.Builder.Transaction));
-        Builder.In = In;
+        Builder.Or = Or;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
@@ -6476,12 +6985,37 @@ var Northwind;
                 }
                 return result;
             };
-            Sort.ASC = 1;
-            Sort.DESC = -1;
             return Sort;
         }());
+        Sort.ASC = 1;
+        Sort.DESC = -1;
         Builder.Sort = Sort;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var Deny = (function () {
+            function Deny() {
+            }
+            Deny.getDeny = function () {
+                return [
+                    "state",
+                    "source",
+                    "insertUrl",
+                    "deleteUrl",
+                    "updateUrl",
+                    "findUrl",
+                    "params",
+                    "internalId",
+                    "method"
+                ];
+            };
+            return Deny;
+        }());
+        Mvc.Deny = Deny;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
 /// <reference path="./Model/Builder/DataType.ts" />
 /// <reference path="./Model/Builder/ComparisonOperators.ts" />
@@ -6720,454 +7254,6 @@ var Northwind;
         Mvc.Query = Query;
     })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
-/// <reference path="./RawModel.ts"/>
-var Northwind;
-/// <reference path="./RawModel.ts"/>
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var AjaxModel = (function (_super) {
-            __extends(AjaxModel, _super);
-            function AjaxModel() {
-                var _this = _super.call(this) || this;
-                _this.insertUrl = null;
-                _this.deleteUrl = null;
-                _this.updateUrl = null;
-                _this.findUrl = null;
-                _this.findOneUrl = null;
-                _this.countUrl = null;
-                _this.method = "POST";
-                _this.initialize();
-                return _this;
-            }
-            AjaxModel.prototype.setSource = function (data) {
-                this.setInsertUrl(data.insert);
-                this.setUpdateUrl(data.update);
-                this.setInsertUrl(data.insert);
-                this.setCountUrl(data.count);
-                this.setFindOneUrl(data.findOne);
-                this.setFindUrl(data.find);
-            };
-            AjaxModel.prototype.setInsertUrl = function (url) {
-                this.insertUrl = url;
-            };
-            AjaxModel.prototype.setFindUrl = function (url) {
-                this.findUrl = url;
-            };
-            AjaxModel.prototype.setFindOneUrl = function (url) {
-                this.findOneUrl = url;
-            };
-            AjaxModel.prototype.setCountUrl = function (url) {
-                this.countUrl = url;
-            };
-            AjaxModel.prototype.setDeleteUrl = function (url) {
-                this.deleteUrl = url;
-            };
-            AjaxModel.prototype.setUpdateUrl = function (url) {
-                this.updateUrl = url;
-            };
-            AjaxModel.prototype.getInsertUrl = function () {
-                return this.insertUrl;
-            };
-            AjaxModel.prototype.getFindUrl = function () {
-                return this.findUrl;
-            };
-            AjaxModel.prototype.getDeleteUrl = function () {
-                return this.deleteUrl;
-            };
-            AjaxModel.prototype.getUpdateUrl = function () {
-                return this.updateUrl;
-            };
-            AjaxModel.prototype.setParams = function (params) {
-                this.params = params;
-            };
-            AjaxModel.prototype.getParams = function () {
-                return this.params;
-            };
-            AjaxModel.prototype.setMethod = function (method) {
-                this.method = method;
-            };
-            AjaxModel.prototype.getMethod = function () {
-                return this.method;
-            };
-            return AjaxModel;
-        }(Northwind.Mvc.RawModel));
-        Mvc.AjaxModel = AjaxModel;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
-/// <reference path="./RawModel.ts"/>
-var Northwind;
-/// <reference path="./RawModel.ts"/>
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var StaticModel = (function (_super) {
-            __extends(StaticModel, _super);
-            /**
-             *
-             */
-            function StaticModel(di) {
-                var _this = _super.call(this) || this;
-                _this.setContainer(new Northwind.Service.Container());
-                _this.initialize();
-                return _this;
-            }
-            /**
-             *
-             */
-            StaticModel.prototype.setData = function (data) {
-                this.getContainer().setPersistent("Models_Identify_" + this.getClassName(), JSON.stringify(data));
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getData = function () {
-                var data = this.getContainer().getPersistent("Models_Identify_" + this.getClassName());
-                if (typeof data == "string") {
-                    //return this.getObjectData();
-                }
-                return data;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getObjectData = function () {
-                return JSON.parse(this.getContainer().getPersistent("Models_Identify_" + this.getClassName()));
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getDi = function () {
-                return this.di;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.setIndex = function (index) {
-                this.index = index;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getIndex = function () {
-                return this.index;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.setContainer = function (container) {
-                this.container = container;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getContainer = function () {
-                return this.container;
-            };
-            return StaticModel;
-        }(Northwind.Mvc.RawModel));
-        Mvc.StaticModel = StaticModel;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
-/// <reference path="./StaticModel.ts"/>
-var Northwind;
-/// <reference path="./StaticModel.ts"/>
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var AjaxModelPersistent = (function (_super) {
-            __extends(AjaxModelPersistent, _super);
-            function AjaxModelPersistent() {
-                var _this = _super !== null && _super.apply(this, arguments) || this;
-                _this.insertUrl = null;
-                _this.deleteUrl = null;
-                _this.updateUrl = null;
-                _this.findUrl = null;
-                _this.method = "POST";
-                return _this;
-            }
-            AjaxModelPersistent.prototype.setSource = function (data) {
-                this.setInsertUrl(data.find);
-                this.setUpdateUrl(data.update);
-                this.setInsertUrl(data.insert);
-                this.setFindUrl(data.insert);
-            };
-            AjaxModelPersistent.prototype.setAjaxInit = function (value) {
-                this.getContainer().setPersistent("ajaxInit_" + this.getClassName(), value);
-            };
-            AjaxModelPersistent.prototype.getAjaxInit = function () {
-                return this.getContainer().getPersistent("ajaxInit_" + this.getClassName());
-            };
-            AjaxModelPersistent.prototype.setInsertUrl = function (url) {
-                this.insertUrl = url;
-            };
-            AjaxModelPersistent.prototype.setFindUrl = function (url) {
-                this.findUrl = url;
-            };
-            AjaxModelPersistent.prototype.setDeleteUrl = function (url) {
-                this.deleteUrl = url;
-            };
-            AjaxModelPersistent.prototype.setUpdateUrl = function (url) {
-                this.updateUrl = url;
-            };
-            AjaxModelPersistent.prototype.getInsertUrl = function () {
-                return this.insertUrl;
-            };
-            AjaxModelPersistent.prototype.getFindUrl = function () {
-                return this.findUrl;
-            };
-            AjaxModelPersistent.prototype.getDeleteUrl = function () {
-                return this.deleteUrl;
-            };
-            AjaxModelPersistent.prototype.getUpdateUrl = function () {
-                return this.updateUrl;
-            };
-            AjaxModelPersistent.prototype.setParams = function (params) {
-                this.params = params;
-            };
-            AjaxModelPersistent.prototype.getParams = function () {
-                return this.params;
-            };
-            AjaxModelPersistent.prototype.setMethod = function (method) {
-                this.method = method;
-            };
-            AjaxModelPersistent.prototype.getMethod = function () {
-                return this.method;
-            };
-            return AjaxModelPersistent;
-        }(Northwind.Mvc.StaticModel));
-        Mvc.AjaxModelPersistent = AjaxModelPersistent;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var Deny = (function () {
-            function Deny() {
-            }
-            Deny.getDeny = function () {
-                return [
-                    "state",
-                    "source",
-                    "insertUrl",
-                    "deleteUrl",
-                    "updateUrl",
-                    "findUrl",
-                    "params",
-                    "internalId",
-                    "method"
-                ];
-            };
-            return Deny;
-        }());
-        Mvc.Deny = Deny;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
-var Northwind;
-///<reference path="Transaction.ts"/>
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Group = (function (_super) {
-            __extends(Group, _super);
-            function Group() {
-                return _super.call(this) || this;
-            }
-            Group.prototype.get = function () {
-            };
-            return Group;
-        }(Northwind.Builder.Transaction));
-        Builder.Group = Group;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
-var Northwind;
-///<reference path="Transaction.ts"/>
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Like = (function (_super) {
-            __extends(Like, _super);
-            /**
-             *
-             * @param condition
-             */
-            function Like(condition) {
-                var _this = _super.call(this) || this;
-                /**
-                 *
-                 */
-                _this.condition = {};
-                if (typeof condition == "object") {
-                    _this.condition = condition;
-                    return _this;
-                }
-                throw "And condition must be an object";
-                return _this;
-            }
-            /**
-             *
-             */
-            Like.prototype.get = function (row) {
-                var result = new Array();
-                var size = Object.keys(this.condition).length;
-                for (var key in this.condition) {
-                    if (this.condition[key] != "" && typeof row[key] == "string") {
-                        //console.log("->", row[key], this.condition[key], this.condition[key].replace(/[^A-Za-z0-9\s]/g, ""));
-                        var regexp = new RegExp(this.condition[key], "i");
-                        if (regexp.test(row[key].replace(/([^a-z_0-9\s]+)/gi, ''))) {
-                            return true;
-                        }
-                        return false;
-                    }
-                }
-                return false;
-            };
-            return Like;
-        }(Northwind.Builder.Transaction));
-        Builder.Like = Like;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="DataType.ts" />
-var Northwind;
-///<reference path="DataType.ts" />
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Or = (function (_super) {
-            __extends(Or, _super);
-            /**
-             *
-             * @param condition
-             */
-            function Or(condition) {
-                var _this = _super.call(this) || this;
-                /**
-                 *
-                 */
-                _this.condition = {};
-                if (typeof condition == "object") {
-                    _this.condition = condition;
-                }
-                else {
-                    throw "And condition must be an object";
-                }
-                return _this;
-            }
-            /**
-             *
-             */
-            Or.prototype.get = function (row) {
-                var result = new Array();
-                var size = Object.keys(this.condition).length;
-                if (this.condition instanceof Builder.Transaction) {
-                    result.push(this.condition.get(row));
-                }
-                for (var key in row) {
-                    if (this.condition[key] instanceof Builder.Transaction) {
-                        result.push(this.condition[key].get(row));
-                    }
-                    else {
-                        if (row[key] == this.condition[key]) {
-                            result.push(true);
-                        }
-                    }
-                }
-                for (var i = 0; i < size; i++) {
-                    if (result[i] == true) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-            return Or;
-        }(Northwind.Builder.Transaction));
-        Builder.Or = Or;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="./TagAdapter.ts"/>
-var Northwind;
-///<reference path="./TagAdapter.ts"/>
-(function (Northwind) {
-    var Html;
-    (function (Html) {
-        var Dom = (function () {
-            /**
-             *
-             * @param element
-             */
-            function Dom(element) {
-                if (element === void 0) { element = null; }
-                if (element != null)
-                    this.element = element;
-            }
-            /**
-             *
-             * @param id
-             */
-            Dom.prototype.getById = function (id, context) {
-                if (context === void 0) { context = null; }
-                var adapter = new Northwind.Tag.TagAdapter(document.getElementById(id));
-                return adapter.get(this);
-            };
-            /**
-             *
-             */
-            Dom.prototype.getByTag = function (name, context) {
-                if (context === void 0) { context = null; }
-                var elements = document.getElementsByTagName(name);
-                var result = new Array();
-                for (var key in elements) {
-                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    result.push(adapter.get(this));
-                }
-                if (result.length == 1) {
-                    return result[0];
-                }
-                return result;
-            };
-            /**
-             *
-             */
-            Dom.prototype.getByClass = function (name, context) {
-                if (context === void 0) { context = null; }
-                var elements = document.getElementsByClassName(name);
-                var result = new Array();
-                for (var key in elements) {
-                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    result.push(adapter.get(this));
-                }
-                if (result.length == 1) {
-                    return result[0];
-                }
-                return this;
-            };
-            /**
-             *
-             */
-            Dom.prototype.getElement = function () {
-                return this.element;
-            };
-            /**
-             *
-             * @param element
-             */
-            Dom.prototype.setElement = function (element) {
-                this.element = element;
-            };
-            return Dom;
-        }());
-        Html.Dom = Dom;
-    })(Html = Northwind.Html || (Northwind.Html = {}));
-})(Northwind || (Northwind = {}));
 ///<reference path="../Component.ts"/>
 ///<reference path="../../../Controller.ts"/>
 var Northwind;
@@ -7185,16 +7271,9 @@ var Northwind;
             /**
              *
              */
-            function Hr(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Hr() {
                 var _this = _super.call(this) || this;
                 _this.create("hr");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -7221,16 +7300,9 @@ var Northwind;
             /**
              *
              */
-            function Summary(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Summary() {
                 var _this = _super.call(this) || this;
                 _this.create("summary");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -7257,16 +7329,9 @@ var Northwind;
             /**
              *
              */
-            function Sup(ctx, parameters) {
-                if (parameters === void 0) { parameters = {}; }
+            function Sup() {
                 var _this = _super.call(this) || this;
                 _this.create("sup");
-                if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                    throw "context must be instance of View.Controller to " + _this.getClassName();
-                }
-                _this.setContext(ctx);
-                _this.setDi(ctx.getDi());
-                _this.em = _this.getDi().get("em");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -7280,217 +7345,211 @@ var Northwind;
 (function (Northwind) {
     var Network;
     (function (Network) {
-        var Ajax = (function () {
-            /**
-             *
-             */
-            function Ajax() {
-                this.context = {};
-                this.method = "POST";
-                this.parameters = "";
-                this.container = [];
-                this.responseFn = function () { };
-                this.bfSendFn = function () { }.bind(this);
-                this.httpRequest = new XMLHttpRequest();
-            }
-            /**
-             *
-             */
-            Ajax.prototype.setContext = function (ctx) {
-                this.context = ctx;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.getContext = function () {
-                return this.context;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.setUrl = function (url) {
-                this.url = url;
-                return this;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.getUrl = function () {
-                return this.url;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.set = function (key, value) {
-                this.container[key] = value;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.get = function (key) {
-                return this.container[key];
-            };
-            /**
-             *
-             */
-            Ajax.prototype.setParams = function (params, value) {
-                if (value === void 0) { value = false; }
-                if (typeof params == "object") {
-                    var i = 0;
-                    for (var key in params) {
-                        var ampersand = "";
-                        if (i < Object.keys(params).length) {
-                            ampersand = "&";
-                        }
-                        this.parameters += key + "=" + encodeURIComponent(params[key]) + ampersand;
-                        i++;
-                    }
-                }
-                else if (value) {
-                    this.parameters = params + "=" + encodeURIComponent(value);
-                }
-                return this;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.POST = function () {
-                this.setMethod("POST");
-                return this;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.PUT = function () {
-                this.setMethod("PUT");
-                return this;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.DELETE = function () {
-                this.setMethod("DELETE");
-                return this;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.GET = function () {
-                this.setMethod("GET");
-                return this;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.setMethod = function (method) {
-                this.method = method;
-                return this;
-            };
-            Ajax.prototype.addContext = function () {
-                this.httpRequest.context = this.getContext();
-                this.httpRequest.getContext = function () {
-                    return this.context;
-                };
-            };
-            /**
-             *
-             */
-            Ajax.prototype.response = function (responseFunction) {
-                this.responseFn = responseFunction;
-                try {
-                    this.bfSendFn();
-                    this.addContext();
-                    this.httpRequest.onreadystatechange = function () {
-                        if (this.httpRequest.readyState === this.httpRequest.DONE) {
-                            if (this.httpRequest.status === 200) {
-                                if (typeof this.httpRequest.response != "undefined") {
-                                    if (typeof this.responseFn != "undefined") {
-                                        this.responseFn(this.httpRequest.response);
-                                    }
-                                }
-                            }
-                            else {
-                                this.error = "ajax status" + this.httpRequest.status + " " + this.httpRequest.statusText;
-                            }
-                        }
-                    }.bind(this);
-                }
-                catch (e) {
-                    console.log("Network.AJax.Exception", e);
-                }
-                return this;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.beforeSend = function (fn) {
-                this.bfSendFn = fn;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.setHeaders = function () {
-                this.httpRequest.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            };
-            /**
-             *
-             */
-            Ajax.prototype.getError = function (errorFunction) {
-                errorFunction(this.error);
-            };
-            Ajax.prototype.clear = function () {
-                this.method = "GET";
-                this.parameters = "";
-                this.error = null;
-                this.url = "";
-                this.bfSendFn = function () { };
-                this.responseFn = function () { };
-                this.container = [];
-            };
-            /**
-             *
-             */
-            Ajax.prototype.send = function (fn) {
-                if (fn === void 0) { fn = false; }
-                if (typeof fn == "function") {
-                    this.response(fn.bind(this));
-                }
-                this.httpRequest.open(this.method, this.url);
-                this.setHeaders();
-                this.httpRequest.send(this.parameters);
-            };
-            /**
-             *
-             */
-            Ajax.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.getDi = function () {
-                return this.di;
-            };
-            return Ajax;
-        }());
-        Network.Ajax = Ajax;
-    })(Network = Northwind.Network || (Northwind.Network = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Network;
-    (function (Network) {
         var MethodType = (function () {
             function MethodType() {
             }
-            MethodType.POST = "POST";
-            MethodType.GET = "GET";
-            MethodType.PUT = "PUT";
-            MethodType.DELETE = "DELETE";
             return MethodType;
         }());
+        MethodType.POST = "POST";
+        MethodType.GET = "GET";
+        MethodType.PUT = "PUT";
+        MethodType.DELETE = "DELETE";
         Network.MethodType = MethodType;
     })(Network = Northwind.Network || (Northwind.Network = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="./Environment/Scope.ts"/>
+///<reference path="./Environment/Config.ts"/>
+///<reference path="./Helper/ArrayHelper.ts"/>
+///<reference path="./Service/Container.ts"/>
+var Northwind;
+///<reference path="./Environment/Scope.ts"/>
+///<reference path="./Environment/Config.ts"/>
+///<reference path="./Helper/ArrayHelper.ts"/>
+///<reference path="./Service/Container.ts"/>
+(function (Northwind) {
+    var Application = (function () {
+        /**
+         *
+         */
+        function Application() {
+            /**
+             *
+             */
+            this.config = {};
+            /**
+             *
+             */
+            this.try = 0;
+            /**
+             *
+             */
+            this.env = Northwind.Environment.Scope.LOCAL;
+            /**
+             *
+             */
+            this.catchErrors = function () { };
+            /**
+             *
+             */
+            this.domManager = new Northwind.Html.Dom;
+            window.onbeforeunload = function () {
+                sessionStorage.clear();
+            };
+        }
+        /**
+         *
+         */
+        Application.prototype.setScope = function (env) {
+            this.env = env;
+        };
+        /**
+         *
+         */
+        Application.prototype.setConfig = function (config) {
+            this.config = config.getConfig(this.env);
+        };
+        /**
+         *
+         */
+        Application.prototype.getConfig = function () {
+            return this.config;
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveConfig = function (di) {
+            var positionArray = new Array();
+            var configData = this.config;
+            for (var key in configData) {
+                switch (key) {
+                    case "urls":
+                        this.resolveUrl(di, configData[key]);
+                        break;
+                    case "services":
+                        this.resolveServices(di, configData[key]);
+                        break;
+                }
+            }
+            //controllers executed in the final section
+            if (configData.hasOwnProperty("controllers")) {
+                this.resolveControllers(di, configData["controllers"]);
+            }
+            else {
+                throw "Config must have controllers item attached";
+            }
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveUrl = function (di, urls) {
+            var url = new Northwind.Url.Url();
+            if (Array.isArray(urls)) {
+                for (var key in urls) {
+                    if (typeof urls[key] == "string") {
+                        url.set(key, urls[key]);
+                    }
+                    else {
+                        throw "Url must be string : " + urls[key];
+                    }
+                }
+            }
+            else if (typeof url == "object") {
+                for (var keyUrlFor in urls) {
+                    url.set(keyUrlFor, urls[keyUrlFor]);
+                }
+            }
+            else {
+                throw "Url data unrecognized";
+            }
+            di.set("url", url);
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveControllers = function (di, controllers) {
+            if (controllers.length == 0) {
+                throw "You must load your controllers";
+            }
+            if (Array.isArray(controllers)) {
+                var i = 1;
+                for (var key in controllers) {
+                    if (typeof controllers[key] != "undefined") {
+                        var temp = new controllers[key];
+                        if (temp instanceof Northwind.Mvc.Controller) {
+                            temp.setDi(di);
+                            temp.initialize();
+                            this.resolvePropertiesController(temp);
+                        }
+                        else {
+                            throw "Controller #" + i + " must be extend from View.Controller class";
+                        }
+                        i++;
+                    }
+                    else {
+                        throw "Config => Controller => 'name' must be initialized with View.Controller class";
+                    }
+                }
+            }
+            else {
+                throw "Config => controllers must be array";
+            }
+        };
+        /**
+         *
+         */
+        Application.prototype.resolvePropertiesController = function (controller) {
+            var restricted = [
+                "constructor",
+                "initialize",
+                "getById",
+                "getByTag",
+                "getByClass",
+                "getDi",
+                "setDi",
+                "getUrl",
+                "setUrl"
+            ];
+            for (var key in controller) {
+                switch (typeof controller[key]) {
+                    case "function":
+                        if (!Northwind.Helper.ArrayHelper.inArray(restricted, key)) {
+                            var component = this.domManager.getById(key);
+                            if (component) {
+                                controller[key](component);
+                            }
+                        }
+                        break;
+                }
+            }
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveServices = function (di, service) {
+            new service().initialize(di);
+        };
+        /**
+         *
+         */
+        Application.prototype.catch = function (fn) {
+            this.catchErrors = fn;
+            return this;
+        };
+        /**
+         *
+         */
+        Application.prototype.start = function () {
+            try {
+                var di = new Northwind.Service.Container;
+                this.resolveConfig(di);
+            }
+            catch (e) {
+                this.catchErrors(e);
+            }
+        };
+        return Application;
+    }());
+    Northwind.Application = Application;
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
@@ -7499,13 +7558,32 @@ var Northwind;
         var ComparisonOperators = (function () {
             function ComparisonOperators() {
             }
-            ComparisonOperators.AND = "&&";
-            ComparisonOperators.OR = "||";
-            ComparisonOperators.EQUAL = "==";
-            ComparisonOperators.DIFFERENT = "!=";
             return ComparisonOperators;
         }());
+        ComparisonOperators.AND = "&&";
+        ComparisonOperators.OR = "||";
+        ComparisonOperators.EQUAL = "==";
+        ComparisonOperators.DIFFERENT = "!=";
         Persistence.ComparisonOperators = ComparisonOperators;
+    })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Persistence;
+    (function (Persistence) {
+        var DatamapperOperators = (function () {
+            function DatamapperOperators() {
+            }
+            return DatamapperOperators;
+        }());
+        DatamapperOperators.OR = "$or";
+        DatamapperOperators.AND = "$and";
+        DatamapperOperators.SORT = "$sort";
+        DatamapperOperators.IS_NOT = "$isNot";
+        DatamapperOperators.LIMIT = "$limit";
+        DatamapperOperators.COLUMNS = "$columns";
+        DatamapperOperators.CONDITIONAL = "$conditions";
+        Persistence.DatamapperOperators = DatamapperOperators;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
@@ -7527,38 +7605,19 @@ var Northwind;
                 }
                 return value;
             };
-            DataType.BOOLEAN = 1;
-            DataType.INTEGER = 2;
-            DataType.STRING = 3;
-            DataType.OBJECT = 4;
-            DataType.ARRAY = 5;
-            DataType.CLASS = 6;
-            DataType.BOOLEAN_TYPE = "boolean";
-            DataType.INTEGER_TYPE = "number";
-            DataType.STRING_TYPE = "string";
-            DataType.OBJECT_TYPE = "object";
             return DataType;
         }());
+        DataType.BOOLEAN = 1;
+        DataType.INTEGER = 2;
+        DataType.STRING = 3;
+        DataType.OBJECT = 4;
+        DataType.ARRAY = 5;
+        DataType.CLASS = 6;
+        DataType.BOOLEAN_TYPE = "boolean";
+        DataType.INTEGER_TYPE = "number";
+        DataType.STRING_TYPE = "string";
+        DataType.OBJECT_TYPE = "object";
         Persistence.DataType = DataType;
-    })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Persistence;
-    (function (Persistence) {
-        var DatamapperOperators = (function () {
-            function DatamapperOperators() {
-            }
-            DatamapperOperators.OR = "$or";
-            DatamapperOperators.AND = "$and";
-            DatamapperOperators.SORT = "$sort";
-            DatamapperOperators.IS_NOT = "$isNot";
-            DatamapperOperators.LIMIT = "$limit";
-            DatamapperOperators.COLUMNS = "$columns";
-            DatamapperOperators.CONDITIONAL = "$conditions";
-            return DatamapperOperators;
-        }());
-        Persistence.DatamapperOperators = DatamapperOperators;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
 /// <reference path="../Mvc/Model/RawModel.ts" />
@@ -7679,47 +7738,16 @@ var Northwind;
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var Service;
-    (function (Service) {
-        var Container = (function () {
-            function Container() {
-                this.service = [];
-            }
-            Container.prototype.set = function (serviceName, content) {
-                this.service[serviceName] = content;
-            };
-            Container.prototype.get = function (serviceName) {
-                return this.service[serviceName];
-            };
-            Container.prototype.hasKey = function (serviceName) {
-                if (typeof this.service[serviceName] == "undefined") {
-                    return false;
-                }
-                return true;
-            };
-            Container.prototype.setPersistent = function (serviceName, content) {
-                sessionStorage.setItem(serviceName, content);
-            };
-            Container.prototype.getPersistent = function (serviceName) {
-                return sessionStorage.getItem(serviceName);
-            };
-            return Container;
-        }());
-        Service.Container = Container;
-    })(Service = Northwind.Service || (Northwind.Service = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
     var Persistence;
     (function (Persistence) {
         var UnitOfWork = (function () {
             function UnitOfWork() {
             }
-            UnitOfWork.NEW = 1;
-            UnitOfWork.CREATED = 2;
-            UnitOfWork.DELETED = 3;
             return UnitOfWork;
         }());
+        UnitOfWork.NEW = 1;
+        UnitOfWork.CREATED = 2;
+        UnitOfWork.DELETED = 3;
         Persistence.UnitOfWork = UnitOfWork;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
@@ -8428,10 +8456,10 @@ var Northwind;
                 }
                 return result;
             };
-            Sort.ASC = 1;
-            Sort.DESC = -1;
             return Sort;
         }());
+        Sort.ASC = 1;
+        Sort.DESC = -1;
         Persistence.Sort = Sort;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
@@ -8464,35 +8492,6 @@ var Northwind;
         Reflection.Checksum = Checksum;
     })(Reflection = Northwind.Reflection || (Northwind.Reflection = {}));
 })(Northwind || (Northwind = {}));
-/// <reference path="../Network/Ajax.ts" />
-/// <reference path="../Mvc/View/Html/Dom.ts"/>
-/// <reference path="../Persistence/Hydrator.ts" />
-/// <reference path="../Persistence/EntityManager.ts" />
-var Northwind;
-/// <reference path="../Network/Ajax.ts" />
-/// <reference path="../Mvc/View/Html/Dom.ts"/>
-/// <reference path="../Persistence/Hydrator.ts" />
-/// <reference path="../Persistence/EntityManager.ts" />
-(function (Northwind) {
-    var Service;
-    (function (Service) {
-        var FactoryDefault = (function (_super) {
-            __extends(FactoryDefault, _super);
-            function FactoryDefault() {
-                var _this = _super.call(this) || this;
-                _this.set("ajax", new Northwind.Network.Ajax);
-                _this.set("container", new Northwind.Service.Container);
-                _this.set("domManager", new Northwind.Html.Dom);
-                var em = new Northwind.Persistence.EntityManager;
-                em.setDi(_this);
-                _this.set("em", em);
-                return _this;
-            }
-            return FactoryDefault;
-        }(Northwind.Service.Container));
-        Service.FactoryDefault = FactoryDefault;
-    })(Service = Northwind.Service || (Northwind.Service = {}));
-})(Northwind || (Northwind = {}));
 /// <reference path="../Service/Container.ts" />
 var Northwind;
 /// <reference path="../Service/Container.ts" />
@@ -8502,7 +8501,7 @@ var Northwind;
         var Url = (function (_super) {
             __extends(Url, _super);
             function Url() {
-                return _super !== null && _super.apply(this, arguments) || this;
+                return _super.apply(this, arguments) || this;
             }
             Url.prototype.getQuery = function (url) {
                 if (url === void 0) { url = false; }

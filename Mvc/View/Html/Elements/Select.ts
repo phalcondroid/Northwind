@@ -12,16 +12,11 @@ namespace Northwind.Tag {
         /**
          *
          */
-        public constructor(ctx, parameters : Object = {})
+        public constructor()
         {
             super("");
             this.create("select");
-            if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                throw "context must be instance of View.Controller to " + this.getClassName();
-            }
-            this.setContext(ctx);
-            this.setDi(ctx.getDi());
-            this.em = this.getDi().get("em");
+            
             this.setArgs(this.getArguments(arguments));
             this.initialize();
         }
@@ -31,9 +26,7 @@ namespace Northwind.Tag {
          */
         public getSelected()
         {
-            var option = new Northwind.Tag.Option(
-                this.getContext()
-            );
+            var option = new Northwind.Tag.Option();
             option.setElement(
                 this.getElement().options[
                     this.getElement().selectedIndex
@@ -89,9 +82,7 @@ namespace Northwind.Tag {
             var i = 0;
             for (let key in content) {
 
-                let option = new Northwind.Tag.Option(
-                    this.getContext()
-                );
+                let option = new Northwind.Tag.Option();
 
                 let id = content[key][fields[0]];
                 if (id === "") {

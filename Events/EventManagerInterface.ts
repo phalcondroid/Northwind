@@ -8,7 +8,10 @@ namespace Northwind.Events
          * @param string eventType
          * @param object|callable handler
          */
-        attach(controller, event);
+        attach : {
+            (component : Northwind.Html.Component, event : string, fn : Function);
+            (component : Northwind.Html.Component, event : string, other: number, fn : Function);
+        }
 
         /**
          * Detach the listener from the events manager
@@ -16,24 +19,21 @@ namespace Northwind.Events
          * @param string eventType
          * @param object handler
          */
-        detach(eventType, handler);
+        detach(event, handler);
+
+        /**
+         *
+         */
+        detachComponent(component : Northwind.Html.Component);
 
         /**
          * Removes all events from the EventsManager
          */
-        detachAll(controller);
+        detachAll();
 
         /**
          * Fires an event in the events manager causing the active listeners
          */
-        fire(controller, event, callback);
-
-        /**
-         * Returns all the attached listeners of a certain type
-         *
-         * @param string type
-         * @return array
-         */
-        getListeners(type);
+        trigger(controller, event, callback);
     }
 }

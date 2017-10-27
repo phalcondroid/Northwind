@@ -1,7 +1,5 @@
 
 ///<reference path="../Component.ts"/>
-///<reference path="../../../Controller.ts"/>
-///<reference path="../../Interfaces/ITagSignature.ts"/>
 
 namespace Northwind.Tag
 {
@@ -15,16 +13,10 @@ namespace Northwind.Tag
         /**
          *
          */
-        public constructor(ctx, p1 : Object = {})
+        public constructor()
         {
             super();
             this.create("a");
-            if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                throw "context must be instance of View.Controller to " + this.getClassName();
-            }
-            this.setContext(ctx);
-            this.setDi(ctx.getDi());
-            this.em = this.getDi().get("em");
             this.href("");
             this.setArgs(this.getArguments(arguments));
             this.initialize();
@@ -35,7 +27,7 @@ namespace Northwind.Tag
          * @return {[type]} [description]
          */
         public favIcon(favIcon) {
-            let icon = new Northwind.Tag.I(this.getContext())
+            let icon = new Northwind.Tag.I()
             .class(favIcon);
             this.append(icon.getElement());
             return this;

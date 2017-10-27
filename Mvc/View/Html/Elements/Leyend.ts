@@ -11,16 +11,11 @@ namespace Northwind.Tag {
         /**
          *
          */
-        public constructor(ctx, parameters : Object = {})
+        public constructor()
         {
             super();
             this.create("leyend");
-            if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                throw "Context must be instance of View.Controller to " + this.getClassName();
-            }
-            this.setContext(ctx);
-            this.setDi(ctx.getDi());
-            this.em = this.getDi().get("em");
+            
             this.setArgs(this.getArguments(arguments));
             this.initialize();
         }

@@ -24,28 +24,14 @@ namespace Northwind.Tag
         /**
          *
          */
-        public constructor(ctx, parameters : Object = {})
+        public constructor()
         {
             super();
             this.create("table");
-            if (!(ctx instanceof Northwind.Mvc.Controller)) {
-                throw "context must be instance of View.Controller to " + this.getClassName();
-            }
-            this.setContext(ctx);
-            this.setDi(ctx.getDi());
-            this.em = this.getDi().get("em");
 
-            this.thead  = new Northwind.Tag.Thead(
-                this.getContext()
-            );
-
-            this.tbody = new Northwind.Tag.Tbody(
-                this.getContext()
-            );
-
-            this.tfoot = new Northwind.Tag.Tfoot(
-                this.getContext()
-            );
+            this.thead = new Northwind.Tag.Thead();
+            this.tbody = new Northwind.Tag.Tbody();
+            this.tfoot = new Northwind.Tag.Tfoot();
 
             this.setArgs(this.getArguments(arguments));
             this.initialize();
@@ -86,7 +72,7 @@ namespace Northwind.Tag
          */
         public toHeadTr(component)
         {
-            let tr = new Northwind.Tag.Tr(this.getContext());
+            let tr = new Northwind.Tag.Tr();
             tr.append(component);
 
             this.thead.append(
@@ -137,7 +123,7 @@ namespace Northwind.Tag
          */
         public toBodyTr(component)
         {
-            let tr = new Northwind.Tag.Tr(this.getContext());
+            let tr = new Northwind.Tag.Tr();
             tr.append(component);
 
             this.tbody.append(
@@ -156,7 +142,7 @@ namespace Northwind.Tag
          */
         public toFootTr(component)
         {
-            let tr = new Northwind.Tag.Tr(this.getContext());
+            let tr = new Northwind.Tag.Tr();
             tr.append(component);
 
             this.tfoot.append(
@@ -178,16 +164,12 @@ namespace Northwind.Tag
         {
             this.header = true;
 
-            this.tr     = new Northwind.Tag.Tr(
-                this.getContext()
-            );
+            this.tr     = new Northwind.Tag.Tr();
 
             let i = 0;
             for (let key in columns) {
 
-                let th = new Northwind.Tag.Th(
-                    this.context
-                );
+                let th = new Northwind.Tag.Th();
 
                 if (typeof columns[key] == "object") {
                     th.append(
@@ -242,31 +224,27 @@ namespace Northwind.Tag
 
             this.system = ["click", "customize"];
 
-            var html = new Northwind.Html.Component();
-            var i = 0;
+            let html = new Northwind.Html.Component();
+            let i = 0;
 
-            for (var key in content) {
+            for (let key in content) {
 
-                var trIdentify = Helper.StringHelper.sanitizeString(key) + this.id;
-                var tr = new Northwind.Tag.Tr(
-                    this.getContext()
-                );
+                let trIdentify = Helper.StringHelper.sanitizeString(key) + this.id;
+                let tr = new Northwind.Tag.Tr();
 
                 var header = new Array();
-                var j = 0;
+                let j = 0;
 
-                for (var row in content[key]) {
+                for (let row in content[key]) {
 
                     header[j] = row;
-                    var trIdentify2 = Helper.StringHelper.sanitizeString(key) + Helper.StringHelper.sanitizeString(row) + this.id;
-                    var td = new Northwind.Tag.Td(
-                        this.getContext()
-                    );
+                    let trIdentify2 = Helper.StringHelper.sanitizeString(key) + Helper.StringHelper.sanitizeString(row) + this.id;
+                    let td = new Northwind.Tag.Td();
 
                     if (!this.validateSystemKeys(row)) {
 
-                        var contentRow = content[key][row];
-                        var finalContent;
+                        let contentRow = content[key][row];
+                        let finalContent;
 
                         if (contentRow instanceof Northwind.Html.Component) {
                             finalContent = contentRow.getElement();
