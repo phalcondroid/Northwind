@@ -33,11 +33,51 @@ namespace Northwind
          */
         private domManager = new Northwind.Html.Dom;
 
+        private restricted = new Array;
+
         /**
          *
          */
         public constructor()
         {
+            let header = this.domManager.getByTag("head");
+            console.log(header);
+            header.append(
+                new Northwind.Tag.Meta().attr({
+                    "charset" : "utf-8"
+                })
+            );
+
+            this.restricted = [
+                "constructor",
+                "initialize",
+                "getById",
+                "getByTag",
+                "getByClass",
+                "getDi",
+                "hasKey",
+                "setPersistent",
+                "getPersistent",
+                "get",
+                "set",
+                "setDi",
+                "getUrl",
+                "setUrl",
+                "getAjax",
+                "setAjax",
+                "getDom",
+                "setDom",
+                "setEm",
+                "getEm",
+                "setEntityManager",
+                "getEntityManager",
+                "setContainer",
+                "getContainer",
+                "setTag",
+                "getTag",
+                "setEvent",
+                "getEvent"
+            ];
             window.onbeforeunload = function () {
                 sessionStorage.clear();
             }
@@ -160,7 +200,8 @@ namespace Northwind
                             temp.setDi(di);
                             temp.initialize();
                             this.resolvePropertiesController(
-                                temp
+                                temp,
+                                di
                             );
 
                         } else {
@@ -181,25 +222,15 @@ namespace Northwind
         /**
          *
          */
-        private resolvePropertiesController(controller : Northwind.Mvc.Controller)
+        private resolvePropertiesController(controller : Northwind.Mvc.Controller, di)
         {
-            let restricted = [
-                "constructor",
-                "initialize",
-                "getById",
-                "getByTag",
-                "getByClass",
-                "getDi",
-                "setDi",
-                "getUrl",
-                "setUrl"
-            ];
-
             for (let key in controller) {
                 switch (typeof controller[key]) {
                     case "function":
-                        if (!Northwind.Helper.ArrayHelper.inArray(restricted, key)) {
+                        if (!Northwind.Helper.ArrayHelper.inArray(this.restricted, key)) {
+                            this.domManager.setDi(controller.getDi());
                             let component = this.domManager.getById(key);
+                            component.setDi(controller.getDi());
                             if (component) {
                                 controller[key](component);
                             }

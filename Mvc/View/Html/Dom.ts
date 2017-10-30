@@ -30,25 +30,33 @@ namespace Northwind.Html
             let adapter = new Northwind.Tag.TagAdapter(
                 document.getElementById(id)
             );
+            adapter.setDi(this.di);
             return adapter.get();
         }
 
         /**
          *
          */
-        public getByTag(name : string, context = null)
+        public getByTag(name : string)
         {
-            var elements = document.getElementsByTagName(
+            let elements = document.getElementsByTagName(
                 name
             );
-            var result = new Array();
+            let result = new Array();
             for (let key in elements) {
-                let adapter = new Northwind.Tag.TagAdapter(
-                    elements[key]
-                );
-                result.push(
-                    adapter.get()
-                );
+                if (typeof elements[key].nodeName == "string") {
+                    let adapter = new Northwind.Tag.TagAdapter(
+                        elements[key]
+                    );
+                    adapter.setDi(this.di);
+                    result.push(
+                        adapter.get()
+                    );
+                }
+            }
+
+            if (result.length == 0) {
+                return false;
             }
 
             if (result.length == 1) {
@@ -70,6 +78,7 @@ namespace Northwind.Html
                 let adapter = new Northwind.Tag.TagAdapter(
                     elements[key]
                 );
+                adapter.setDi(this.di);
                 result.push(
                     adapter.get()
                 );

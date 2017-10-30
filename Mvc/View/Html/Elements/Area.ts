@@ -14,8 +14,7 @@ namespace Northwind.Tag
          */
         public constructor()
         {
-            super();
-            this.create("area");
+            super("AREA");
             this.setArgs(this.getArguments(arguments));
             this.initialize();
         }

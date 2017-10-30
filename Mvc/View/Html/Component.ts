@@ -1,6 +1,6 @@
 
-///<reference path="../../../Service/FactoryDefault.ts"/>
 ///<reference path="./TagAdapter.ts"/>
+///<reference path="../../../Service/InjectorComponents.ts"/>
 
 namespace Northwind.Html
 {
@@ -8,7 +8,7 @@ namespace Northwind.Html
      *
      * @type
      */
-    export class Component extends Northwind.Service.FactoryDefault
+    export class Component extends Service.InjectorComponents
     {
         public static NO_CONTEXT = 1;
 
@@ -141,72 +141,12 @@ namespace Northwind.Html
             return this;
         }
 
-        /*
-        public getById(id : string)
-        {
-            if (document.getElementById(id)) {
-                let adapter = new Northwind.Tag.TagAdapter(
-                    document.getElementById(id)
-                );
-                if (!adapter) {
-                    return false;
-                }
-                return adapter.get(
-                    this.getContext()
-                );
-            } else {
-                return false;
-            }
-        }
-
-        public getByTag(name : string)
-        {
-            let elements = document.getElementsByTagName(
-                name
-            );
-            let result = new Array();
-            for (let key in elements) {
-                let adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                result.push(
-                    adapter.get(
-                        this.getContext()
-                    )
-                );
-            }
-
-            if (result.length == 1) {
-                return result[0];
-            }
-            return result;
-        }
-
-        public getByClass(name : string)
-        {
-            let elements = document.getElementsByClassName(
-                name
-            );
-            let result = new Array();
-            for (let key in elements) {
-                let adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                result.push(
-                    adapter.get(
-                        this.getContext()
-                    )
-                );
-            }
-
-            if (result.length == 1) {
-                return result[0];
-            }
-            return this;
-        }
-        */
-
         /**
          *
          */
         public create(tag: string)
         {
+            console.log("la tag", tag);
             this.element = this.init(tag, this.id);
             return this;
         }
@@ -222,11 +162,9 @@ namespace Northwind.Html
         {
             this.className = element;
             let docElement = document.createElement(element);
-
             if (element === "Button") {
                 docElement.setAttribute("type", "button");
             }
-
             if (name !== "") {
                 if (Helper.ArrayHelper.inArray(this.deny, element)) {
                     docElement.setAttribute("name", name);

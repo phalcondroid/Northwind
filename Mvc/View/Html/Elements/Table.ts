@@ -26,9 +26,8 @@ namespace Northwind.Tag
          */
         public constructor()
         {
-            super();
-            this.create("table");
-
+            super("TABLE");
+            
             this.thead = new Northwind.Tag.Thead();
             this.tbody = new Northwind.Tag.Tbody();
             this.tfoot = new Northwind.Tag.Tfoot();

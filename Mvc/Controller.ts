@@ -1,5 +1,5 @@
 
-///<reference path="../Service/Container.ts"/>
+///<reference path="../Service/FactoryDefault.ts" />
 
 /*
 function sealed(constructor: Function) {
@@ -11,9 +11,8 @@ function sealed(constructor: Function) {
 namespace Northwind.Mvc
 {
     //@sealed
-    export class Controller extends Service.Container
+    export class Controller extends Service.FactoryDefault
     {
-        private di;
         public constructor()
         {
             super();
@@ -25,16 +24,6 @@ namespace Northwind.Mvc
         public initialize()
         {
 
-        }
-
-        public setDi(di)
-        {
-            this.di = di;
-        }
-
-        public getDi()
-        {
-            return this.di;
         }
     }
 }

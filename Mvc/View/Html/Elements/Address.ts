@@ -13,8 +13,7 @@ namespace Northwind.Tag {
          */
         public constructor()
         {
-            super();
-            this.create("address");
+            super("ADDRESS");
             this.setArgs(this.getArguments(arguments));
             this.initialize();
         }

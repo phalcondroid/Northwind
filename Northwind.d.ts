@@ -75,6 +75,156 @@ declare namespace Northwind.Events {
         trigger(controller: any, event: any, callback: any): any;
     }
 }
+declare namespace Northwind {
+    class Events {
+        private di;
+        private events;
+        private params;
+        private others;
+        private element;
+        private static AFTER;
+        private static BEFORE;
+        private static ONCREATE;
+        private static ONDELETE;
+        private static ONCHANGE;
+        private nativeEvents;
+        contructor(): void;
+        /**
+         *
+         */
+        attach(component: Northwind.Html.Component, event: string, fn: any): this;
+        /**
+         *
+         */
+        add(otherEvent: number): this;
+        /**
+         *
+         */
+        detachComponent(component: Northwind.Html.Component): this;
+        /**
+         *
+         */
+        detach(component: any, event: any, params?: boolean): this;
+        /**
+         *
+         */
+        trigger(controller: any, event: any, callback: any, params?: {}): this;
+        /**
+         *
+         */
+        detachAll(): this;
+        /**
+         *
+         */
+        tag(component: any): this;
+        /**
+         *
+         * @param  {Function} fn [description]
+         * @return {[type]}      [description]
+         */
+        click(fn: any): this;
+        /**
+         *
+         */
+        doubleClick(fn: any): this;
+        /**
+         *
+         * @return {[type]} [description]
+         */
+        change(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        keypress(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        keydown(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        keyup(fn: any): this;
+        paste(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        blur(fn: any): this;
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        focus(fn: any): this;
+        setDi(di: any): this;
+        getDi(): any;
+    }
+}
+declare namespace Northwind.Events {
+    interface EventsAwareInterface {
+        /**
+         * Sets the events manager
+         */
+        setEventsManager(eventsManager: any): any;
+        /**
+         * Returns the internal event manager
+         */
+        getEventsManager(): Northwind.Events.ManagerInterface;
+    }
+}
+declare namespace Northwind.Helper {
+    class ArrayHelper {
+        constructor();
+        static inArray(container: any[], element: any): boolean;
+    }
+}
+declare namespace Northwind.Helper {
+    class MathHelper {
+        constructor();
+        static getRandom(init: any, last: any): number;
+        static getUUID(): string;
+        static getS4(): string;
+    }
+}
+declare namespace Northwind.Helper {
+    class StringHelper {
+        constructor();
+        /**
+         * [sanitizeString description]
+         * @param  {string} str [description]
+         * @return {[type]}     [description]
+         */
+        static sanitizeString(str: string): string;
+        /**
+         * [capitalize description]
+         * @param  {[type]} str [description]
+         * @return {[type]}     [description]
+         */
+        static capitalize(str: any): any;
+    }
+}
+declare namespace Northwind.Helper {
+    class Uuid {
+        constructor();
+        static get(): string;
+    }
+}
+declare namespace Northwind.Helper {
+    class Validator {
+        static validStructArray(data: any[]): boolean;
+    }
+}
+declare namespace Northwind.Loader {
+    interface DiConstructorInjection {
+        initialize(di: Northwind.Service.Container): any;
+    }
+}
+declare namespace Northwind.Mvc {
+    class Application {
+    }
+}
 declare namespace Northwind.Service {
     class Container {
         private service;
@@ -181,12 +331,37 @@ declare namespace Northwind.Network {
         getDi(): Service.Container;
     }
 }
+declare namespace Northwind.Service {
+    class InjectorComponents {
+        tag: any;
+        ajax: any;
+        dom: any;
+        di: any;
+        event: any;
+        container: any;
+        em: any;
+        setDi(di: Service.Container): void;
+        getDi(): any;
+        setDom(dom: any): void;
+        getDom(): any;
+        setTag(tag: any): void;
+        getTag(): any;
+        setEvent(event: any): void;
+        getEvent(): any;
+        setEm(em: any): void;
+        getEm(): any;
+        setContainer(container: any): void;
+        getContainer(): any;
+        setAjax(ajax: any): void;
+        getAjax(): any;
+    }
+}
 declare namespace Northwind.Html {
     /**
      *
      * @type
      */
-    class Component extends Northwind.Service.FactoryDefault {
+    class Component extends Service.InjectorComponents {
         static NO_CONTEXT: number;
         /**
          * Node javascript element
@@ -438,18 +613,6 @@ declare namespace Northwind.Tag {
          *
          */
         constructor();
-    }
-}
-declare namespace Northwind.Mvc {
-    class Controller extends Service.Container {
-        private di;
-        constructor();
-        /**
-         *
-         */
-        initialize(): void;
-        setDi(di: any): void;
-        getDi(): any;
     }
 }
 declare namespace Northwind.Tag {
@@ -1467,12 +1630,6 @@ declare namespace Northwind.Tag {
         constructor();
     }
 }
-declare namespace Northwind.Helper {
-    class Uuid {
-        constructor();
-        static get(): string;
-    }
-}
 declare namespace Northwind.Mvc {
     class RawModel {
         state: number;
@@ -1889,7 +2046,13 @@ declare namespace Northwind.Tag {
         /**
          *
          */
+        di: any;
+        /**
+         *
+         */
         constructor(element: any);
+        setDi(di: any): this;
+        getDi(): any;
         /**
          *
          */
@@ -1916,7 +2079,7 @@ declare namespace Northwind.Html {
         /**
          *
          */
-        getByTag(name: string, context?: any): any;
+        getByTag(name: string): any;
         /**
          *
          */
@@ -1936,6 +2099,7 @@ declare namespace Northwind.Html {
 }
 declare namespace Northwind.Tag {
     class FactoryTag {
+        di: any;
         /**
          *
          */
@@ -1944,6 +2108,8 @@ declare namespace Northwind.Tag {
          *
          */
         constructor(ctx: any);
+        setDi(di: any): this;
+        getDi(): any;
         /**
          *
          */
@@ -1952,157 +2118,25 @@ declare namespace Northwind.Tag {
 }
 declare namespace Northwind.Service {
     class FactoryDefault extends Northwind.Service.Container {
-        private di;
+        di: any;
         constructor();
         getDom(): any;
         getAjax(): any;
-        getEntityManager(): any;
+        getEm(): any;
         getContainer(): any;
         getTag(name: string): any;
         getEvent(): any;
         setDi(di: any): this;
-        getDi(): this;
-    }
-}
-declare namespace Northwind {
-    class Events {
-        private events;
-        private params;
-        private others;
-        private element;
-        private static AFTER;
-        private static BEFORE;
-        private static ONCREATE;
-        private static ONDELETE;
-        private static ONCHANGE;
-        private nativeEvents;
-        contructor(): void;
-        /**
-         *
-         */
-        attach(component: Northwind.Html.Component, event: string, fn: any): this;
-        /**
-         *
-         */
-        add(otherEvent: number): this;
-        /**
-         *
-         */
-        detachComponent(component: Northwind.Html.Component): this;
-        /**
-         *
-         */
-        detach(component: any, event: any, params?: boolean): this;
-        /**
-         *
-         */
-        trigger(controller: any, event: any, callback: any, params?: {}): this;
-        /**
-         *
-         */
-        detachAll(): this;
-        /**
-         *
-         */
-        tag(component: any): this;
-        /**
-         *
-         * @param  {Function} fn [description]
-         * @return {[type]}      [description]
-         */
-        click(fn: any): this;
-        /**
-         *
-         */
-        doubleClick(fn: any): this;
-        /**
-         *
-         * @return {[type]} [description]
-         */
-        change(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        keypress(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        keydown(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        keyup(fn: any): this;
-        paste(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        blur(fn: any): this;
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        focus(fn: any): this;
-    }
-}
-declare namespace Northwind.Events {
-    interface EventsAwareInterface {
-        /**
-         * Sets the events manager
-         */
-        setEventsManager(eventsManager: any): any;
-        /**
-         * Returns the internal event manager
-         */
-        getEventsManager(): Northwind.Events.ManagerInterface;
-    }
-}
-declare namespace Northwind.Helper {
-    class ArrayHelper {
-        constructor();
-        static inArray(container: any[], element: any): boolean;
-    }
-}
-declare namespace Northwind.Helper {
-    class MathHelper {
-        constructor();
-        static getRandom(init: any, last: any): number;
-        static getUUID(): string;
-        static getS4(): string;
-    }
-}
-declare namespace Northwind.Helper {
-    class StringHelper {
-        constructor();
-        /**
-         * [sanitizeString description]
-         * @param  {string} str [description]
-         * @return {[type]}     [description]
-         */
-        static sanitizeString(str: string): string;
-        /**
-         * [capitalize description]
-         * @param  {[type]} str [description]
-         * @return {[type]}     [description]
-         */
-        static capitalize(str: any): any;
-    }
-}
-declare namespace Northwind.Helper {
-    class Validator {
-        static validStructArray(data: any[]): boolean;
-    }
-}
-declare namespace Northwind.Loader {
-    interface DiConstructorInjection {
-        initialize(di: Northwind.Service.Container): any;
+        getDi(): any;
     }
 }
 declare namespace Northwind.Mvc {
-    class Application {
+    class Controller extends Service.FactoryDefault {
+        constructor();
+        /**
+         *
+         */
+        initialize(): void;
     }
 }
 declare namespace Northwind.Mvc {
@@ -2586,6 +2620,7 @@ declare namespace Northwind {
          *
          */
         private domManager;
+        private restricted;
         /**
          *
          */
@@ -2617,7 +2652,7 @@ declare namespace Northwind {
         /**
          *
          */
-        private resolvePropertiesController(controller);
+        private resolvePropertiesController(controller, di);
         /**
          *
          */

@@ -14,8 +14,7 @@ namespace Northwind.Tag {
          */
         public constructor()
         {
-            super();
-            this.create("button");
+            super("BUTTON");
             this.attr("type", "button");
             this.setArgs(this.getArguments(arguments));
             this.initialize();

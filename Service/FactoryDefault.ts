@@ -8,71 +8,84 @@ namespace Northwind.Service
 {
     export class FactoryDefault extends Northwind.Service.Container
     {
-        private di;
+        public di;
 
         public constructor()
         {
             super();
-            this.set("ajax",       new Northwind.Network.Ajax);
-            this.set("container",  new Northwind.Service.Container);
-            this.set("dom", new Northwind.Html.Dom);
-
-            let em = new Northwind.Persistence.EntityManager;
-            em.setDi(this);
-
-            this.set("em", em);
-
-            let dom = new Northwind.Html.Dom;
-            this.set("dom", dom);
-
-            let tag = new Northwind.Tag.FactoryTag(this);
-            this.set("tag", tag);
-
-            let eventManager = new Northwind.Events;
-            this.set("events", eventManager);
         }
 
         public getDom()
         {
-            return this.get("dom");
+            return this.di.get(
+                "dom"
+            );
         }
 
         public getAjax()
         {
-            return this.get("ajax");
+            return this.di.get(
+                "ajax"
+            );
         }
 
-        public getEntityManager()
+        public getEm()
         {
-            return this.get("em");
+            return this.di.get(
+                "em"
+            );
         }
 
         public getContainer()
         {
-            return this.get("container");
+            return this.di.get(
+                "container"
+            );
         }
 
         public getTag(name : string)
         {
             let tag = this.get("tag");
+            tag.setDi(this.di);
             return tag.get(name);
         }
 
         public getEvent()
         {
-            let events = this.get("events");
+            let events = this.di.get(
+                "events"
+            );
             return events;
         }
 
         public setDi(di)
         {
             this.di = di;
+            this.di.set("ajax",       new Northwind.Network.Ajax);
+            this.di.set("container",  new Northwind.Service.Container);
+
+            let em = new Northwind.Persistence.EntityManager;
+            em.setDi(this.di);
+            this.di.set("em", em);
+
+            let dom = new Northwind.Html.Dom;
+            dom.setDi(di);
+            this.di.set("dom", dom);
+
+            let tag = new Northwind.Tag.FactoryTag(this);
+            tag.setDi(di);
+            this.di.set("tag", tag);
+
+            let eventManager = new Northwind.Events;
+            eventManager.setDi(di);
+            this.di.set("event", eventManager);
+
             return this;
         }
 
         public getDi()
         {
-            return this;
+            return this.di;
         }
     }
 }

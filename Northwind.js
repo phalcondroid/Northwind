@@ -97,6 +97,320 @@ var Northwind;
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
+    var Events = (function () {
+        function Events() {
+            this.events = {};
+            this.params = {};
+            this.others = {};
+            this.nativeEvents = [];
+        }
+        Events.prototype.contructor = function () {
+            this.nativeEvents = [
+                "click",
+                "doubleClick",
+                "change",
+                "keypress",
+                "keydown",
+                "keyup",
+                "paste",
+                "blur",
+                "focus"
+            ];
+        };
+        /**
+         *
+         */
+        Events.prototype.attach = function (component, event, fn) {
+            this.events[component.getClassName()][event][fn];
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.add = function (otherEvent) {
+            this.others[otherEvent];
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.detachComponent = function (component) {
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.detach = function (component, event, params) {
+            if (params === void 0) { params = false; }
+            this.events[component][event];
+            this.params[component][event] = params;
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.trigger = function (controller, event, callback, params) {
+            if (params === void 0) { params = {}; }
+            var result = this.events[controller][event](params);
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.detachAll = function () {
+            this.events = {};
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.tag = function (component) {
+            if (component instanceof Northwind.Html.Component) {
+                this.element = component;
+                return this;
+            }
+            throw "Component must be a instance of Northwind.Html.Component or Northwind.Tag";
+        };
+        /**
+         *
+         * @param  {Function} fn [description]
+         * @return {[type]}      [description]
+         */
+        Events.prototype.click = function (fn) {
+            this.element.getElement().addEventListener("click", fn.bind(this));
+            return this;
+        };
+        /**
+         *
+         */
+        Events.prototype.doubleClick = function (fn) {
+            this.element.getElement().addEventListener("dblclick", fn.bind(this));
+            return this;
+        };
+        /**
+         *
+         * @return {[type]} [description]
+         */
+        Events.prototype.change = function (fn) {
+            this.element.getElement().addEventListener("change", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.keypress = function (fn) {
+            this.element.getElement().addEventListener("keypress", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.keydown = function (fn) {
+            this.element.getElement().addEventListener("keydown", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.keyup = function (fn) {
+            this.element.getElement().addEventListener("keyup", fn.bind(this));
+            return this;
+        };
+        Events.prototype.paste = function (fn) {
+            this.element.getElement().addEventListener("paste", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.blur = function (fn) {
+            this.element.getElement().addEventListener("blur", fn.bind(this));
+            return this;
+        };
+        /**
+         * [change description]
+         * @return {[type]} [description]
+         */
+        Events.prototype.focus = function (fn) {
+            this.element.getElement().addEventListener("focus", fn.bind(this));
+            return this;
+        };
+        Events.prototype.setDi = function (di) {
+            this.di = di;
+            return this;
+        };
+        Events.prototype.getDi = function () {
+            return this.di;
+        };
+        return Events;
+    }());
+    Events.AFTER = 1;
+    Events.BEFORE = 2;
+    Events.ONCREATE = 3;
+    Events.ONDELETE = 4;
+    Events.ONCHANGE = 5;
+    Northwind.Events = Events;
+})(Northwind || (Northwind = {}));
+/// <reference path="./EventManagerInterface.ts"/>
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var ArrayHelper = (function () {
+            function ArrayHelper() {
+            }
+            ArrayHelper.inArray = function (container, element) {
+                for (var key in container) {
+                    if (container[key] == element) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            return ArrayHelper;
+        }());
+        Helper.ArrayHelper = ArrayHelper;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var MathHelper = (function () {
+            function MathHelper() {
+            }
+            MathHelper.getRandom = function (init, last) {
+                return Math.floor((Math.random() * last) + init);
+            };
+            MathHelper.getUUID = function () {
+                return this.getS4() + this.getS4() + '-' +
+                    this.getS4() + '-' + this.getS4() + '-' +
+                    this.getS4() + '-' + this.getS4() +
+                    this.getS4() + this.getS4();
+            };
+            MathHelper.getS4 = function () {
+                return Math.floor((1 + Math.random()) * 0x10000)
+                    .toString(16)
+                    .substring(1);
+            };
+            return MathHelper;
+        }());
+        Helper.MathHelper = MathHelper;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var StringHelper = (function () {
+            function StringHelper() {
+            }
+            /**
+             * [sanitizeString description]
+             * @param  {string} str [description]
+             * @return {[type]}     [description]
+             */
+            StringHelper.sanitizeString = function (str) {
+                var idTr = str.replace(/[`~!@#$%^&*()_|+\-=?;:"",.<>\{\}\[\]\\\/]/gi, "").toLowerCase();
+                idTr = idTr.toString().replace(/\s/g, "");
+                return idTr;
+            };
+            /**
+             * [capitalize description]
+             * @param  {[type]} str [description]
+             * @return {[type]}     [description]
+             */
+            StringHelper.capitalize = function (str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            };
+            return StringHelper;
+        }());
+        Helper.StringHelper = StringHelper;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var Uuid = (function () {
+            function Uuid() {
+            }
+            Uuid.get = function () {
+                var helper = Northwind.Helper;
+                return helper.MathHelper.getS4() + helper.MathHelper.getS4() + '-' +
+                    helper.MathHelper.getS4() + '-' + helper.MathHelper.getS4() + '-' +
+                    helper.MathHelper.getS4() + '-' + Helper.MathHelper.getS4() +
+                    helper.MathHelper.getS4() + helper.MathHelper.getS4();
+            };
+            return Uuid;
+        }());
+        Helper.Uuid = Uuid;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="../Errors/Message.ts"/>
+var Northwind;
+/// <reference path="../Errors/Message.ts"/>
+(function (Northwind) {
+    var Helper;
+    (function (Helper) {
+        var Validator = (function () {
+            function Validator() {
+            }
+            Validator.validStructArray = function (data) {
+                var message = Northwind.Errors.Message;
+                try {
+                    if (Array.isArray(data)) {
+                        var firstPosition = data[0];
+                        if (typeof firstPosition == "object") {
+                            return true;
+                        }
+                        else {
+                            throw message.NOT_VALID_ARRAY_OBJECT;
+                        }
+                    }
+                    else {
+                        throw message.NOT_VALID_ARRAY;
+                    }
+                }
+                catch (e) {
+                }
+            };
+            return Validator;
+        }());
+        Helper.Validator = Validator;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+/*
+function sealed(constructor: Function) {
+    Object.seal(constructor);
+    Object.seal(constructor.prototype);
+}
+*/
+var Northwind;
+/*
+function sealed(constructor: Function) {
+    Object.seal(constructor);
+    Object.seal(constructor.prototype);
+}
+*/
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        //@sealed
+        var Application = (function () {
+            function Application() {
+            }
+            return Application;
+        }());
+        Mvc.Application = Application;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
     var Service;
     (function (Service) {
         var Container = (function () {
@@ -326,11 +640,83 @@ var Northwind;
         Network.Ajax = Ajax;
     })(Network = Northwind.Network || (Northwind.Network = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../../Service/FactoryDefault.ts"/>
-///<reference path="./TagAdapter.ts"/>
 var Northwind;
-///<reference path="../../../Service/FactoryDefault.ts"/>
+(function (Northwind) {
+    var Service;
+    (function (Service) {
+        var InjectorComponents = (function () {
+            function InjectorComponents() {
+            }
+            InjectorComponents.prototype.setDi = function (di) {
+                if (di.hasKey("ajax")) {
+                    this.ajax = di.get("ajax");
+                }
+                if (di.hasKey("em")) {
+                    this.em = di.get("em");
+                }
+                if (di.hasKey("dom")) {
+                    this.dom = di.get("dom");
+                }
+                if (di.hasKey("tag")) {
+                    this.tag = di.get("tag");
+                }
+                if (di.hasKey("event")) {
+                    this.event = di.get("event");
+                }
+                if (di.hasKey("container")) {
+                    this.container = di.get("container");
+                }
+                this.di = di;
+            };
+            InjectorComponents.prototype.getDi = function () {
+                return this.di;
+            };
+            InjectorComponents.prototype.setDom = function (dom) {
+                this.dom = dom;
+            };
+            InjectorComponents.prototype.getDom = function () {
+                return this.dom;
+            };
+            InjectorComponents.prototype.setTag = function (tag) {
+                this.tag = tag;
+            };
+            InjectorComponents.prototype.getTag = function () {
+                return this.tag;
+            };
+            InjectorComponents.prototype.setEvent = function (event) {
+                this.event = event;
+            };
+            InjectorComponents.prototype.getEvent = function () {
+                return this.event;
+            };
+            InjectorComponents.prototype.setEm = function (em) {
+                this.em = em;
+            };
+            InjectorComponents.prototype.getEm = function () {
+                return this.em;
+            };
+            InjectorComponents.prototype.setContainer = function (container) {
+                this.container = container;
+            };
+            InjectorComponents.prototype.getContainer = function () {
+                return this.container;
+            };
+            InjectorComponents.prototype.setAjax = function (ajax) {
+                this.ajax = ajax;
+            };
+            InjectorComponents.prototype.getAjax = function () {
+                return this.ajax;
+            };
+            return InjectorComponents;
+        }());
+        Service.InjectorComponents = InjectorComponents;
+    })(Service = Northwind.Service || (Northwind.Service = {}));
+})(Northwind || (Northwind = {}));
 ///<reference path="./TagAdapter.ts"/>
+///<reference path="../../../Service/InjectorComponents.ts"/>
+var Northwind;
+///<reference path="./TagAdapter.ts"/>
+///<reference path="../../../Service/InjectorComponents.ts"/>
 (function (Northwind) {
     var Html;
     (function (Html) {
@@ -431,70 +817,11 @@ var Northwind;
                 this.element.style.display = "none";
                 return this;
             };
-            /*
-            public getById(id : string)
-            {
-                if (document.getElementById(id)) {
-                    let adapter = new Northwind.Tag.TagAdapter(
-                        document.getElementById(id)
-                    );
-                    if (!adapter) {
-                        return false;
-                    }
-                    return adapter.get(
-                        this.getContext()
-                    );
-                } else {
-                    return false;
-                }
-            }
-    
-            public getByTag(name : string)
-            {
-                let elements = document.getElementsByTagName(
-                    name
-                );
-                let result = new Array();
-                for (let key in elements) {
-                    let adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    result.push(
-                        adapter.get(
-                            this.getContext()
-                        )
-                    );
-                }
-    
-                if (result.length == 1) {
-                    return result[0];
-                }
-                return result;
-            }
-    
-            public getByClass(name : string)
-            {
-                let elements = document.getElementsByClassName(
-                    name
-                );
-                let result = new Array();
-                for (let key in elements) {
-                    let adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    result.push(
-                        adapter.get(
-                            this.getContext()
-                        )
-                    );
-                }
-    
-                if (result.length == 1) {
-                    return result[0];
-                }
-                return this;
-            }
-            */
             /**
              *
              */
             Component.prototype.create = function (tag) {
+                console.log("la tag", tag);
                 this.element = this.init(tag, this.id);
                 return this;
             };
@@ -905,7 +1232,7 @@ var Northwind;
                 }
             };
             return Component;
-        }(Northwind.Service.FactoryDefault));
+        }(Northwind.Service.InjectorComponents));
         Component.NO_CONTEXT = 1;
         Html.Component = Component;
     })(Html = Northwind.Html || (Northwind.Html = {}));
@@ -925,8 +1252,7 @@ var Northwind;
              *
              */
             function A() {
-                var _this = _super.call(this) || this;
-                _this.create("a");
+                var _this = _super.call(this, "A") || this;
                 _this.href("");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
@@ -972,8 +1298,7 @@ var Northwind;
              *
              */
             function Abbr() {
-                var _this = _super.call(this) || this;
-                _this.create("abbr");
+                var _this = _super.call(this, "ABBR") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -982,46 +1307,6 @@ var Northwind;
         }(Northwind.Html.Component));
         Tag.Abbr = Abbr;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="../Service/Container.ts"/>
-/*
-function sealed(constructor: Function) {
-    Object.seal(constructor);
-    Object.seal(constructor.prototype);
-}
-*/
-var Northwind;
-///<reference path="../Service/Container.ts"/>
-/*
-function sealed(constructor: Function) {
-    Object.seal(constructor);
-    Object.seal(constructor.prototype);
-}
-*/
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        //@sealed
-        var Controller = (function (_super) {
-            __extends(Controller, _super);
-            function Controller() {
-                return _super.call(this) || this;
-            }
-            /**
-             *
-             */
-            Controller.prototype.initialize = function () {
-            };
-            Controller.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            Controller.prototype.getDi = function () {
-                return this.di;
-            };
-            return Controller;
-        }(Northwind.Service.Container));
-        Mvc.Controller = Controller;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="../Component.ts"/>
 ///<reference path="../../../Controller.ts"/>
@@ -1041,8 +1326,7 @@ var Northwind;
              *
              */
             function Address() {
-                var _this = _super.call(this) || this;
-                _this.create("address");
+                var _this = _super.call(this, "ADDRESS") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1070,8 +1354,7 @@ var Northwind;
              *
              */
             function Area() {
-                var _this = _super.call(this) || this;
-                _this.create("area");
+                var _this = _super.call(this, "AREA") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1099,8 +1382,7 @@ var Northwind;
              *
              */
             function Article() {
-                var _this = _super.call(this) || this;
-                _this.create("article");
+                var _this = _super.call(this, "ARTICLE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1128,8 +1410,7 @@ var Northwind;
              *
              */
             function Aside() {
-                var _this = _super.call(this) || this;
-                _this.create("aside");
+                var _this = _super.call(this, "ASIDE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1157,8 +1438,7 @@ var Northwind;
              *
              */
             function Audio() {
-                var _this = _super.call(this) || this;
-                _this.create("aside");
+                var _this = _super.call(this, "AUDIO") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1186,8 +1466,7 @@ var Northwind;
              *
              */
             function B() {
-                var _this = _super.call(this) || this;
-                _this.create("b");
+                var _this = _super.call(this, "B") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1215,8 +1494,7 @@ var Northwind;
              *
              */
             function Base() {
-                var _this = _super.call(this) || this;
-                _this.create("base");
+                var _this = _super.call(this, "BASE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1244,8 +1522,7 @@ var Northwind;
              *
              */
             function Bdi() {
-                var _this = _super.call(this) || this;
-                _this.create("bdi");
+                var _this = _super.call(this, "BDI") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1273,8 +1550,7 @@ var Northwind;
              *
              */
             function Bdo() {
-                var _this = _super.call(this) || this;
-                _this.create("bdo");
+                var _this = _super.call(this, "BDO") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1302,8 +1578,7 @@ var Northwind;
              *
              */
             function Blockquote() {
-                var _this = _super.call(this) || this;
-                _this.create("blockquote");
+                var _this = _super.call(this, "BLOCKQUOTE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1357,8 +1632,7 @@ var Northwind;
              *
              */
             function Br() {
-                var _this = _super.call(this) || this;
-                _this.create("br");
+                var _this = _super.call(this, "BR") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1385,8 +1659,7 @@ var Northwind;
              *
              */
             function Button() {
-                var _this = _super.call(this) || this;
-                _this.create("button");
+                var _this = _super.call(this, "BUTTON") || this;
                 _this.attr("type", "button");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
@@ -1482,8 +1755,7 @@ var Northwind;
              *
              */
             function Canvas() {
-                var _this = _super.call(this) || this;
-                _this.create("canvas");
+                var _this = _super.call(this, "CANVAS") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1511,8 +1783,7 @@ var Northwind;
              *
              */
             function Caption() {
-                var _this = _super.call(this) || this;
-                _this.create("caption");
+                var _this = _super.call(this, "CAPTION") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1540,8 +1811,7 @@ var Northwind;
              *
              */
             function Cite() {
-                var _this = _super.call(this) || this;
-                _this.create("cite");
+                var _this = _super.call(this, "CITE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1569,8 +1839,7 @@ var Northwind;
              *
              */
             function Code() {
-                var _this = _super.call(this) || this;
-                _this.create("code");
+                var _this = _super.call(this, "CODE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1598,8 +1867,7 @@ var Northwind;
              *
              */
             function Col() {
-                var _this = _super.call(this) || this;
-                _this.create("col");
+                var _this = _super.call(this, "COL") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1627,8 +1895,7 @@ var Northwind;
              *
              */
             function ColGroup() {
-                var _this = _super.call(this) || this;
-                _this.create("colgroup");
+                var _this = _super.call(this, "COLGROUP") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1656,8 +1923,7 @@ var Northwind;
              *
              */
             function Datalist() {
-                var _this = _super.call(this) || this;
-                _this.create("datalist");
+                var _this = _super.call(this, "DETAILS") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1685,8 +1951,7 @@ var Northwind;
              *
              */
             function Db() {
-                var _this = _super.call(this) || this;
-                _this.create("db");
+                var _this = _super.call(this, "DB") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1714,8 +1979,7 @@ var Northwind;
              *
              */
             function Del() {
-                var _this = _super.call(this) || this;
-                _this.create("del");
+                var _this = _super.call(this, "DEL") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1743,8 +2007,7 @@ var Northwind;
              *
              */
             function Details() {
-                var _this = _super.call(this) || this;
-                _this.create("details");
+                var _this = _super.call(this, "DETAILS") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1772,8 +2035,7 @@ var Northwind;
              *
              */
             function Dfn() {
-                var _this = _super.call(this) || this;
-                _this.create("dfn");
+                var _this = _super.call(this, "DFN") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1801,8 +2063,7 @@ var Northwind;
              *
              */
             function Dialog() {
-                var _this = _super.call(this) || this;
-                _this.create("dialog");
+                var _this = _super.call(this, "DIALOG") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1830,8 +2091,7 @@ var Northwind;
              *
              */
             function Div() {
-                var _this = _super.call(this) || this;
-                _this.create("div");
+                var _this = _super.call(this, "DIV") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1859,8 +2119,7 @@ var Northwind;
              *
              */
             function Dl() {
-                var _this = _super.call(this) || this;
-                _this.create("dl");
+                var _this = _super.call(this, "DL") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1888,8 +2147,7 @@ var Northwind;
              *
              */
             function Dt() {
-                var _this = _super.call(this) || this;
-                _this.create("dt");
+                var _this = _super.call(this, "DT") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1917,8 +2175,7 @@ var Northwind;
              *
              */
             function Em() {
-                var _this = _super.call(this) || this;
-                _this.create("em");
+                var _this = _super.call(this, "EM") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1946,8 +2203,7 @@ var Northwind;
              *
              */
             function Embed() {
-                var _this = _super.call(this) || this;
-                _this.create("embed");
+                var _this = _super.call(this, "EMBED") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -1975,8 +2231,7 @@ var Northwind;
              *
              */
             function Fieldset() {
-                var _this = _super.call(this) || this;
-                _this.create("fieldset");
+                var _this = _super.call(this, "FIELDSET") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2004,8 +2259,7 @@ var Northwind;
              *
              */
             function Figcaption() {
-                var _this = _super.call(this) || this;
-                _this.create("figcaption");
+                var _this = _super.call(this, "FIGCAPTION") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2033,8 +2287,7 @@ var Northwind;
              *
              */
             function Figure() {
-                var _this = _super.call(this) || this;
-                _this.create("figure");
+                var _this = _super.call(this, "FIGURE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2062,8 +2315,7 @@ var Northwind;
              *
              */
             function Footer() {
-                var _this = _super.call(this) || this;
-                _this.create("footer");
+                var _this = _super.call(this, "FOOTER") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2091,8 +2343,7 @@ var Northwind;
              *
              */
             function Form() {
-                var _this = _super.call(this) || this;
-                _this.create("form");
+                var _this = _super.call(this, "FORM") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2120,8 +2371,7 @@ var Northwind;
              *
              */
             function H1() {
-                var _this = _super.call(this) || this;
-                _this.create("h1");
+                var _this = _super.call(this, "H1") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2149,8 +2399,7 @@ var Northwind;
              *
              */
             function H2() {
-                var _this = _super.call(this) || this;
-                _this.create("h2");
+                var _this = _super.call(this, "H2") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2178,8 +2427,7 @@ var Northwind;
              *
              */
             function H3() {
-                var _this = _super.call(this) || this;
-                _this.create("h3");
+                var _this = _super.call(this, "H3") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2207,8 +2455,7 @@ var Northwind;
              *
              */
             function H4() {
-                var _this = _super.call(this) || this;
-                _this.create("h4");
+                var _this = _super.call(this, "H4") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2236,8 +2483,7 @@ var Northwind;
              *
              */
             function H5() {
-                var _this = _super.call(this) || this;
-                _this.create("h5");
+                var _this = _super.call(this, "H5") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2265,8 +2511,7 @@ var Northwind;
              *
              */
             function H6() {
-                var _this = _super.call(this) || this;
-                _this.create("h6");
+                var _this = _super.call(this, "H6") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2294,8 +2539,7 @@ var Northwind;
              *
              */
             function Head() {
-                var _this = _super.call(this) || this;
-                _this.create("head");
+                var _this = _super.call(this, "HEAD") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2323,8 +2567,7 @@ var Northwind;
              *
              */
             function Header() {
-                var _this = _super.call(this) || this;
-                _this.create("header");
+                var _this = _super.call(this, "HEADER") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2352,8 +2595,7 @@ var Northwind;
              *
              */
             function I() {
-                var _this = _super.call(this) || this;
-                _this.create("i");
+                var _this = _super.call(this, "I") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2381,8 +2623,7 @@ var Northwind;
              *
              */
             function Iframe() {
-                var _this = _super.call(this) || this;
-                _this.create("iframe");
+                var _this = _super.call(this, "IFRAME") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2410,8 +2651,7 @@ var Northwind;
              *
              */
             function Img() {
-                var _this = _super.call(this) || this;
-                _this.create("img");
+                var _this = _super.call(this, "IMG") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2451,8 +2691,7 @@ var Northwind;
              *
              */
             function Input() {
-                var _this = _super.call(this) || this;
-                _this.create("input");
+                var _this = _super.call(this, "INPUT") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2502,8 +2741,7 @@ var Northwind;
              *
              */
             function Ins() {
-                var _this = _super.call(this) || this;
-                _this.create("ins");
+                var _this = _super.call(this, "INS") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2531,8 +2769,7 @@ var Northwind;
              *
              */
             function Kbd() {
-                var _this = _super.call(this) || this;
-                _this.create("kbd");
+                var _this = _super.call(this, "KBD") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2560,8 +2797,7 @@ var Northwind;
              *
              */
             function Keygen() {
-                var _this = _super.call(this) || this;
-                _this.create("keygen");
+                var _this = _super.call(this, "KEYGEN") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2589,8 +2825,7 @@ var Northwind;
              *
              */
             function Label() {
-                var _this = _super.call(this) || this;
-                _this.create("label");
+                var _this = _super.call(this, "LABEL") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2618,8 +2853,7 @@ var Northwind;
              *
              */
             function Leyend() {
-                var _this = _super.call(this) || this;
-                _this.create("leyend");
+                var _this = _super.call(this, "LEYEND") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2647,8 +2881,7 @@ var Northwind;
              *
              */
             function Li() {
-                var _this = _super.call(this) || this;
-                _this.create("li");
+                var _this = _super.call(this, "LI") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2676,8 +2909,7 @@ var Northwind;
              *
              */
             function Link() {
-                var _this = _super.call(this) || this;
-                _this.create("li");
+                var _this = _super.call(this, "LINK") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2705,8 +2937,7 @@ var Northwind;
              *
              */
             function Main() {
-                var _this = _super.call(this) || this;
-                _this.create("main");
+                var _this = _super.call(this, "MAIN") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2734,8 +2965,7 @@ var Northwind;
              *
              */
             function Map() {
-                var _this = _super.call(this) || this;
-                _this.create("map");
+                var _this = _super.call(this, "MAP") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2763,8 +2993,7 @@ var Northwind;
              *
              */
             function Menu() {
-                var _this = _super.call(this) || this;
-                _this.create("menu");
+                var _this = _super.call(this, "MENU") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2792,8 +3021,7 @@ var Northwind;
              *
              */
             function Menuitem() {
-                var _this = _super.call(this) || this;
-                _this.create("menuitem");
+                var _this = _super.call(this, "MENUITEM") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2821,8 +3049,7 @@ var Northwind;
              *
              */
             function Meta() {
-                var _this = _super.call(this) || this;
-                _this.create("meta");
+                var _this = _super.call(this, "META") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2850,8 +3077,7 @@ var Northwind;
              *
              */
             function Meter() {
-                var _this = _super.call(this) || this;
-                _this.create("meter");
+                var _this = _super.call(this, "METER") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2879,8 +3105,7 @@ var Northwind;
              *
              */
             function Nav() {
-                var _this = _super.call(this) || this;
-                _this.create("nav");
+                var _this = _super.call(this, "NAV") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2908,8 +3133,7 @@ var Northwind;
              *
              */
             function Noscrip() {
-                var _this = _super.call(this) || this;
-                _this.create("noscrip");
+                var _this = _super.call(this, "NOSCRIP") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2937,8 +3161,7 @@ var Northwind;
              *
              */
             function Obj() {
-                var _this = _super.call(this) || this;
-                _this.create("object");
+                var _this = _super.call(this, "OBJ") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2966,8 +3189,7 @@ var Northwind;
              *
              */
             function Ol() {
-                var _this = _super.call(this) || this;
-                _this.create("ol");
+                var _this = _super.call(this, "OL") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -2995,8 +3217,7 @@ var Northwind;
              *
              */
             function Optgroup() {
-                var _this = _super.call(this) || this;
-                _this.create("optgroup");
+                var _this = _super.call(this, "OPTGROUP") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3024,8 +3245,7 @@ var Northwind;
              *
              */
             function Option() {
-                var _this = _super.call(this) || this;
-                _this.create("option");
+                var _this = _super.call(this, "OPTION") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3076,8 +3296,7 @@ var Northwind;
              *
              */
             function Output() {
-                var _this = _super.call(this) || this;
-                _this.create("output");
+                var _this = _super.call(this, "OUTPUT") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3105,8 +3324,7 @@ var Northwind;
              *
              */
             function P() {
-                var _this = _super.call(this) || this;
-                _this.create("p");
+                var _this = _super.call(this, "P") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3134,8 +3352,7 @@ var Northwind;
              *
              */
             function Param() {
-                var _this = _super.call(this) || this;
-                _this.create("param");
+                var _this = _super.call(this, "PARAM") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3163,8 +3380,7 @@ var Northwind;
              *
              */
             function Pre() {
-                var _this = _super.call(this) || this;
-                _this.create("pre");
+                var _this = _super.call(this, "PRE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3192,8 +3408,7 @@ var Northwind;
              *
              */
             function Progress() {
-                var _this = _super.call(this) || this;
-                _this.create("progress");
+                var _this = _super.call(this, "PROGRESS") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3221,8 +3436,7 @@ var Northwind;
              *
              */
             function Q() {
-                var _this = _super.call(this) || this;
-                _this.create("q");
+                var _this = _super.call(this, "Q") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3250,8 +3464,7 @@ var Northwind;
              *
              */
             function Rp() {
-                var _this = _super.call(this) || this;
-                _this.create("rp");
+                var _this = _super.call(this, "RP") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3279,8 +3492,7 @@ var Northwind;
              *
              */
             function Rt() {
-                var _this = _super.call(this) || this;
-                _this.create("rt");
+                var _this = _super.call(this, "RT") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3308,8 +3520,7 @@ var Northwind;
              *
              */
             function Ruby() {
-                var _this = _super.call(this) || this;
-                _this.create("ruby");
+                var _this = _super.call(this, "RUBY") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3337,8 +3548,7 @@ var Northwind;
              *
              */
             function S() {
-                var _this = _super.call(this) || this;
-                _this.create("s");
+                var _this = _super.call(this, "S") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3366,8 +3576,7 @@ var Northwind;
              *
              */
             function Samp() {
-                var _this = _super.call(this) || this;
-                _this.create("samp");
+                var _this = _super.call(this, "SAMP") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3395,8 +3604,7 @@ var Northwind;
              *
              */
             function Script() {
-                var _this = _super.call(this) || this;
-                _this.create("script");
+                var _this = _super.call(this, "SCRIPT") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3424,8 +3632,7 @@ var Northwind;
              *
              */
             function Section() {
-                var _this = _super.call(this) || this;
-                _this.create("section");
+                var _this = _super.call(this, "SECTION") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3434,25 +3641,6 @@ var Northwind;
         }(Northwind.Html.Component));
         Tag.Section = Section;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var Uuid = (function () {
-            function Uuid() {
-            }
-            Uuid.get = function () {
-                var helper = Northwind.Helper;
-                return helper.MathHelper.getS4() + helper.MathHelper.getS4() + '-' +
-                    helper.MathHelper.getS4() + '-' + helper.MathHelper.getS4() + '-' +
-                    helper.MathHelper.getS4() + '-' + Helper.MathHelper.getS4() +
-                    helper.MathHelper.getS4() + helper.MathHelper.getS4();
-            };
-            return Uuid;
-        }());
-        Helper.Uuid = Uuid;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
 })(Northwind || (Northwind = {}));
 /// <reference path="../../Helper/Uuid.ts" />
 var Northwind;
@@ -3511,9 +3699,8 @@ var Northwind;
              *
              */
             function Select() {
-                var _this = _super.call(this, "") || this;
+                var _this = _super.call(this, "SELECT") || this;
                 _this.choose = "Choose...";
-                _this.create("select");
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3604,8 +3791,7 @@ var Northwind;
              *
              */
             function Small() {
-                var _this = _super.call(this) || this;
-                _this.create("small");
+                var _this = _super.call(this, "SMALL") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3633,8 +3819,7 @@ var Northwind;
              *
              */
             function Source() {
-                var _this = _super.call(this) || this;
-                _this.create("source");
+                var _this = _super.call(this, "SOURCE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3662,8 +3847,7 @@ var Northwind;
              *
              */
             function Span() {
-                var _this = _super.call(this) || this;
-                _this.create("span");
+                var _this = _super.call(this, "SPAN") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3691,8 +3875,7 @@ var Northwind;
              *
              */
             function Strong() {
-                var _this = _super.call(this) || this;
-                _this.create("strong");
+                var _this = _super.call(this, "STRONG") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3720,8 +3903,7 @@ var Northwind;
              *
              */
             function Style() {
-                var _this = _super.call(this) || this;
-                _this.create("style");
+                var _this = _super.call(this, "STYLE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3749,8 +3931,7 @@ var Northwind;
              *
              */
             function Sub() {
-                var _this = _super.call(this) || this;
-                _this.create("sub");
+                var _this = _super.call(this, "SUB") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -3778,9 +3959,8 @@ var Northwind;
              *
              */
             function Table() {
-                var _this = _super.call(this) || this;
+                var _this = _super.call(this, "TABLE") || this;
                 _this.header = false;
-                _this.create("table");
                 _this.thead = new Northwind.Tag.Thead();
                 _this.tbody = new Northwind.Tag.Tbody();
                 _this.tfoot = new Northwind.Tag.Tfoot();
@@ -4004,8 +4184,7 @@ var Northwind;
              *
              */
             function Tbody() {
-                var _this = _super.call(this) || this;
-                _this.create("tbody");
+                var _this = _super.call(this, "TBODY") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4033,8 +4212,7 @@ var Northwind;
              *
              */
             function Td() {
-                var _this = _super.call(this) || this;
-                _this.create("td");
+                var _this = _super.call(this, "TD") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4084,8 +4262,7 @@ var Northwind;
              *
              */
             function Textarea() {
-                var _this = _super.call(this) || this;
-                _this.create("textarea");
+                var _this = _super.call(this, "TEXTAREA") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4113,8 +4290,7 @@ var Northwind;
              *
              */
             function Tfoot() {
-                var _this = _super.call(this) || this;
-                _this.create("tfoot");
+                var _this = _super.call(this, "TFOOT") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4142,8 +4318,7 @@ var Northwind;
              *
              */
             function Th() {
-                var _this = _super.call(this) || this;
-                _this.create("th");
+                var _this = _super.call(this, "TH") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4193,8 +4368,7 @@ var Northwind;
              *
              */
             function Thead() {
-                var _this = _super.call(this) || this;
-                _this.create("thead");
+                var _this = _super.call(this, "THEAD") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4222,8 +4396,7 @@ var Northwind;
              *
              */
             function Time() {
-                var _this = _super.call(this) || this;
-                _this.create("time");
+                var _this = _super.call(this, "TIME") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4251,8 +4424,7 @@ var Northwind;
              *
              */
             function Title() {
-                var _this = _super.call(this) || this;
-                _this.create("title");
+                var _this = _super.call(this, "TITLE") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4280,8 +4452,7 @@ var Northwind;
              *
              */
             function Tr() {
-                var _this = _super.call(this) || this;
-                _this.create("tr");
+                var _this = _super.call(this, "TR") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4309,8 +4480,7 @@ var Northwind;
              *
              */
             function Track() {
-                var _this = _super.call(this) || this;
-                _this.create("track");
+                var _this = _super.call(this, "TRACK") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4338,8 +4508,7 @@ var Northwind;
              *
              */
             function U() {
-                var _this = _super.call(this) || this;
-                _this.create("u");
+                var _this = _super.call(this, "U") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4367,8 +4536,7 @@ var Northwind;
              *
              */
             function Ul() {
-                var _this = _super.call(this) || this;
-                _this.create("ul");
+                var _this = _super.call(this, "UL") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4396,8 +4564,7 @@ var Northwind;
              *
              */
             function Var() {
-                var _this = _super.call(this) || this;
-                _this.create("var");
+                var _this = _super.call(this, "VAR") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4425,8 +4592,7 @@ var Northwind;
              *
              */
             function Video() {
-                var _this = _super.call(this) || this;
-                _this.create("video");
+                var _this = _super.call(this, "VIDEO") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4454,8 +4620,7 @@ var Northwind;
              *
              */
             function Wbr() {
-                var _this = _super.call(this) || this;
-                _this.create("wbr");
+                var _this = _super.call(this, "WBR") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -4684,6 +4849,13 @@ var Northwind;
             function TagAdapter(element) {
                 this.element = element;
             }
+            TagAdapter.prototype.setDi = function (di) {
+                this.di = di;
+                return this;
+            };
+            TagAdapter.prototype.getDi = function () {
+                return this.di;
+            };
             /**
              *
              */
@@ -5013,6 +5185,7 @@ var Northwind;
                                 break;
                         }
                         instance.setElement(this.element);
+                        instance.setDi(this.di);
                         return instance;
                     }
                     else {
@@ -5051,18 +5224,24 @@ var Northwind;
             Dom.prototype.getById = function (id, context) {
                 if (context === void 0) { context = null; }
                 var adapter = new Northwind.Tag.TagAdapter(document.getElementById(id));
+                adapter.setDi(this.di);
                 return adapter.get();
             };
             /**
              *
              */
-            Dom.prototype.getByTag = function (name, context) {
-                if (context === void 0) { context = null; }
+            Dom.prototype.getByTag = function (name) {
                 var elements = document.getElementsByTagName(name);
                 var result = new Array();
                 for (var key in elements) {
-                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    result.push(adapter.get());
+                    if (typeof elements[key].nodeName == "string") {
+                        var adapter = new Northwind.Tag.TagAdapter(elements[key]);
+                        adapter.setDi(this.di);
+                        result.push(adapter.get());
+                    }
+                }
+                if (result.length == 0) {
+                    return false;
                 }
                 if (result.length == 1) {
                     return result[0];
@@ -5078,6 +5257,7 @@ var Northwind;
                 var result = new Array();
                 for (var key in elements) {
                     var adapter = new Northwind.Tag.TagAdapter(elements[key]);
+                    adapter.setDi(this.di);
                     result.push(adapter.get());
                 }
                 if (result.length == 1) {
@@ -5330,6 +5510,13 @@ var Northwind;
             function FactoryTag(ctx) {
                 this.context = ctx;
             }
+            FactoryTag.prototype.setDi = function (di) {
+                this.di = di;
+                return this;
+            };
+            FactoryTag.prototype.getDi = function () {
+                return this.di;
+            };
             /**
              *
              */
@@ -5760,6 +5947,7 @@ var Northwind;
                         instance.create(tagName);
                         break;
                 }
+                instance.setDi(this.di);
                 return instance;
             };
             return FactoryTag;
@@ -5782,318 +5970,56 @@ var Northwind;
         var FactoryDefault = (function (_super) {
             __extends(FactoryDefault, _super);
             function FactoryDefault() {
-                var _this = _super.call(this) || this;
-                _this.set("ajax", new Northwind.Network.Ajax);
-                _this.set("container", new Northwind.Service.Container);
-                _this.set("dom", new Northwind.Html.Dom);
-                var em = new Northwind.Persistence.EntityManager;
-                em.setDi(_this);
-                _this.set("em", em);
-                var dom = new Northwind.Html.Dom;
-                _this.set("dom", dom);
-                var tag = new Northwind.Tag.FactoryTag(_this);
-                _this.set("tag", tag);
-                var eventManager = new Northwind.Events;
-                _this.set("events", eventManager);
-                return _this;
+                return _super.call(this) || this;
             }
             FactoryDefault.prototype.getDom = function () {
-                return this.get("dom");
+                return this.di.get("dom");
             };
             FactoryDefault.prototype.getAjax = function () {
-                return this.get("ajax");
+                return this.di.get("ajax");
             };
-            FactoryDefault.prototype.getEntityManager = function () {
-                return this.get("em");
+            FactoryDefault.prototype.getEm = function () {
+                return this.di.get("em");
             };
             FactoryDefault.prototype.getContainer = function () {
-                return this.get("container");
+                return this.di.get("container");
             };
             FactoryDefault.prototype.getTag = function (name) {
                 var tag = this.get("tag");
+                tag.setDi(this.di);
                 return tag.get(name);
             };
             FactoryDefault.prototype.getEvent = function () {
-                var events = this.get("events");
+                var events = this.di.get("events");
                 return events;
             };
             FactoryDefault.prototype.setDi = function (di) {
                 this.di = di;
+                this.di.set("ajax", new Northwind.Network.Ajax);
+                this.di.set("container", new Northwind.Service.Container);
+                var em = new Northwind.Persistence.EntityManager;
+                em.setDi(this.di);
+                this.di.set("em", em);
+                var dom = new Northwind.Html.Dom;
+                dom.setDi(di);
+                this.di.set("dom", dom);
+                var tag = new Northwind.Tag.FactoryTag(this);
+                tag.setDi(di);
+                this.di.set("tag", tag);
+                var eventManager = new Northwind.Events;
+                eventManager.setDi(di);
+                this.di.set("event", eventManager);
                 return this;
             };
             FactoryDefault.prototype.getDi = function () {
-                return this;
+                return this.di;
             };
             return FactoryDefault;
         }(Northwind.Service.Container));
         Service.FactoryDefault = FactoryDefault;
     })(Service = Northwind.Service || (Northwind.Service = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../Service/FactoryDefault.ts"/>
-var Northwind;
-///<reference path="../Service/FactoryDefault.ts"/>
-(function (Northwind) {
-    var Events = (function () {
-        function Events() {
-            this.events = {};
-            this.params = {};
-            this.others = {};
-            this.nativeEvents = [];
-        }
-        Events.prototype.contructor = function () {
-            this.nativeEvents = [
-                "click",
-                "doubleClick",
-                "change",
-                "keypress",
-                "keydown",
-                "keyup",
-                "paste",
-                "blur",
-                "focus"
-            ];
-        };
-        /**
-         *
-         */
-        Events.prototype.attach = function (component, event, fn) {
-            this.events[component.getClassName()][event][fn];
-            return this;
-        };
-        /**
-         *
-         */
-        Events.prototype.add = function (otherEvent) {
-            this.others[otherEvent];
-            return this;
-        };
-        /**
-         *
-         */
-        Events.prototype.detachComponent = function (component) {
-            return this;
-        };
-        /**
-         *
-         */
-        Events.prototype.detach = function (component, event, params) {
-            if (params === void 0) { params = false; }
-            this.events[component][event];
-            this.params[component][event] = params;
-            return this;
-        };
-        /**
-         *
-         */
-        Events.prototype.trigger = function (controller, event, callback, params) {
-            if (params === void 0) { params = {}; }
-            var result = this.events[controller][event](params);
-            return this;
-        };
-        /**
-         *
-         */
-        Events.prototype.detachAll = function () {
-            this.events = {};
-            return this;
-        };
-        /**
-         *
-         */
-        Events.prototype.tag = function (component) {
-            if (component instanceof Northwind.Html.Component) {
-                this.element = component;
-                return this;
-            }
-            throw "Component must be a instance of Northwind.Html.Component or Northwind.Tag";
-        };
-        /**
-         *
-         * @param  {Function} fn [description]
-         * @return {[type]}      [description]
-         */
-        Events.prototype.click = function (fn) {
-            this.element.getElement().addEventListener("click", fn.bind(this));
-            return this;
-        };
-        /**
-         *
-         */
-        Events.prototype.doubleClick = function (fn) {
-            this.element.getElement().addEventListener("dblclick", fn.bind(this));
-            return this;
-        };
-        /**
-         *
-         * @return {[type]} [description]
-         */
-        Events.prototype.change = function (fn) {
-            this.element.getElement().addEventListener("change", fn.bind(this));
-            return this;
-        };
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        Events.prototype.keypress = function (fn) {
-            this.element.getElement().addEventListener("keypress", fn.bind(this));
-            return this;
-        };
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        Events.prototype.keydown = function (fn) {
-            this.element.getElement().addEventListener("keydown", fn.bind(this));
-            return this;
-        };
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        Events.prototype.keyup = function (fn) {
-            this.element.getElement().addEventListener("keyup", fn.bind(this));
-            return this;
-        };
-        Events.prototype.paste = function (fn) {
-            this.element.getElement().addEventListener("paste", fn.bind(this));
-            return this;
-        };
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        Events.prototype.blur = function (fn) {
-            this.element.getElement().addEventListener("blur", fn.bind(this));
-            return this;
-        };
-        /**
-         * [change description]
-         * @return {[type]} [description]
-         */
-        Events.prototype.focus = function (fn) {
-            this.element.getElement().addEventListener("focus", fn.bind(this));
-            return this;
-        };
-        return Events;
-    }());
-    Events.AFTER = 1;
-    Events.BEFORE = 2;
-    Events.ONCREATE = 3;
-    Events.ONDELETE = 4;
-    Events.ONCHANGE = 5;
-    Northwind.Events = Events;
-})(Northwind || (Northwind = {}));
-/// <reference path="./EventManagerInterface.ts"/>
-var Northwind;
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var ArrayHelper = (function () {
-            function ArrayHelper() {
-            }
-            ArrayHelper.inArray = function (container, element) {
-                for (var key in container) {
-                    if (container[key] == element) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-            return ArrayHelper;
-        }());
-        Helper.ArrayHelper = ArrayHelper;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var MathHelper = (function () {
-            function MathHelper() {
-            }
-            MathHelper.getRandom = function (init, last) {
-                return Math.floor((Math.random() * last) + init);
-            };
-            MathHelper.getUUID = function () {
-                return this.getS4() + this.getS4() + '-' +
-                    this.getS4() + '-' + this.getS4() + '-' +
-                    this.getS4() + '-' + this.getS4() +
-                    this.getS4() + this.getS4();
-            };
-            MathHelper.getS4 = function () {
-                return Math.floor((1 + Math.random()) * 0x10000)
-                    .toString(16)
-                    .substring(1);
-            };
-            return MathHelper;
-        }());
-        Helper.MathHelper = MathHelper;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var StringHelper = (function () {
-            function StringHelper() {
-            }
-            /**
-             * [sanitizeString description]
-             * @param  {string} str [description]
-             * @return {[type]}     [description]
-             */
-            StringHelper.sanitizeString = function (str) {
-                var idTr = str.replace(/[`~!@#$%^&*()_|+\-=?;:"",.<>\{\}\[\]\\\/]/gi, "").toLowerCase();
-                idTr = idTr.toString().replace(/\s/g, "");
-                return idTr;
-            };
-            /**
-             * [capitalize description]
-             * @param  {[type]} str [description]
-             * @return {[type]}     [description]
-             */
-            StringHelper.capitalize = function (str) {
-                return str.charAt(0).toUpperCase() + str.slice(1);
-            };
-            return StringHelper;
-        }());
-        Helper.StringHelper = StringHelper;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
-/// <reference path="../Errors/Message.ts"/>
-var Northwind;
-/// <reference path="../Errors/Message.ts"/>
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var Validator = (function () {
-            function Validator() {
-            }
-            Validator.validStructArray = function (data) {
-                var message = Northwind.Errors.Message;
-                try {
-                    if (Array.isArray(data)) {
-                        var firstPosition = data[0];
-                        if (typeof firstPosition == "object") {
-                            return true;
-                        }
-                        else {
-                            throw message.NOT_VALID_ARRAY_OBJECT;
-                        }
-                    }
-                    else {
-                        throw message.NOT_VALID_ARRAY;
-                    }
-                }
-                catch (e) {
-                }
-            };
-            return Validator;
-        }());
-        Helper.Validator = Validator;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
+///<reference path="../Service/FactoryDefault.ts" />
 /*
 function sealed(constructor: Function) {
     Object.seal(constructor);
@@ -6101,6 +6027,7 @@ function sealed(constructor: Function) {
 }
 */
 var Northwind;
+///<reference path="../Service/FactoryDefault.ts" />
 /*
 function sealed(constructor: Function) {
     Object.seal(constructor);
@@ -6111,12 +6038,19 @@ function sealed(constructor: Function) {
     var Mvc;
     (function (Mvc) {
         //@sealed
-        var Application = (function () {
-            function Application() {
+        var Controller = (function (_super) {
+            __extends(Controller, _super);
+            function Controller() {
+                return _super.call(this) || this;
             }
-            return Application;
-        }());
-        Mvc.Application = Application;
+            /**
+             *
+             */
+            Controller.prototype.initialize = function () {
+            };
+            return Controller;
+        }(Northwind.Service.FactoryDefault));
+        Mvc.Controller = Controller;
     })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
 /// <reference path="./RawModel.ts"/>
@@ -7272,8 +7206,7 @@ var Northwind;
              *
              */
             function Hr() {
-                var _this = _super.call(this) || this;
-                _this.create("hr");
+                var _this = _super.call(this, "HR") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -7301,8 +7234,7 @@ var Northwind;
              *
              */
             function Summary() {
-                var _this = _super.call(this) || this;
-                _this.create("summary");
+                var _this = _super.call(this, "SUMMARY") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -7330,8 +7262,7 @@ var Northwind;
              *
              */
             function Sup() {
-                var _this = _super.call(this) || this;
-                _this.create("sup");
+                var _this = _super.call(this, "SUP") || this;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
@@ -7392,6 +7323,42 @@ var Northwind;
              *
              */
             this.domManager = new Northwind.Html.Dom;
+            this.restricted = new Array;
+            var header = this.domManager.getByTag("head");
+            console.log(header);
+            header.append(new Northwind.Tag.Meta().attr({
+                "charset": "utf-8"
+            }));
+            this.restricted = [
+                "constructor",
+                "initialize",
+                "getById",
+                "getByTag",
+                "getByClass",
+                "getDi",
+                "hasKey",
+                "setPersistent",
+                "getPersistent",
+                "get",
+                "set",
+                "setDi",
+                "getUrl",
+                "setUrl",
+                "getAjax",
+                "setAjax",
+                "getDom",
+                "setDom",
+                "setEm",
+                "getEm",
+                "setEntityManager",
+                "getEntityManager",
+                "setContainer",
+                "getContainer",
+                "setTag",
+                "getTag",
+                "setEvent",
+                "getEvent"
+            ];
             window.onbeforeunload = function () {
                 sessionStorage.clear();
             };
@@ -7478,7 +7445,7 @@ var Northwind;
                         if (temp instanceof Northwind.Mvc.Controller) {
                             temp.setDi(di);
                             temp.initialize();
-                            this.resolvePropertiesController(temp);
+                            this.resolvePropertiesController(temp, di);
                         }
                         else {
                             throw "Controller #" + i + " must be extend from View.Controller class";
@@ -7497,23 +7464,14 @@ var Northwind;
         /**
          *
          */
-        Application.prototype.resolvePropertiesController = function (controller) {
-            var restricted = [
-                "constructor",
-                "initialize",
-                "getById",
-                "getByTag",
-                "getByClass",
-                "getDi",
-                "setDi",
-                "getUrl",
-                "setUrl"
-            ];
+        Application.prototype.resolvePropertiesController = function (controller, di) {
             for (var key in controller) {
                 switch (typeof controller[key]) {
                     case "function":
-                        if (!Northwind.Helper.ArrayHelper.inArray(restricted, key)) {
+                        if (!Northwind.Helper.ArrayHelper.inArray(this.restricted, key)) {
+                            this.domManager.setDi(controller.getDi());
                             var component = this.domManager.getById(key);
+                            component.setDi(controller.getDi());
                             if (component) {
                                 controller[key](component);
                             }
