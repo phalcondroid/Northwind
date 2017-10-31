@@ -49,6 +49,11 @@ namespace Northwind.Html
         private className;
 
         /**
+         * @type
+         */
+        private globals;
+
+        /**
          *
          * @param  
          * @return
@@ -82,6 +87,23 @@ namespace Northwind.Html
         /**
          *
          */
+        public setGlobals(globals)
+        {
+            this.globals = globals;
+            return this;
+        }
+
+        /**
+         *
+         */
+        public getGlobals()
+        {
+            return this.globals;
+        }
+
+        /**
+         *
+         */
         public getArguments(args)
         {
             if (typeof args == "object") {
@@ -95,6 +117,17 @@ namespace Northwind.Html
             } else {
                 return false
             }
+        }
+
+        public setId(id : string)
+        {
+            this.attr("id", id);
+            return this;
+        }
+
+        public getId()
+        {
+            return this.attr("id");
         }
 
         /**
@@ -121,6 +154,23 @@ namespace Northwind.Html
         {
             this.element = element;
             return this;
+        }
+
+        /**
+         *
+         */
+        public setRequired(req)
+        {
+            this.element.required = req;
+            return this;
+        }
+
+        /**
+         *
+         */
+        public getRequired()
+        {
+            return this.element.required;
         }
 
         /**

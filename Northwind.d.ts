@@ -406,6 +406,8 @@ declare namespace Northwind.Html {
          *
          */
         getArguments(args: any): false | any[];
+        setId(id: string): this;
+        getId(): any;
         /**
          *
          */
@@ -418,6 +420,14 @@ declare namespace Northwind.Html {
          *
          */
         setElement(element: any): this;
+        /**
+         *
+         */
+        setRequired(req: any): this;
+        /**
+         *
+         */
+        getRequired(): any;
         /**
          *
          */
@@ -1060,16 +1070,39 @@ declare namespace Northwind.Tag {
         constructor();
     }
 }
+declare function ValidationDecorator<TFunction extends Function>(target: TFunction): TFunction;
 declare namespace Northwind.Tag {
     /**
-     * [ViewElement description]
-     * @type {[type]}
+     *
+     * @type
      */
     class Form extends Northwind.Html.Component {
         /**
          *
          */
+        private invalidElements;
+        /**
+         *
+         */
         constructor();
+        /**
+         *
+         */
+        submit(fn: Function): void;
+        /**
+         *
+         */
+        getInvalidElements(): any[];
+        /**
+         *
+         */
+        validate(fn: Function): boolean;
+        /**
+         *
+         */
+        getFormElements(): any[];
+        setAutoComplete(data: Boolean): this;
+        getAutoComplete(): any;
     }
 }
 declare namespace Northwind.Tag {
@@ -1213,6 +1246,11 @@ declare namespace Northwind.Tag {
      * @type {[type]}
      */
     class Input extends Northwind.Html.Component {
+        static NUMBERS: number;
+        static TEXT: number;
+        static NO_SPECIAL_CHARACTERS: number;
+        static TEXT_NO_SPECIAL_CHARACTERS: number;
+        static NUMBERS_NO_SPECIAL_CHARACTERS: number;
         /**
          *
          */
@@ -1231,6 +1269,37 @@ declare namespace Northwind.Tag {
          * @return {[type]}      [description]
          */
         type(type: any): this;
+        setText(): this;
+        setHidden(): this;
+        setNumber(): this;
+        setDate(): this;
+        setFile(): this;
+        setReadOnly(readOnly: Boolean): this;
+        getReadOnly(): any;
+        setDisabled(disabled: Boolean): this;
+        getDisabled(): any;
+        setSize(size: string | number): this;
+        getSize(): any;
+        setMaxLength(max: any): this;
+        getMaxLength(): any;
+        setAutoFocus(data: Boolean): this;
+        getAutoFocus(): any;
+        setMin(min: number): this;
+        getMin(): number;
+        setMax(max: number): this;
+        getMax(): number;
+        setAlt(alt: string): this;
+        getAlt(): any;
+        setPlaceholder(placeholder: string): this;
+        getPlaceholder(): any;
+        setTitle(title: string): this;
+        getTitle(): any;
+        setPattern(pattern: string | number): this;
+        getPattern(): any;
+        setName(name: string): this;
+        getName(): any;
+        setStep(num: number): this;
+        getStep(): any;
     }
 }
 declare namespace Northwind.Tag {
@@ -2550,6 +2619,19 @@ declare namespace Northwind.Mvc {
     }
 }
 declare namespace Northwind.Tag {
+    class InjectorComponents {
+    }
+}
+declare namespace Northwind.Tag {
+    /**
+     * [Input description]
+     * @type {[type]}
+     */
+    class Hidden extends Northwind.Tag.Input {
+        constructor();
+    }
+}
+declare namespace Northwind.Tag {
     /**
      * [ViewElement description]
      * @type {[type]}
@@ -2641,6 +2723,7 @@ declare namespace Northwind {
          *
          */
         private resolveConfig(di);
+        private addCharset(di);
         /**
          *
          */

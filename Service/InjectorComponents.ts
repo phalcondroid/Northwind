@@ -12,25 +12,28 @@ namespace Northwind.Service
 
         public setDi(di : Service.Container)
         {
-        	if (di.hasKey("ajax")) {
-        		this.ajax = di.get("ajax");
-        	}
-        	if (di.hasKey("em")) {
-        		this.em = di.get("em");
-        	}
-        	if (di.hasKey("dom")) {
-        		this.dom = di.get("dom");
-        	}
-        	if (di.hasKey("tag")) {
-        		this.tag = di.get("tag");
-        	}
-        	if (di.hasKey("event")) {
-        		this.event = di.get("event");
-        	}
-        	if (di.hasKey("container")) {
-        		this.container = di.get("container");
-        	}
-        	this.di = di;
+            this.di = di;
+            if (typeof di != "undefined") {
+                if (di.hasKey("ajax")) {
+                    this.ajax = di.get("ajax");
+                }
+                if (di.hasKey("em")) {
+                    this.em = di.get("em");
+                }
+                if (di.hasKey("dom")) {
+                    this.dom = di.get("dom");
+                }
+                if (di.hasKey("tag")) {
+                    this.tag = di.get("tag");
+                }
+                if (di.hasKey("event")) {
+                    this.event = di.get("event");
+                }
+                if (di.hasKey("container")) {
+                    this.container = di.get("container");
+                }
+                this.di = di;
+            }
         }
 
         public getDi()

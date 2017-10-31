@@ -75,13 +75,18 @@ namespace Northwind.Html
             );
             var result = new Array();
             for (let key in elements) {
-                let adapter = new Northwind.Tag.TagAdapter(
-                    elements[key]
-                );
-                adapter.setDi(this.di);
-                result.push(
-                    adapter.get()
-                );
+                if (typeof elements[key].nodeName == "string") {
+                    let adapter = new Northwind.Tag.TagAdapter(
+                        elements[key]
+                    );
+                    adapter.setDi(this.di);
+                    result.push(
+                        adapter.get()
+                    );
+                }
+            }
+            if (result.length == 0) {
+                return false;
             }
             if (result.length == 1) {
                 return result[0];

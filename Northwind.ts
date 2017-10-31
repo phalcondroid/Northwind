@@ -33,21 +33,21 @@ namespace Northwind
          */
         private domManager = new Northwind.Html.Dom;
 
+        /**
+         *
+         */
         private restricted = new Array;
+
+        /**
+         *
+         */
+        private globals = new Array;
 
         /**
          *
          */
         public constructor()
         {
-            let header = this.domManager.getByTag("head");
-            console.log(header);
-            header.append(
-                new Northwind.Tag.Meta().attr({
-                    "charset" : "utf-8"
-                })
-            );
-
             this.restricted = [
                 "constructor",
                 "initialize",
@@ -110,8 +110,26 @@ namespace Northwind
         /**
          *
          */
+        public setGlobals(globals)
+        {
+            this.globals = globals;
+            return this;
+        }
+
+        /**
+         *
+         */
+        public getGlobals()
+        {
+            return this.globals;
+        }
+
+        /**
+         *
+         */
         private resolveConfig(di)
         {
+            this.addCharset(di);
             let positionArray = new Array();
             let configData = this.config;
 
@@ -143,13 +161,23 @@ namespace Northwind
             }
         }
 
+        private addCharset(di)
+        {
+            this.domManager.setDi(di);
+            let header = this.domManager.getByTag("head");
+            header.append(
+                new Northwind.Tag.Meta().attr({
+                    "charset" : "utf-8"
+                })
+            );
+        }
+
         /**
          *
          */
         private resolveUrl(di, urls)
         {
             let url = new Northwind.Url.Url();
-
             if (Array.isArray(urls)) {
                 for (let key in urls) {
                     if (typeof urls[key] == "string") {
@@ -198,6 +226,7 @@ namespace Northwind
 
                         if (temp instanceof Northwind.Mvc.Controller) {
                             temp.setDi(di);
+                            temp.setGlobals(this.getGlobals());
                             temp.initialize();
                             this.resolvePropertiesController(
                                 temp,

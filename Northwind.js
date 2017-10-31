@@ -3,6 +3,12 @@ var __extends = (this && this.__extends) || function (d, b) {
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
 };
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
 var Northwind;
 (function (Northwind) {
     var Environment;
@@ -648,25 +654,28 @@ var Northwind;
             function InjectorComponents() {
             }
             InjectorComponents.prototype.setDi = function (di) {
-                if (di.hasKey("ajax")) {
-                    this.ajax = di.get("ajax");
-                }
-                if (di.hasKey("em")) {
-                    this.em = di.get("em");
-                }
-                if (di.hasKey("dom")) {
-                    this.dom = di.get("dom");
-                }
-                if (di.hasKey("tag")) {
-                    this.tag = di.get("tag");
-                }
-                if (di.hasKey("event")) {
-                    this.event = di.get("event");
-                }
-                if (di.hasKey("container")) {
-                    this.container = di.get("container");
-                }
                 this.di = di;
+                if (typeof di != "undefined") {
+                    if (di.hasKey("ajax")) {
+                        this.ajax = di.get("ajax");
+                    }
+                    if (di.hasKey("em")) {
+                        this.em = di.get("em");
+                    }
+                    if (di.hasKey("dom")) {
+                        this.dom = di.get("dom");
+                    }
+                    if (di.hasKey("tag")) {
+                        this.tag = di.get("tag");
+                    }
+                    if (di.hasKey("event")) {
+                        this.event = di.get("event");
+                    }
+                    if (di.hasKey("container")) {
+                        this.container = di.get("container");
+                    }
+                    this.di = di;
+                }
             };
             InjectorComponents.prototype.getDi = function () {
                 return this.di;
@@ -783,6 +792,13 @@ var Northwind;
                     return false;
                 }
             };
+            Component.prototype.setId = function (id) {
+                this.attr("id", id);
+                return this;
+            };
+            Component.prototype.getId = function () {
+                return this.attr("id");
+            };
             /**
              *
              */
@@ -802,6 +818,19 @@ var Northwind;
             Component.prototype.setElement = function (element) {
                 this.element = element;
                 return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.setRequired = function (req) {
+                this.element.required = req;
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.getRequired = function () {
+                return this.element.required;
             };
             /**
              *
@@ -2327,15 +2356,22 @@ var Northwind;
 })(Northwind || (Northwind = {}));
 ///<reference path="../Component.ts"/>
 ///<reference path="../../../Controller.ts"/>
+function ValidationDecorator(target) {
+    Object.defineProperty(target.prototype, 'test', {
+        value: function () {
+            console.log('test call');
+            return 'test result';
+        }
+    });
+    return target;
+}
 var Northwind;
-///<reference path="../Component.ts"/>
-///<reference path="../../../Controller.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
         /**
-         * [ViewElement description]
-         * @type {[type]}
+         *
+         * @type
          */
         var Form = (function (_super) {
             __extends(Form, _super);
@@ -2344,12 +2380,88 @@ var Northwind;
              */
             function Form() {
                 var _this = _super.call(this, "FORM") || this;
+                /**
+                 *
+                 */
+                _this.invalidElements = new Array;
                 _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
+            /**
+             *
+             */
+            Form.prototype.submit = function (fn) {
+                this.getElement().addEventListener("submit", function (event) {
+                    var returnCallback = fn.bind(this)(event);
+                    if (returnCallback == false || typeof returnCallback == "undefined") {
+                        event.preventDefault();
+                    }
+                    return true;
+                }.bind(this));
+            };
+            /**
+             *
+             */
+            Form.prototype.getInvalidElements = function () {
+                return this.invalidElements;
+            };
+            /**
+             *
+             */
+            Form.prototype.validate = function (fn) {
+                var elements = this.getFormElements();
+                this.invalidElements = new Array;
+                if (elements.length > 0) {
+                    for (var _i = 0, elements_1 = elements; _i < elements_1.length; _i++) {
+                        var item = elements_1[_i];
+                        if (item.val() == "") {
+                            this.invalidElements.push(item);
+                        }
+                    }
+                    if (this.invalidElements.length == 0) {
+                        return false;
+                    }
+                    else {
+                        return true;
+                    }
+                }
+                return true;
+            };
+            /**
+             *
+             */
+            Form.prototype.getFormElements = function () {
+                var northwindElements = new Array;
+                var elements = this.element.elements;
+                for (var _i = 0, elements_2 = elements; _i < elements_2.length; _i++) {
+                    var item = elements_2[_i];
+                    var aux = new Northwind.Tag.TagAdapter(item);
+                    aux.setDi(this.getDi());
+                    var element = aux.get();
+                    if (element != false) {
+                        northwindElements.push(element);
+                    }
+                }
+                return northwindElements;
+            };
+            Form.prototype.setAutoComplete = function (data) {
+                if (data) {
+                    this.attr("autocomplete", "on");
+                }
+                else {
+                    this.attr("autocomplete", "off");
+                }
+                return this;
+            };
+            Form.prototype.getAutoComplete = function () {
+                return this.attr("autocomplete");
+            };
             return Form;
         }(Northwind.Html.Component));
+        Form = __decorate([
+            ValidationDecorator
+        ], Form);
         Tag.Form = Form;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
@@ -2718,8 +2830,143 @@ var Northwind;
                 this.attr("type", type);
                 return this;
             };
+            Input.prototype.setText = function () {
+                this.attr("type", "text");
+                return this;
+            };
+            Input.prototype.setHidden = function () {
+                this.attr("type", "hidden");
+                return this;
+            };
+            Input.prototype.setNumber = function () {
+                this.attr("type", "number");
+                return this;
+            };
+            Input.prototype.setDate = function () {
+                this.attr("type", "number");
+                return this;
+            };
+            Input.prototype.setFile = function () {
+                this.attr("type", "file");
+                return this;
+            };
+            Input.prototype.setReadOnly = function (readOnly) {
+                this.getElement().readOnly = readOnly;
+                return this;
+            };
+            Input.prototype.getReadOnly = function () {
+                return this.getElement().readOnly;
+            };
+            Input.prototype.setDisabled = function (disabled) {
+                this.getElement().disabled = disabled;
+                return this;
+            };
+            Input.prototype.getDisabled = function () {
+                return this.getElement().disabled;
+            };
+            Input.prototype.setSize = function (size) {
+                this.attr("size", size);
+                return this;
+            };
+            Input.prototype.getSize = function () {
+                return this.attr("size");
+            };
+            Input.prototype.setMaxLength = function (max) {
+                this.attr("maxlength", max);
+                return this;
+            };
+            Input.prototype.getMaxLength = function () {
+                return this.attr("maxlength");
+            };
+            Input.prototype.setAutoFocus = function (data) {
+                this.getElement().autofocus = data;
+                return this;
+            };
+            Input.prototype.getAutoFocus = function () {
+                return this.getElement().autofocus;
+            };
+            Input.prototype.setMin = function (min) {
+                this.attr("min", min);
+                return this;
+            };
+            Input.prototype.getMin = function () {
+                return parseInt(this.attr("min"));
+            };
+            Input.prototype.setMax = function (max) {
+                this.attr("max", max);
+                return this;
+            };
+            Input.prototype.getMax = function () {
+                return parseInt(this.attr("max"));
+            };
+            Input.prototype.setAlt = function (alt) {
+                this.attr("alt", alt);
+                return this;
+            };
+            Input.prototype.getAlt = function () {
+                return this.attr("alt");
+            };
+            Input.prototype.setPlaceholder = function (placeholder) {
+                this.attr("placeholder", placeholder);
+                return this;
+            };
+            Input.prototype.getPlaceholder = function () {
+                return this.attr("placeholder");
+            };
+            Input.prototype.setTitle = function (title) {
+                this.attr("title", title);
+                return this;
+            };
+            Input.prototype.getTitle = function () {
+                return this.attr("title");
+            };
+            Input.prototype.setPattern = function (pattern) {
+                switch (pattern) {
+                    case Northwind.Tag.Input.NUMBERS:
+                        this.attr("pattern", "[0-9]");
+                        break;
+                    case Northwind.Tag.Input.TEXT:
+                        this.attr("pattern", "[A-Za-z]{3}");
+                        break;
+                    case Northwind.Tag.Input.NO_SPECIAL_CHARACTERS:
+                        this.attr("pattern", "{3}");
+                        break;
+                    case Northwind.Tag.Input.NUMBERS_NO_SPECIAL_CHARACTERS:
+                        this.attr("pattern", "[0-9]{3}");
+                        break;
+                    case Northwind.Tag.Input.TEXT_NO_SPECIAL_CHARACTERS:
+                        this.attr("pattern", "[A-Za-z]{3}");
+                        break;
+                    default:
+                        this.attr("pattern", pattern);
+                        break;
+                }
+                return this;
+            };
+            Input.prototype.getPattern = function () {
+                return this.attr("pattern");
+            };
+            Input.prototype.setName = function (name) {
+                this.attr("name", name);
+                return this;
+            };
+            Input.prototype.getName = function () {
+                return this.attr("name");
+            };
+            Input.prototype.setStep = function (num) {
+                this.attr("step", num);
+                return this;
+            };
+            Input.prototype.getStep = function () {
+                return this.attr("step");
+            };
             return Input;
         }(Northwind.Html.Component));
+        Input.NUMBERS = 0;
+        Input.TEXT = 1;
+        Input.NO_SPECIAL_CHARACTERS = 2;
+        Input.TEXT_NO_SPECIAL_CHARACTERS = 3;
+        Input.NUMBERS_NO_SPECIAL_CHARACTERS = 4;
         Tag.Input = Input;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
@@ -5256,9 +5503,14 @@ var Northwind;
                 var elements = document.getElementsByClassName(name);
                 var result = new Array();
                 for (var key in elements) {
-                    var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                    adapter.setDi(this.di);
-                    result.push(adapter.get());
+                    if (typeof elements[key].nodeName == "string") {
+                        var adapter = new Northwind.Tag.TagAdapter(elements[key]);
+                        adapter.setDi(this.di);
+                        result.push(adapter.get());
+                    }
+                }
+                if (result.length == 0) {
+                    return false;
                 }
                 if (result.length == 1) {
                     return result[0];
@@ -7188,6 +7440,42 @@ var Northwind;
         Mvc.Query = Query;
     })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Tag;
+    (function (Tag) {
+        var InjectorComponents = (function () {
+            function InjectorComponents() {
+            }
+            return InjectorComponents;
+        }());
+        Tag.InjectorComponents = InjectorComponents;
+    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../Component.ts"/>
+///<reference path="../../../Controller.ts"/>
+var Northwind;
+///<reference path="../Component.ts"/>
+///<reference path="../../../Controller.ts"/>
+(function (Northwind) {
+    var Tag;
+    (function (Tag) {
+        /**
+         * [Input description]
+         * @type {[type]}
+         */
+        var Hidden = (function (_super) {
+            __extends(Hidden, _super);
+            function Hidden() {
+                var _this = _super.call(this) || this;
+                _this.setHidden();
+                return _this;
+            }
+            return Hidden;
+        }(Northwind.Tag.Input));
+        Tag.Hidden = Hidden;
+    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
 ///<reference path="../Component.ts"/>
 ///<reference path="../../../Controller.ts"/>
 var Northwind;
@@ -7324,11 +7612,6 @@ var Northwind;
              */
             this.domManager = new Northwind.Html.Dom;
             this.restricted = new Array;
-            var header = this.domManager.getByTag("head");
-            console.log(header);
-            header.append(new Northwind.Tag.Meta().attr({
-                "charset": "utf-8"
-            }));
             this.restricted = [
                 "constructor",
                 "initialize",
@@ -7385,6 +7668,7 @@ var Northwind;
          *
          */
         Application.prototype.resolveConfig = function (di) {
+            this.addCharset(di);
             var positionArray = new Array();
             var configData = this.config;
             for (var key in configData) {
@@ -7404,6 +7688,13 @@ var Northwind;
             else {
                 throw "Config must have controllers item attached";
             }
+        };
+        Application.prototype.addCharset = function (di) {
+            this.domManager.setDi(di);
+            var header = this.domManager.getByTag("head");
+            header.append(new Northwind.Tag.Meta().attr({
+                "charset": "utf-8"
+            }));
         };
         /**
          *
