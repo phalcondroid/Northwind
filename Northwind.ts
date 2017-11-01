@@ -41,7 +41,7 @@ namespace Northwind
         /**
          *
          */
-        private globals = new Array;
+        private globals    = new Array;
 
         /**
          *
@@ -76,7 +76,9 @@ namespace Northwind
                 "setTag",
                 "getTag",
                 "setEvent",
-                "getEvent"
+                "getEvent",
+                "setGlobals",
+                "getGlobals"
             ];
             window.onbeforeunload = function () {
                 sessionStorage.clear();
@@ -215,15 +217,10 @@ namespace Northwind
             }
 
             if (Array.isArray(controllers)) {
-
                 let i = 1;
-
                 for (let key in controllers) {
-
                     if (typeof controllers[key] != "undefined") {
-
                         let temp = new controllers[key];
-
                         if (temp instanceof Northwind.Mvc.Controller) {
                             temp.setDi(di);
                             temp.setGlobals(this.getGlobals());
@@ -232,13 +229,10 @@ namespace Northwind
                                 temp,
                                 di
                             );
-
                         } else {
                             throw "Controller #" + i + " must be extend from View.Controller class";
                         }
-
                         i++;
-
                     } else {
                         throw "Config => Controller => 'name' must be initialized with View.Controller class"
                     }

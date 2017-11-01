@@ -8,8 +8,11 @@ namespace Northwind.Html
      *
      * @type
      */
-    export class Component extends Service.InjectorComponents
+    export class Component
     {
+        /**
+         *
+         */
         public static NO_CONTEXT = 1;
 
         /**
@@ -55,12 +58,16 @@ namespace Northwind.Html
 
         /**
          *
+         */
+        private di;
+
+        /**
+         *
          * @param  
          * @return
          */
         public constructor(name: any = "", newClone = false)
         {
-            super();
             if (typeof name.nodeName != "undefined") {
                 this.id      = name.getAttribute("id");
                 this.element = this.init(name.nodeName, this.id);
@@ -81,11 +88,10 @@ namespace Northwind.Html
          */
         public initialize()
         {
-
         }
 
         /**
-         *
+         * 
          */
         public setGlobals(globals)
         {
@@ -94,11 +100,21 @@ namespace Northwind.Html
         }
 
         /**
-         *
+         * 
          */
         public getGlobals()
         {
             return this.globals;
+        }
+
+        public setDi(di)
+        {
+            this.di = di;
+        }
+
+        public getDi()
+        {
+            return this.di;
         }
 
         /**
@@ -119,12 +135,18 @@ namespace Northwind.Html
             }
         }
 
+        /**
+         *
+         */
         public setId(id : string)
         {
             this.attr("id", id);
             return this;
         }
 
+        /**
+         *
+         */
         public getId()
         {
             return this.attr("id");
@@ -196,7 +218,6 @@ namespace Northwind.Html
          */
         public create(tag: string)
         {
-            console.log("la tag", tag);
             this.element = this.init(tag, this.id);
             return this;
         }
@@ -226,16 +247,16 @@ namespace Northwind.Html
 
         /**
          *
-         * @return
+         * @return 
          */
         public getType() {
             return this.className;
         }
 
         /**
-         *
-         * @param  {string} class [description]
-         * @return {[type]}       [description]
+         * Set class 
+         * @param  {string} attrClass 
+         * @return {this}  [description]
          */
         public class(attrClass: string)
         {
@@ -244,7 +265,7 @@ namespace Northwind.Html
         }
 
         /**
-         *
+         * 
          */
         public addClass(attrClass : string)
         {

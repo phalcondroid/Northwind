@@ -1,6 +1,7 @@
 ///<reference path="../Component.ts"/>
 ///<reference path="../../../Controller.ts"/>
 
+/*
 function ValidationDecorator<TFunction extends Function>(target: TFunction): TFunction {
     Object.defineProperty(target.prototype, 'test', {
         value: function() {
@@ -10,6 +11,7 @@ function ValidationDecorator<TFunction extends Function>(target: TFunction): TFu
     });
     return target;
 }
+*/
 
 namespace Northwind.Tag
 {
@@ -17,7 +19,6 @@ namespace Northwind.Tag
      * 
      * @type 
      */
-    @ValidationDecorator
     export class Form extends Northwind.Html.Component
     {
         /**
@@ -26,7 +27,7 @@ namespace Northwind.Tag
         private invalidElements = new Array;
 
         /**
-         *
+         * 
          */
         public constructor()
         {
@@ -36,7 +37,7 @@ namespace Northwind.Tag
         }
 
         /**
-         *
+         * @param {Function} fn
          */
         public submit(fn : Function)
         {
@@ -50,7 +51,7 @@ namespace Northwind.Tag
         }
 
         /**
-         *
+         * 
          */
         public getInvalidElements()
         {
@@ -58,7 +59,7 @@ namespace Northwind.Tag
         }
 
         /**
-         *
+         * 
          */
         public validate(fn : Function)
         {
@@ -73,16 +74,16 @@ namespace Northwind.Tag
                     }
                 }
                 if (this.invalidElements.length == 0) {
-                    return false;
-                } else {
                     return true;
+                } else {
+                    return false;
                 }
             }
-            return true;
+            return false;
         }
 
         /**
-         *
+         * 
          */
         public getFormElements()
         {
@@ -101,6 +102,9 @@ namespace Northwind.Tag
             return northwindElements;
         }
 
+        /**
+         * 
+         */
         public setAutoComplete(data : Boolean)
         {
             if (data) {
@@ -111,6 +115,9 @@ namespace Northwind.Tag
             return this;
         }
 
+        /**
+         * 
+         */
         public getAutoComplete()
         {
             return this.attr("autocomplete");

@@ -4,7 +4,7 @@
 
 namespace Northwind.Tag {
 
-    export class Select extends Northwind.Html.Component
+    export class Select extends Northwind.Tag.FormTag
     {
 
         private choose = "Choose...";

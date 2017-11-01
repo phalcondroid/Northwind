@@ -361,7 +361,10 @@ declare namespace Northwind.Html {
      *
      * @type
      */
-    class Component extends Service.InjectorComponents {
+    class Component {
+        /**
+         *
+         */
         static NO_CONTEXT: number;
         /**
          * Node javascript element
@@ -393,6 +396,14 @@ declare namespace Northwind.Html {
          */
         private className;
         /**
+         * @type
+         */
+        private globals;
+        /**
+         *
+         */
+        private di;
+        /**
          *
          * @param
          * @return
@@ -405,8 +416,24 @@ declare namespace Northwind.Html {
         /**
          *
          */
+        setGlobals(globals: any): this;
+        /**
+         *
+         */
+        getGlobals(): any;
+        setDi(di: any): void;
+        getDi(): any;
+        /**
+         *
+         */
         getArguments(args: any): false | any[];
+        /**
+         *
+         */
         setId(id: string): this;
+        /**
+         *
+         */
         getId(): any;
         /**
          *
@@ -454,9 +481,9 @@ declare namespace Northwind.Html {
          */
         getType(): any;
         /**
-         *
-         * @param  {string} class [description]
-         * @return {[type]}       [description]
+         * Set class
+         * @param  {string} attrClass
+         * @return {this}  [description]
          */
         class(attrClass: string): this;
         /**
@@ -1070,7 +1097,6 @@ declare namespace Northwind.Tag {
         constructor();
     }
 }
-declare function ValidationDecorator<TFunction extends Function>(target: TFunction): TFunction;
 declare namespace Northwind.Tag {
     /**
      *
@@ -1086,7 +1112,7 @@ declare namespace Northwind.Tag {
          */
         constructor();
         /**
-         *
+         * @param {Function} fn
          */
         submit(fn: Function): void;
         /**
@@ -1101,7 +1127,13 @@ declare namespace Northwind.Tag {
          *
          */
         getFormElements(): any[];
+        /**
+         *
+         */
         setAutoComplete(data: Boolean): this;
+        /**
+         *
+         */
         getAutoComplete(): any;
     }
 }
@@ -1241,41 +1273,20 @@ declare namespace Northwind.Tag {
     }
 }
 declare namespace Northwind.Tag {
-    /**
-     * [Input description]
-     * @type {[type]}
-     */
-    class Input extends Northwind.Html.Component {
-        static NUMBERS: number;
-        static TEXT: number;
-        static NO_SPECIAL_CHARACTERS: number;
-        static TEXT_NO_SPECIAL_CHARACTERS: number;
-        static NUMBERS_NO_SPECIAL_CHARACTERS: number;
+    class FormTag extends Northwind.Html.Component {
         /**
-         *
+         * Set form element property readonly
+         * @param {Boolean} readOnly
          */
-        constructor();
-        /**
-         *
-         */
-        getValue(): any;
-        /**
-         *
-         */
-        setValue(value: any): this;
-        /**
-         * [type description]
-         * @param  {[type]} type [description]
-         * @return {[type]}      [description]
-         */
-        type(type: any): this;
-        setText(): this;
-        setHidden(): this;
-        setNumber(): this;
-        setDate(): this;
-        setFile(): this;
         setReadOnly(readOnly: Boolean): this;
+        /**
+         * Get form read only
+         */
         getReadOnly(): any;
+        /**
+         * Set disabled
+         * @param {Boolean} disabled
+         */
         setDisabled(disabled: Boolean): this;
         getDisabled(): any;
         setSize(size: string | number): this;
@@ -1288,18 +1299,111 @@ declare namespace Northwind.Tag {
         getMin(): number;
         setMax(max: number): this;
         getMax(): number;
+        /**
+         *
+         */
         setAlt(alt: string): this;
+        /**
+         *
+         */
         getAlt(): any;
+        /**
+         *
+         */
         setPlaceholder(placeholder: string): this;
+        /**
+         *
+         */
         getPlaceholder(): any;
+        /**
+         *
+         */
         setTitle(title: string): this;
+        /**
+         *
+         */
         getTitle(): any;
+        /**
+         *
+         */
         setPattern(pattern: string | number): this;
+        /**
+         *
+         */
         getPattern(): any;
+        /**
+         *
+         */
         setName(name: string): this;
+        /**
+         *
+         */
         getName(): any;
+        /**
+         *
+         */
         setStep(num: number): this;
+        /**
+         *
+         */
         getStep(): any;
+        /**
+         *
+         */
+        validate(fn?: Function | Boolean): boolean;
+    }
+}
+declare namespace Northwind.Tag {
+    /**
+     *
+     * @type
+     */
+    class Input extends Northwind.Tag.FormTag {
+        static NUMBERS: number;
+        static TEXT: number;
+        static NO_SPECIAL_CHARACTERS: number;
+        static TEXT_NO_SPECIAL_CHARACTERS: number;
+        static NUMBERS_NO_SPECIAL_CHARACTERS: number;
+        /**
+         *
+         */
+        constructor();
+        /**
+         * Get value, alternative to val() method
+         * @param
+         * @return any
+         */
+        getValue(): any;
+        /**
+         *
+         */
+        setValue(value: any): this;
+        /**
+         * [type description]
+         * @param  {[type]} type [description]
+         * @return {[type]}      [description]
+         */
+        type(type: any): this;
+        /**
+         *
+         */
+        setText(): this;
+        /**
+         *
+         */
+        setHidden(): this;
+        /**
+         *
+         */
+        setNumber(): this;
+        /**
+         *
+         */
+        setDate(): this;
+        /**
+         *
+         */
+        setFile(): this;
     }
 }
 declare namespace Northwind.Tag {
@@ -1720,7 +1824,7 @@ declare namespace Northwind.Mvc {
     }
 }
 declare namespace Northwind.Tag {
-    class Select extends Northwind.Html.Component {
+    class Select extends Northwind.Tag.FormTag {
         private choose;
         /**
          *
@@ -2201,11 +2305,30 @@ declare namespace Northwind.Service {
 }
 declare namespace Northwind.Mvc {
     class Controller extends Service.FactoryDefault {
+        /**
+         *
+         */
+        private globals;
+        /**
+         *
+         */
         constructor();
         /**
          *
          */
+        setGlobals(globals: any): this;
+        /**
+         *
+         */
+        getGlobals(): any;
+        /**
+         *
+         */
         initialize(): void;
+    }
+}
+declare namespace Northwind.Mvc {
+    class Component extends Northwind.Mvc.Controller {
     }
 }
 declare namespace Northwind.Mvc {
@@ -2619,10 +2742,6 @@ declare namespace Northwind.Mvc {
     }
 }
 declare namespace Northwind.Tag {
-    class InjectorComponents {
-    }
-}
-declare namespace Northwind.Tag {
     /**
      * [Input description]
      * @type {[type]}
@@ -2702,7 +2821,14 @@ declare namespace Northwind {
          *
          */
         private domManager;
+        /**
+         *
+         */
         private restricted;
+        /**
+         *
+         */
+        private globals;
         /**
          *
          */
@@ -2719,6 +2845,14 @@ declare namespace Northwind {
          *
          */
         getConfig(): Object;
+        /**
+         *
+         */
+        setGlobals(globals: any): this;
+        /**
+         *
+         */
+        getGlobals(): any[];
         /**
          *
          */
@@ -2897,6 +3031,14 @@ declare namespace Northwind.Persistence {
          */
         setWhenIsModel(model: any, params: any, type: any): void;
         private callAjax(objModel, type, params);
+        /**
+         *
+         */
+        private ucfirst(str);
+        /**
+         *
+         */
+        private lcfirst(str);
         /**
          *
          */

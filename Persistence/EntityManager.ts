@@ -150,8 +150,8 @@ namespace Northwind.Persistence
             }
             if (url == null) {
                 url = this.getDi().get("url").get("baseUrl") +
-                type +
-                objModel.getClassName();
+                this.lcfirst(objModel.getClassName()) +
+                this.ucfirst(type);
             }
             this.ajax.setUrl(
                 url
@@ -162,6 +162,22 @@ namespace Northwind.Persistence
             this.ajax.setMethod(
                 objModel.getMethod()
             );
+        }
+
+        /**
+         *
+         */
+        private ucfirst(str)
+        {
+            return str.charAt(0).toUpperCase() + str.slice(1);
+        }
+
+        /**
+         *
+         */
+        private lcfirst(str)
+        {
+            return str.charAt(0).toLowerCase() + str.slice(1);
         }
 
         /**
@@ -208,7 +224,7 @@ namespace Northwind.Persistence
                             var url = model.getUpdateUrl();
                             if (url == null) {
                                 url = this.getDi().get("url").get("baseUrl") +
-                                modelName +
+                                this.lcfirst(modelName) +
                                 "Update";
                             }
                             this.ajax.setUrl(
@@ -272,8 +288,8 @@ namespace Northwind.Persistence
 
                 var url = model.getDeleteUrl();
                 if (url == null) {
-                    url = this.getDi().get("url").get("baseUrl")+
-                    modelName +
+                    url = this.getDi().get("url").get("baseUrl") +
+                    this.lcfirst(modelName) +
                     "Delete";
                 }
                 this.ajax.setUrl(
