@@ -108,16 +108,6 @@ namespace Northwind.Html
             return this.globals;
         }
 
-        public setDi(di)
-        {
-            this.di = di;
-        }
-
-        public getDi()
-        {
-            return this.di;
-        }
-
         /**
          *
          */
