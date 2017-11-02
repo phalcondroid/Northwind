@@ -36,27 +36,27 @@ div.append([
 ```
 
 ### Most popular view properties
-```typescript
-attr
-show
-hide
-class
-addClass
-addChild
-removeAttr
-append
-html
-css
-val
-text
-empty
-getChilds
-getParent
-getAsObject
-getAsJson
-remove
-getRandomString
-```
+
+* attr
+* show
+* hide
+* class
+* addClass
+* addChild
+* removeAttr
+* append
+* html
+* css
+* val
+* text
+* empty
+* getChilds
+* getParent
+* getAsObject
+* getAsJson
+* remove
+* getRandomString
+
 ### Event Manager
 
 ```typescript
@@ -74,6 +74,18 @@ namespace YourProject.Controllers
 }
 
 ```
+
+#### List of support events
+
+* click
+* doubleClick
+* change
+* keypress
+* keydown
+* keyup
+* paste
+* blur
+* focus
 
 ### Controllers
 
