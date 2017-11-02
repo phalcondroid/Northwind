@@ -45,7 +45,7 @@ namespace Northwind.Service
 
         public getTag(name : string)
         {
-            let tag = this.get("tag");
+            let tag = this.di.get("tag");
             tag.setDi(this.di);
             return tag.get(name);
         }
@@ -53,7 +53,7 @@ namespace Northwind.Service
         public getEvent()
         {
             let events = this.di.get(
-                "events"
+                "event"
             );
             return events;
         }

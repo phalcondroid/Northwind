@@ -75,9 +75,33 @@ declare namespace Northwind.Events {
         trigger(controller: any, event: any, callback: any): any;
     }
 }
+declare namespace Northwind.Service {
+    class InjectorComponents {
+        tagElement: any;
+        ajaxNative: any;
+        domNative: any;
+        diNative: any;
+        eventNative: any;
+        containerNative: any;
+        emNative: any;
+        setDi(di: Service.Container): void;
+        getDi(): any;
+        setDom(dom: any): void;
+        getDom(): any;
+        setTag(tag: any): void;
+        getTag(): any;
+        setEvent(event: any): void;
+        getEvent(): any;
+        setEm(em: any): void;
+        getEm(): any;
+        setContainer(container: any): void;
+        getContainer(): any;
+        setAjax(ajax: any): void;
+        getAjax(): any;
+    }
+}
 declare namespace Northwind {
-    class Events {
-        private di;
+    class Events extends Northwind.Service.InjectorComponents {
         private events;
         private params;
         private others;
@@ -158,8 +182,6 @@ declare namespace Northwind {
          * @return {[type]} [description]
          */
         focus(fn: any): this;
-        setDi(di: any): this;
-        getDi(): any;
     }
 }
 declare namespace Northwind.Events {
@@ -236,8 +258,7 @@ declare namespace Northwind.Service {
     }
 }
 declare namespace Northwind.Network {
-    class Ajax implements Service.InjectionAwareInterface {
-        di: Service.Container;
+    class Ajax extends Service.InjectorComponents {
         private httpRequest;
         private context;
         private method;
@@ -321,39 +342,6 @@ declare namespace Northwind.Network {
          *
          */
         send(fn?: any): void;
-        /**
-         *
-         */
-        setDi(di: Service.Container): void;
-        /**
-         *
-         */
-        getDi(): Service.Container;
-    }
-}
-declare namespace Northwind.Service {
-    class InjectorComponents {
-        tag: any;
-        ajax: any;
-        dom: any;
-        di: any;
-        event: any;
-        container: any;
-        em: any;
-        setDi(di: Service.Container): void;
-        getDi(): any;
-        setDom(dom: any): void;
-        getDom(): any;
-        setTag(tag: any): void;
-        getTag(): any;
-        setEvent(event: any): void;
-        getEvent(): any;
-        setEm(em: any): void;
-        getEm(): any;
-        setContainer(container: any): void;
-        getContainer(): any;
-        setAjax(ajax: any): void;
-        getAjax(): any;
     }
 }
 declare namespace Northwind.Html {
@@ -361,7 +349,7 @@ declare namespace Northwind.Html {
      *
      * @type
      */
-    class Component {
+    class Component extends Northwind.Service.InjectorComponents {
         /**
          *
          */
@@ -2233,8 +2221,7 @@ declare namespace Northwind.Tag {
     }
 }
 declare namespace Northwind.Html {
-    class Dom {
-        private di;
+    class Dom extends Northwind.Service.InjectorComponents {
         /**
          *
          */
@@ -2266,8 +2253,6 @@ declare namespace Northwind.Html {
          * @param element
          */
         setElement(element: any): void;
-        setDi(di: any): void;
-        getDi(): any;
     }
 }
 declare namespace Northwind.Tag {
@@ -2990,10 +2975,8 @@ declare namespace Northwind.Persistence {
     }
 }
 declare namespace Northwind.Persistence {
-    class EntityManager implements EntityManagerInterface {
-        di: Northwind.Service.Container;
+    class EntityManager extends Service.InjectorComponents implements EntityManagerInterface {
         uow: Northwind.Persistence.UnitOfWork;
-        private container;
         private ajax;
         private hydrator;
         private source;
@@ -3004,10 +2987,6 @@ declare namespace Northwind.Persistence {
          * Entity manager is a class
          */
         constructor();
-        /**
-         *
-         */
-        private getContainer();
         /**
          *
          * @param model
@@ -3096,10 +3075,8 @@ declare namespace Northwind.Persistence {
          */
         forget(): boolean;
         checksum(obj: any): string;
-        setDi(di: Service.Container): void;
-        getDi(): Service.Container;
     }
-    interface EntityManagerInterface extends Northwind.Service.InjectionAwareInterface {
+    interface EntityManagerInterface {
         uow: Object;
         find(conext: any, model: Northwind.Mvc.RawModel, params: Object): any;
         findOne(context: any, model: Northwind.Mvc.RawModel, params: Object): any;

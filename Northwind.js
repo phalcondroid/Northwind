@@ -97,12 +97,92 @@ var Northwind;
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var Events = (function () {
+    var Service;
+    (function (Service) {
+        var InjectorComponents = (function () {
+            function InjectorComponents() {
+            }
+            InjectorComponents.prototype.setDi = function (di) {
+                this.diNative = di;
+                if (typeof di != "undefined") {
+                    if (di.hasKey("ajax")) {
+                        this.ajaxNative = di.get("ajax");
+                    }
+                    if (di.hasKey("em")) {
+                        this.emNative = di.get("em");
+                    }
+                    if (di.hasKey("dom")) {
+                        this.domNative = di.get("dom");
+                    }
+                    if (di.hasKey("tag")) {
+                        this.tagElement = di.get("tag");
+                    }
+                    if (di.hasKey("event")) {
+                        this.eventNative = di.get("event");
+                    }
+                    if (di.hasKey("container")) {
+                        this.containerNative = di.get("container");
+                    }
+                    this.diNative = di;
+                }
+            };
+            InjectorComponents.prototype.getDi = function () {
+                return this.diNative;
+            };
+            InjectorComponents.prototype.setDom = function (dom) {
+                this.domNative = dom;
+            };
+            InjectorComponents.prototype.getDom = function () {
+                return this.domNative;
+            };
+            InjectorComponents.prototype.setTag = function (tag) {
+                this.tagElement = tag;
+            };
+            InjectorComponents.prototype.getTag = function () {
+                return this.tagElement;
+            };
+            InjectorComponents.prototype.setEvent = function (event) {
+                this.eventNative = event;
+            };
+            InjectorComponents.prototype.getEvent = function () {
+                return this.eventNative;
+            };
+            InjectorComponents.prototype.setEm = function (em) {
+                this.emNative = em;
+            };
+            InjectorComponents.prototype.getEm = function () {
+                return this.emNative;
+            };
+            InjectorComponents.prototype.setContainer = function (container) {
+                this.containerNative = container;
+            };
+            InjectorComponents.prototype.getContainer = function () {
+                return this.containerNative;
+            };
+            InjectorComponents.prototype.setAjax = function (ajax) {
+                this.ajaxNative = ajax;
+            };
+            InjectorComponents.prototype.getAjax = function () {
+                return this.ajaxNative;
+            };
+            return InjectorComponents;
+        }());
+        Service.InjectorComponents = InjectorComponents;
+    })(Service = Northwind.Service || (Northwind.Service = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../Service/InjectorComponents.ts" />
+var Northwind;
+///<reference path="../Service/InjectorComponents.ts" />
+(function (Northwind) {
+    var Events = (function (_super) {
+        __extends(Events, _super);
         function Events() {
-            this.events = {};
-            this.params = {};
-            this.others = {};
-            this.nativeEvents = [];
+            var _this = _super.apply(this, arguments) || this;
+            _this.events = {};
+            _this.params = {};
+            _this.others = {};
+            _this.nativeEvents = [];
+            return _this;
         }
         Events.prototype.contructor = function () {
             this.nativeEvents = [
@@ -239,15 +319,8 @@ var Northwind;
             this.element.getElement().addEventListener("focus", fn.bind(this));
             return this;
         };
-        Events.prototype.setDi = function (di) {
-            this.di = di;
-            return this;
-        };
-        Events.prototype.getDi = function () {
-            return this.di;
-        };
         return Events;
-    }());
+    }(Northwind.Service.InjectorComponents));
     Events.AFTER = 1;
     Events.BEFORE = 2;
     Events.ONCREATE = 3;
@@ -440,22 +513,27 @@ var Northwind;
         Service.Container = Container;
     })(Service = Northwind.Service || (Northwind.Service = {}));
 })(Northwind || (Northwind = {}));
+///<reference path="../Service/InjectorComponents.ts" />
 var Northwind;
+///<reference path="../Service/InjectorComponents.ts" />
 (function (Northwind) {
     var Network;
     (function (Network) {
-        var Ajax = (function () {
+        var Ajax = (function (_super) {
+            __extends(Ajax, _super);
             /**
              *
              */
             function Ajax() {
-                this.context = {};
-                this.method = "POST";
-                this.parameters = "";
-                this.container = [];
-                this.responseFn = function () { };
-                this.bfSendFn = function () { }.bind(this);
-                this.httpRequest = new XMLHttpRequest();
+                var _this = _super.call(this) || this;
+                _this.context = {};
+                _this.method = "POST";
+                _this.parameters = "";
+                _this.container = [];
+                _this.responseFn = function () { };
+                _this.bfSendFn = function () { }.bind(_this);
+                _this.httpRequest = new XMLHttpRequest();
+                return _this;
             }
             /**
              *
@@ -623,97 +701,10 @@ var Northwind;
                 this.setHeaders();
                 this.httpRequest.send(this.parameters);
             };
-            /**
-             *
-             */
-            Ajax.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            /**
-             *
-             */
-            Ajax.prototype.getDi = function () {
-                return this.di;
-            };
             return Ajax;
-        }());
+        }(Northwind.Service.InjectorComponents));
         Network.Ajax = Ajax;
     })(Network = Northwind.Network || (Northwind.Network = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Service;
-    (function (Service) {
-        var InjectorComponents = (function () {
-            function InjectorComponents() {
-            }
-            InjectorComponents.prototype.setDi = function (di) {
-                this.di = di;
-                if (typeof di != "undefined") {
-                    if (di.hasKey("ajax")) {
-                        this.ajax = di.get("ajax");
-                    }
-                    if (di.hasKey("em")) {
-                        this.em = di.get("em");
-                    }
-                    if (di.hasKey("dom")) {
-                        this.dom = di.get("dom");
-                    }
-                    if (di.hasKey("tag")) {
-                        this.tag = di.get("tag");
-                    }
-                    if (di.hasKey("event")) {
-                        this.event = di.get("event");
-                    }
-                    if (di.hasKey("container")) {
-                        this.container = di.get("container");
-                    }
-                    this.di = di;
-                }
-            };
-            InjectorComponents.prototype.getDi = function () {
-                return this.di;
-            };
-            InjectorComponents.prototype.setDom = function (dom) {
-                this.dom = dom;
-            };
-            InjectorComponents.prototype.getDom = function () {
-                return this.dom;
-            };
-            InjectorComponents.prototype.setTag = function (tag) {
-                this.tag = tag;
-            };
-            InjectorComponents.prototype.getTag = function () {
-                return this.tag;
-            };
-            InjectorComponents.prototype.setEvent = function (event) {
-                this.event = event;
-            };
-            InjectorComponents.prototype.getEvent = function () {
-                return this.event;
-            };
-            InjectorComponents.prototype.setEm = function (em) {
-                this.em = em;
-            };
-            InjectorComponents.prototype.getEm = function () {
-                return this.em;
-            };
-            InjectorComponents.prototype.setContainer = function (container) {
-                this.container = container;
-            };
-            InjectorComponents.prototype.getContainer = function () {
-                return this.container;
-            };
-            InjectorComponents.prototype.setAjax = function (ajax) {
-                this.ajax = ajax;
-            };
-            InjectorComponents.prototype.getAjax = function () {
-                return this.ajax;
-            };
-            return InjectorComponents;
-        }());
-        Service.InjectorComponents = InjectorComponents;
-    })(Service = Northwind.Service || (Northwind.Service = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="./TagAdapter.ts"/>
 ///<reference path="../../../Service/InjectorComponents.ts"/>
@@ -727,7 +718,8 @@ var Northwind;
          *
          * @type
          */
-        var Component = (function () {
+        var Component = (function (_super) {
+            __extends(Component, _super);
             /**
              *
              * @param
@@ -736,31 +728,32 @@ var Northwind;
             function Component(name, newClone) {
                 if (name === void 0) { name = ""; }
                 if (newClone === void 0) { newClone = false; }
+                var _this = _super.call(this) || this;
                 /**
                  *
                  */
-                this.deny = ["Table", "Td", "Div", "Thead", "Tbody", "Tfoot", "Tr", "Td", "Th", "Label", "Span", "I", "A"];
+                _this.deny = ["Table", "Td", "Div", "Thead", "Tbody", "Tfoot", "Tr", "Td", "Th", "Label", "Span", "I", "A"];
                 /**
                  *
                  * @type
                  */
-                this.url = "";
+                _this.url = "";
                 if (typeof name.nodeName != "undefined") {
-                    this.id = name.getAttribute("id");
-                    this.element = this.init(name.nodeName, this.id);
+                    _this.id = name.getAttribute("id");
+                    _this.element = _this.init(name.nodeName, _this.id);
                 }
                 else if (typeof name.target != "undefined") {
-                    this.element = name.target;
+                    _this.element = name.target;
                 }
                 else if (typeof name == "string") {
-                    this.id = name;
-                    this.element = this.init(name, name);
+                    _this.id = name;
+                    _this.element = _this.init(name, name);
                 }
                 else {
-                    this.id = name;
-                    this.element = this.init(this.getClassName(), name);
+                    _this.id = name;
+                    _this.element = _this.init(_this.getClassName(), name);
                 }
-                return this;
+                return _this;
             }
             /**
              *
@@ -1277,7 +1270,7 @@ var Northwind;
                 }
             };
             return Component;
-        }());
+        }(Northwind.Service.InjectorComponents));
         /**
          *
          */
@@ -5577,20 +5570,25 @@ var Northwind;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="./TagAdapter.ts"/>
+///<reference path="../../../Service/InjectorComponents.ts" />
 var Northwind;
 ///<reference path="./TagAdapter.ts"/>
+///<reference path="../../../Service/InjectorComponents.ts" />
 (function (Northwind) {
     var Html;
     (function (Html) {
-        var Dom = (function () {
+        var Dom = (function (_super) {
+            __extends(Dom, _super);
             /**
              *
              * @param element
              */
             function Dom(element) {
                 if (element === void 0) { element = null; }
+                var _this = _super.call(this) || this;
                 if (element != null)
-                    this.element = element;
+                    _this.element = element;
+                return _this;
             }
             /**
              *
@@ -5599,7 +5597,7 @@ var Northwind;
             Dom.prototype.getById = function (id, context) {
                 if (context === void 0) { context = null; }
                 var adapter = new Northwind.Tag.TagAdapter(document.getElementById(id));
-                adapter.setDi(this.di);
+                adapter.setDi(this.getDi());
                 return adapter.get();
             };
             /**
@@ -5611,7 +5609,7 @@ var Northwind;
                 for (var key in elements) {
                     if (typeof elements[key].nodeName == "string") {
                         var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                        adapter.setDi(this.di);
+                        adapter.setDi(this.getDi());
                         result.push(adapter.get());
                     }
                 }
@@ -5633,7 +5631,7 @@ var Northwind;
                 for (var key in elements) {
                     if (typeof elements[key].nodeName == "string") {
                         var adapter = new Northwind.Tag.TagAdapter(elements[key]);
-                        adapter.setDi(this.di);
+                        adapter.setDi(this.getDi());
                         result.push(adapter.get());
                     }
                 }
@@ -5658,14 +5656,8 @@ var Northwind;
             Dom.prototype.setElement = function (element) {
                 this.element = element;
             };
-            Dom.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            Dom.prototype.getDi = function () {
-                return this.di;
-            };
             return Dom;
-        }());
+        }(Northwind.Service.InjectorComponents));
         Html.Dom = Dom;
     })(Html = Northwind.Html || (Northwind.Html = {}));
 })(Northwind || (Northwind = {}));
@@ -6365,12 +6357,12 @@ var Northwind;
                 return this.di.get("container");
             };
             FactoryDefault.prototype.getTag = function (name) {
-                var tag = this.get("tag");
+                var tag = this.di.get("tag");
                 tag.setDi(this.di);
                 return tag.get(name);
             };
             FactoryDefault.prototype.getEvent = function () {
-                var events = this.di.get("events");
+                var events = this.di.get("event");
                 return events;
             };
             FactoryDefault.prototype.setDi = function (di) {
@@ -8428,6 +8420,7 @@ var Northwind;
         Persistence.Filter = Filter;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
+/// <reference path="../Service/InjectorComponents.ts" />
 /// <reference path="../Reflection/Reflection.ts" />
 /// <reference path="../Service/Container.ts" />
 /// <reference path="../Mvc/Model/StaticModel.ts" />
@@ -8437,6 +8430,7 @@ var Northwind;
 /// <reference path="./Hydrator.ts" />
 /// <reference path="./Filter.ts" />
 var Northwind;
+/// <reference path="../Service/InjectorComponents.ts" />
 /// <reference path="../Reflection/Reflection.ts" />
 /// <reference path="../Service/Container.ts" />
 /// <reference path="../Mvc/Model/StaticModel.ts" />
@@ -8448,25 +8442,18 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var EntityManager = (function () {
+        var EntityManager = (function (_super) {
+            __extends(EntityManager, _super);
             /**
              * Entity manager is a class
              */
             function EntityManager() {
-                this.container = null;
-                this.ajax = null;
-                this.hydrator = null;
-                this.uow = new Northwind.Persistence.UnitOfWork;
+                var _this = _super.call(this) || this;
+                _this.ajax = null;
+                _this.hydrator = null;
+                _this.uow = new Northwind.Persistence.UnitOfWork;
+                return _this;
             }
-            /**
-             *
-             */
-            EntityManager.prototype.getContainer = function () {
-                if (this.container == null) {
-                    this.container = this.getDi().get("container");
-                }
-                return this.container;
-            };
             /**
              *
              * @param model
@@ -8830,14 +8817,8 @@ var Northwind;
                 }
                 return JSON.stringify(output);
             };
-            EntityManager.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            EntityManager.prototype.getDi = function () {
-                return this.di;
-            };
             return EntityManager;
-        }());
+        }(Northwind.Service.InjectorComponents));
         Persistence.EntityManager = EntityManager;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));

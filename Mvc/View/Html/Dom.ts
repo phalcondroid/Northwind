@@ -1,11 +1,10 @@
 ///<reference path="./TagAdapter.ts"/>
+///<reference path="../../../Service/InjectorComponents.ts" />
 
 namespace Northwind.Html
 {
-    export class Dom
+    export class Dom extends Northwind.Service.InjectorComponents
     {
-        private di;
-
         /**
          * 
          */
@@ -17,6 +16,7 @@ namespace Northwind.Html
          */
         public constructor(element = null)
         {
+            super();
             if (element != null)
                 this.element = element;
         }
@@ -30,7 +30,7 @@ namespace Northwind.Html
             let adapter = new Northwind.Tag.TagAdapter(
                 document.getElementById(id)
             );
-            adapter.setDi(this.di);
+            adapter.setDi(this.getDi());
             return adapter.get();
         }
 
@@ -48,7 +48,7 @@ namespace Northwind.Html
                     let adapter = new Northwind.Tag.TagAdapter(
                         elements[key]
                     );
-                    adapter.setDi(this.di);
+                    adapter.setDi(this.getDi());
                     result.push(
                         adapter.get()
                     );
@@ -79,7 +79,7 @@ namespace Northwind.Html
                     let adapter = new Northwind.Tag.TagAdapter(
                         elements[key]
                     );
-                    adapter.setDi(this.di);
+                    adapter.setDi(this.getDi());
                     result.push(
                         adapter.get()
                     );
@@ -109,16 +109,6 @@ namespace Northwind.Html
         public setElement(element)
         {
             this.element = element;
-        }
-
-        public setDi(di)
-        {
-            this.di = di;
-        }
-
-        public getDi()
-        {
-            return this.di;
         }
     }
 }

@@ -1,4 +1,5 @@
 
+/// <reference path="../Service/InjectorComponents.ts" />
 /// <reference path="../Reflection/Reflection.ts" />
 /// <reference path="../Service/Container.ts" />
 /// <reference path="../Mvc/Model/StaticModel.ts" />
@@ -10,11 +11,9 @@
 
 namespace Northwind.Persistence
 {
-    export class EntityManager implements EntityManagerInterface
+    export class EntityManager extends Service.InjectorComponents implements EntityManagerInterface
     {
-        di                 : Northwind.Service.Container;
         uow                : Northwind.Persistence.UnitOfWork;
-        private container  : Northwind.Service.Container    = null;
         private ajax       : Northwind.Network.Ajax         = null;
         private hydrator   : Northwind.Persistence.Hydrator = null;
         private source     : string;
@@ -27,18 +26,8 @@ namespace Northwind.Persistence
          */
         public constructor()
         {
+            super();
             this.uow = new Northwind.Persistence.UnitOfWork;
-        }
-
-        /**
-         *
-         */
-        private getContainer()
-        {
-            if (this.container == null) {
-                this.container = this.getDi().get("container");
-            }
-            return this.container;
         }
 
         /**
@@ -595,19 +584,9 @@ namespace Northwind.Persistence
             }
             return JSON.stringify(output);
         }
-
-        public setDi(di : Service.Container)
-        {
-            this.di = di;
-        }
-
-        public getDi()
-        {
-            return this.di;
-        }
     }
 
-    export interface EntityManagerInterface extends Northwind.Service.InjectionAwareInterface
+    export interface EntityManagerInterface
     {
         uow : Object;
 

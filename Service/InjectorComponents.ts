@@ -2,103 +2,103 @@ namespace Northwind.Service
 {
     export class InjectorComponents
     {
-    	public tag;
-    	public ajax;
-    	public dom;
-        public di; 
-        public event;
-        public container;
-        public em;
+    	public tagElement;
+    	public ajaxNative;
+    	public domNative;
+        public diNative; 
+        public eventNative;
+        public containerNative;
+        public emNative;
 
         public setDi(di : Service.Container)
         {
-            this.di = di;
+            this.diNative = di;
             if (typeof di != "undefined") {
                 if (di.hasKey("ajax")) {
-                    this.ajax = di.get("ajax");
+                    this.ajaxNative = di.get("ajax");
                 }
                 if (di.hasKey("em")) {
-                    this.em = di.get("em");
+                    this.emNative = di.get("em");
                 }
                 if (di.hasKey("dom")) {
-                    this.dom = di.get("dom");
+                    this.domNative = di.get("dom");
                 }
                 if (di.hasKey("tag")) {
-                    this.tag = di.get("tag");
+                    this.tagElement = di.get("tag");
                 }
                 if (di.hasKey("event")) {
-                    this.event = di.get("event");
+                    this.eventNative = di.get("event");
                 }
                 if (di.hasKey("container")) {
-                    this.container = di.get("container");
+                    this.containerNative = di.get("container");
                 }
-                this.di = di;
+                this.diNative = di;
             }
         }
 
         public getDi()
         {
-        	return this.di;
+        	return this.diNative;
         }
 
         public setDom(dom)
         {
-        	this.dom = dom;
+        	this.domNative = dom;
         }
 
         public getDom()
         {
-        	return this.dom;
+        	return this.domNative;
         }
 
         public setTag(tag)
         {
-        	this.tag = tag;
+        	this.tagElement = tag;
         }
 
         public getTag()
         {
-        	return this.tag;
+        	return this.tagElement;
         }
 
         public setEvent(event)
         {
-        	this.event = event;
+        	this.eventNative = event;
         }
 
         public getEvent()
         {
-        	return this.event;
+        	return this.eventNative;
         }
 
         public setEm(em)
         {
-        	this.em = em;
+        	this.emNative = em;
         }
         
         public getEm()
         {
-        	return this.em;
+        	return this.emNative;
         }
         
         public setContainer(container)
         {
-        	this.container = container;
+        	this.containerNative = container;
         }
 
         public getContainer()
         {
-        	return this.container;
+        	return this.containerNative;
         }
 
         public setAjax(ajax)
         {
-        	this.ajax = ajax;
+        	this.ajaxNative = ajax;
         }
 
         public getAjax()
         {
-        	return this.ajax;
+        	return this.ajaxNative;
         }
     }
 }

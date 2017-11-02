@@ -1,9 +1,9 @@
+///<reference path="../Service/InjectorComponents.ts" />
 
 namespace Northwind.Network
 {
-    export class Ajax implements Service.InjectionAwareInterface
+    export class Ajax extends Service.InjectorComponents
     {
-        di                  : Service.Container;
         private httpRequest : any;
         private context     : Object = {};
         private method      : string = "POST";
@@ -19,6 +19,7 @@ namespace Northwind.Network
          */
         public constructor()
         {
+            super();
             this.httpRequest = new XMLHttpRequest();
         }
 
@@ -232,22 +233,6 @@ namespace Northwind.Network
             this.httpRequest.send(
                 this.parameters
             );
-        }
-
-        /**
-         *
-         */
-        public setDi(di : Service.Container)
-        {
-            this.di = di;
-        }
-
-        /**
-         *
-         */
-        public getDi()
-        {
-            return this.di;
         }
     }
 }

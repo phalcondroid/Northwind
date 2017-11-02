@@ -8,7 +8,7 @@ namespace Northwind.Html
      *
      * @type
      */
-    export class Component
+    export class Component extends Northwind.Service.InjectorComponents
     {
         /**
          *
@@ -68,6 +68,7 @@ namespace Northwind.Html
          */
         public constructor(name: any = "", newClone = false)
         {
+            super();
             if (typeof name.nodeName != "undefined") {
                 this.id      = name.getAttribute("id");
                 this.element = this.init(name.nodeName, this.id);

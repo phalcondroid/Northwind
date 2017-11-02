@@ -1,9 +1,9 @@
+///<reference path="../Service/InjectorComponents.ts" />
 
 namespace Northwind
 {
-    export class Events
+    export class Events extends Northwind.Service.InjectorComponents
     {
-        private di;
         private events  : Object = {};
         private params  : Object = {};
         private others  : Object = {};
@@ -205,17 +205,6 @@ namespace Northwind
                 fn.bind(this)
             );
             return this;
-        }
-
-        public setDi(di)
-        {
-            this.di = di;
-            return this;
-        }
-
-        public getDi()
-        {
-            return this.di;
         }
     }
 }
