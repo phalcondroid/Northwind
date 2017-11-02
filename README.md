@@ -32,6 +32,8 @@ div.append([
 ]);
 ```
 
+### Event Manager
+
 ### Controllers
 
 We can to start to modify all components in your application through controllers, you can to modify sections of your web content, in controllers you should develop all business logic of your frontend application.
@@ -43,7 +45,7 @@ namespace NewProject.Controllers
     {
         public initialize()
         {
-        console.log("Hello world");
+          console.log("Hello world");
         }
     }
 }
@@ -67,8 +69,8 @@ namespace NewProject.Controllers
     {
         public initialize()
         {
-        let input = this.getDom().getById("myInput");
-            input.val("some value to input");
+          let input = this.getDom().getById("myInput");
+          input.val("some value to input");
         }
     }
 }
@@ -99,21 +101,190 @@ namespace NewProject.Controllers
         
         public myInput(input)
         {
-        let input = this.getDom().getById("myInput");
-            input.val("some value to input");
+          let input = this.getDom().getById("myInput");
+          input.val("some value to input");
         }
     }
 }
 ```
 
-### Models
+### Models and Ajax
+The best way to make an ajax request through Northwind is create models similar to any ORM of any framework, such as Doctrine, Phalcon ORM, JPA or Hibbernate, you should define class models that represent a table in the ORM, northwind do something similar, you can create models to represent any object response of ajax as object models.
 
-### Ajax
+##### Response of server API
 
-### Dependency Injector
+```javascript
+[
+  {
+    "name" : "Jonn",
+    "last" : "Doe"
+  },
+  {
+    "name" : "Jonn2",
+    "last" : "Doe2"
+  }
+]
+```
 
-### Event Manager
+##### Model - Entity
 
-### Data Mapper
+```typescript
+namespace NewProject.Models
+{
+    export class Sample extends Northwind.Mvc.AjaxModel
+    {
+        private id   : number = 0;
+        private name : string = "";
+        private last : string = "";
+
+        public setName(value : string) { this.name = value; }
+        public getName() : string { return this.name; }
+        
+        public setLast(value : string) { this.last = value; }
+        public getLast() : string { return this.last; }
+    }
+}
+```
+
+##### in controller...
+
+```typescript
+namespace NewProject.Controllers
+{
+    export class IndexController extends Northwind.Mvc.Controller
+    {
+        public initialize()
+        {
+          let entityManager = this.getEm();
+          entityManager.find(
+            Models.Sample
+          ).response(function (data) {
+            for (let sample of data) {
+              console.log(
+                sample.getName() + " - " sample.getLast()
+              );
+            }
+          });
+        }
+    }
+}
+```
 
 ### Query Builder
+
+Northwind query builder works in array objects of javascript, this component iterate and filter data.
+
+```typescript
+let data = [
+  {
+    "id"   : 1, 
+    "name" : "Jonn",
+    "last" : "Doe"
+  },
+  {
+    "id"   : 2,
+    "name" : "Jonn2",
+    "last" : "Doe2"
+  }
+];
+
+let builder = new Mvc.Query(data);
+builder.where(new Builder.Like({
+  "name" : "2"
+));
+
+```
+
+#### After
+
+```javascript
+let data = [
+  {
+    "id"   : 2,
+    "name" : "Jonn2",
+    "last" : "Doe2"
+  }
+];
+```
+
+#### Filter columns
+
+```typescript
+let builder = new Mvc.Query(data);
+builder.columns([
+  "name",
+  "last"
+]);
+
+```
+
+#### Limit data
+
+```typescript
+let builder = new Mvc.Query(data);
+builder.limit(1);
+```
+
+#### Order by column
+
+```typescript
+let builder = new Mvc.Query(data);
+builder.orderBy({
+  "name" : 1
+});
+```
+
+#### Other features classes
+
+* AND
+* OR
+* Like
+* Not
+* Lte - Less than or equals
+* Lt  - Less than
+* Gt  - Greather than
+* Gte - Greather than equals
+* Group
+* Sort  - just arrange in two ways 1, -1 as mongo db
+* In    - list
+* NotIn - list
+
+### Dependency Injector
+Di is a container, you can save any data or objects into DI, DI is going to be shared with all components in your application.
+
+##### IndexController.ts
+
+```typescript
+namespace NewProject.Controllers
+{
+    export class IndexController extends Northwind.Mvc.Controller
+    {
+        public initialize()
+        {
+          this.getDi().set("shareText", "myText");
+          this.getDi().set("function", function (params) {
+            console.log("Created in index controller and " + params);
+          });
+        }
+    }
+}
+```
+
+##### OtherController.ts
+
+```typescript
+namespace NewProject.Controllers
+{
+    export class OtherController extends Northwind.Mvc.Controller
+    {
+        public initialize()
+        {
+          this.getDi().get("shareText"); // myText
+          
+          let fn = this.getDi().get("function");
+          fn("other param"); // Created in index controller and other param
+        }
+    }
+}
+```
+
