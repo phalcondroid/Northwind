@@ -43,7 +43,7 @@ namespace NewProject.Controllers
     {
         public initialize()
         {
-        	console.log("Hello world");
+        console.log("Hello world");
         }
     }
 }
@@ -67,7 +67,7 @@ namespace NewProject.Controllers
     {
         public initialize()
         {
-        	let input = this.getDom().getById("myInput");
+        let input = this.getDom().getById("myInput");
             input.val("some value to input");
         }
     }
@@ -82,6 +82,28 @@ namespace NewProject.Controllers
         <input type="text" id="myInput" value="some value to input">
     </body>
 </html>
+```
+
+##### Manage elements by methods
+
+You can create a method with the same name id to the element of html and northwind call this element and will be passed as param there.
+
+```typescript
+namespace NewProject.Controllers
+{
+    export class IndexController extends Northwind.Mvc.Controller
+    {
+        public initialize()
+        {
+        }
+        
+        public myInput(input)
+        {
+        let input = this.getDom().getById("myInput");
+            input.val("some value to input");
+        }
+    }
+}
 ```
 
 ### Models
