@@ -44,7 +44,9 @@ namespace YourProject.Controllers
     {
         public initialize()
         {
-          console.log("Hello world");
+          this.getEvent().tag(inputName).click(function () {
+            console.log("clickeeed!!");
+          });
         }
     }
 }
