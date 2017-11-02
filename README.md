@@ -2,6 +2,10 @@
 
 Northwind is a javascript framework oriented to perform applications using something similar to MVC "Model View Controller", northwind is based in backend server frameworks like Laravel, Phalcon or Ruby on rails or Django.
 
+### File structure
+![GitHub Logo](https://raw.githubusercontent.com/phalcondroid/Northwind/master/FileStructure.png)
+Format: ![Alt Text](https://raw.githubusercontent.com/phalcondroid/Northwind/master/FileStructure.png)
+
 ### Views
 
 Views in northwind are object oriented similar to JSX of React.js but this works as wraper of DOM of javascript but becomes to object oriented each html components.
@@ -34,12 +38,26 @@ div.append([
 
 ### Event Manager
 
+```typescript
+namespace YourProject.Controllers
+{
+    export class IndexController extends Northwind.Mvc.Controller
+    {
+        public initialize()
+        {
+          console.log("Hello world");
+        }
+    }
+}
+
+```
+
 ### Controllers
 
 We can to start to modify all components in your application through controllers, you can to modify sections of your web content, in controllers you should develop all business logic of your frontend application.
 
 ```typescript
-namespace NewProject.Controllers
+namespace YourProject.Controllers
 {
     export class IndexController extends Northwind.Mvc.Controller
     {
@@ -63,7 +81,7 @@ The controllers have injected all of necesary to manipulate the html components 
 ```
 
 ```typescript
-namespace NewProject.Controllers
+namespace YourProject.Controllers
 {
     export class IndexController extends Northwind.Mvc.Controller
     {
@@ -91,7 +109,7 @@ namespace NewProject.Controllers
 You can create a method with the same name id to the element of html and northwind call this element and will be passed as param there.
 
 ```typescript
-namespace NewProject.Controllers
+namespace YourProject.Controllers
 {
     export class IndexController extends Northwind.Mvc.Controller
     {
@@ -129,7 +147,7 @@ The best way to make an ajax request through Northwind is create models similar 
 ##### Model - Entity
 
 ```typescript
-namespace NewProject.Models
+namespace YourProject.Models
 {
     export class Sample extends Northwind.Mvc.AjaxModel
     {
@@ -149,7 +167,7 @@ namespace NewProject.Models
 ##### in controller...
 
 ```typescript
-namespace NewProject.Controllers
+namespace YourProject.Controllers
 {
     export class IndexController extends Northwind.Mvc.Controller
     {
@@ -255,7 +273,7 @@ Di is a container, you can save any data or objects into DI, DI is going to be s
 ##### IndexController.ts
 
 ```typescript
-namespace NewProject.Controllers
+namespace YourProject.Controllers
 {
     export class IndexController extends Northwind.Mvc.Controller
     {
@@ -273,7 +291,7 @@ namespace NewProject.Controllers
 ##### OtherController.ts
 
 ```typescript
-namespace NewProject.Controllers
+namespace YourProject.Controllers
 {
     export class OtherController extends Northwind.Mvc.Controller
     {
@@ -287,4 +305,29 @@ namespace NewProject.Controllers
     }
 }
 ```
+
+#### Final step - start application in html
+
+```javascript
+let northwind = new Northwind.Application();
+let config = new YourProject.Config.AppConfig;
+config.setBaseUrl("{{ url() }}");
+northwind.setScope(
+    Environment.Scope.LOCAL
+);
+northwind.setConfig(
+    config.getConfig()
+);
+northwind.catch(function (exception) {
+    console.log(exception);
+    console.log(exception.message);
+    console.log(exception.description);
+    console.log(exception.fileName);
+    console.log(exception.lineNumber);
+    console.log(exception.name);
+});
+northwind.start();
+```
+
+
 
