@@ -3,7 +3,7 @@
 Northwind is a javascript framework oriented to perform applications using something similar to MVC "Model View Controller", northwind is based in backend server frameworks like Laravel, Phalcon or Ruby on rails or Django.
 
 ### File structure
-[Alt Northwind file structure](https://raw.githubusercontent.com/phalcondroid/Northwind/master/FileStructure.png)
+![Alt Northwind file structure](https://raw.githubusercontent.com/phalcondroid/Northwind/master/FileStructure.png)
 
 ### Views
 
