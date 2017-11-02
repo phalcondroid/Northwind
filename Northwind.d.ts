@@ -409,8 +409,6 @@ declare namespace Northwind.Html {
          *
          */
         getGlobals(): any;
-        setDi(di: any): void;
-        getDi(): any;
         /**
          *
          */
@@ -1339,6 +1337,9 @@ declare namespace Northwind.Tag {
          *
          */
         validate(fn?: Function | Boolean): boolean;
+        isChecked(): any;
+        check(): this;
+        unCheck(): this;
     }
 }
 declare namespace Northwind.Tag {

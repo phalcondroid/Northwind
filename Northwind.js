@@ -773,12 +773,6 @@ var Northwind;
             Component.prototype.getGlobals = function () {
                 return this.globals;
             };
-            Component.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            Component.prototype.getDi = function () {
-                return this.di;
-            };
             /**
              *
              */
@@ -2991,6 +2985,17 @@ var Northwind;
                 if (this.val() == "" || typeof this.val() == "undefined") {
                     return false;
                 }
+            };
+            FormTag.prototype.isChecked = function () {
+                return this.getElement().checked;
+            };
+            FormTag.prototype.check = function () {
+                this.getElement().checked = true;
+                return this;
+            };
+            FormTag.prototype.unCheck = function () {
+                this.getElement().checked = false;
+                return this;
             };
             return FormTag;
         }(Northwind.Html.Component));

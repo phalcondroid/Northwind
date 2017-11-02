@@ -223,5 +223,22 @@ namespace Northwind.Tag
             	return false;
             }
         }
+
+        public isChecked()
+        {
+            return this.getElement().checked;
+        }
+
+        public check()
+        {
+            this.getElement().checked = true;
+            return this;
+        }
+
+        public unCheck()
+        {
+            this.getElement().checked = false;
+            return this;
+        }
     }
 }
