@@ -15,7 +15,7 @@ Northwind internally use document.createElement("div"); to access to html elemen
 ##### View properties
 Every tag of native html is wraped in a northwind class like Northwind.Tag.Table(), this gives the possibility of being able to modify the html elements with methods of Northwind.Tag.
 
-````
+```typescript
 let table = new Northwind.Tag.Table();
 table.class("table table-striped");
 table.css("display", "none");
