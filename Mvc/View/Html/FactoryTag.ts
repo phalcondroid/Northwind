@@ -141,7 +141,7 @@ namespace Northwind.Tag
         public get(tagName)
         {
             let instance : Northwind.Html.Component;
-            switch (tagName) {
+            switch (tagName.toUpperCase()) {
                 case "A":
                         instance = new Northwind.Tag.A();;
                     break;

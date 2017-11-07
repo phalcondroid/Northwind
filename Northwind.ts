@@ -46,6 +46,11 @@ namespace Northwind
         /**
          *
          */
+        private 
+
+        /**
+         *
+         */
         public constructor()
         {
             this.restricted = [
@@ -253,9 +258,11 @@ namespace Northwind
                         if (!Northwind.Helper.ArrayHelper.inArray(this.restricted, key)) {
                             this.domManager.setDi(controller.getDi());
                             let component = this.domManager.getById(key);
-                            component.setDi(controller.getDi());
-                            if (component) {
-                                controller[key](component);
+                            if (component != false) {
+                                component.setDi(controller.getDi());
+                                if (component) {
+                                    controller[key](component);
+                                }
                             }
                         }
                     break;

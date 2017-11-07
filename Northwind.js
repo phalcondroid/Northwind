@@ -5899,7 +5899,7 @@ var Northwind;
              */
             FactoryTag.prototype.get = function (tagName) {
                 var instance;
-                switch (tagName) {
+                switch (tagName.toUpperCase()) {
                     case "A":
                         instance = new Northwind.Tag.A();
                         ;
@@ -7918,9 +7918,11 @@ var Northwind;
                         if (!Northwind.Helper.ArrayHelper.inArray(this.restricted, key)) {
                             this.domManager.setDi(controller.getDi());
                             var component = this.domManager.getById(key);
-                            component.setDi(controller.getDi());
-                            if (component) {
-                                controller[key](component);
+                            if (component != false) {
+                                component.setDi(controller.getDi());
+                                if (component) {
+                                    controller[key](component);
+                                }
                             }
                         }
                         break;
