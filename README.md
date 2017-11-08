@@ -66,7 +66,8 @@ namespace YourProject.Controllers
     {
         public initialize()
         {
-          this.getEvent().tag(inputName).click(function () {
+          let input = this.getDom().getById("anyHtmlElement");
+          this.getEvent().tag(input).click(function () {
             console.log("clickeeed!!");
           });
         }
