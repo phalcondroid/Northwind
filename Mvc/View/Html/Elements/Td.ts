@@ -1,5 +1,4 @@
-///<reference path="../Component.ts"/>
-///<reference path="../../../Controller.ts"/>
+///<reference path="../../Component.ts"/>
 
 namespace Northwind.Tag {
     /**
@@ -31,8 +30,7 @@ namespace Northwind.Tag {
             return this;
         }
 
-        /**
-         *
+         /** no pedi las hamburguesas soy un mk acompalene a comprar
          * @param  {[type]} row [description]
          * @return {[type]}     [description]
          */

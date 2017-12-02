@@ -1,5 +1,5 @@
 
-///<reference path="../Component.ts"/>
+///<reference path="../../0.ts"/>
 
 namespace Northwind.Tag
 {

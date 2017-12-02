@@ -1,5 +1,4 @@
-///<reference path="../Component.ts"/>
-///<reference path="../../../Controller.ts"/>
+///<reference path="../../Component.ts"/>
 
 /*
 function ValidationDecorator<TFunction extends Function>(target: TFunction): TFunction {
@@ -91,7 +90,6 @@ namespace Northwind.Tag
             let elements = this.element.elements;
             for (let item of elements) {
                 let aux = new Northwind.Tag.TagAdapter(item);
-                aux.setDi(this.getDi());
                 let element = aux.get();
                 if (element != false) {
                     northwindElements.push(

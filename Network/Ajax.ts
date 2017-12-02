@@ -1,8 +1,7 @@
-///<reference path="../Service/InjectorComponents.ts" />
 
 namespace Northwind.Network
 {
-    export class Ajax extends Service.InjectorComponents
+    export class Ajax
     {
         private httpRequest : any;
         private context     : Object = {};
@@ -19,7 +18,6 @@ namespace Northwind.Network
          */
         public constructor()
         {
-            super();
             this.httpRequest = new XMLHttpRequest();
         }
 
@@ -233,6 +231,82 @@ namespace Northwind.Network
             this.httpRequest.send(
                 this.parameters
             );
+        }
+
+        /**
+         * [getClassName description]
+         * @return {[type]} [description]
+         */
+        public getClassName() {
+            let funcNameRegex = /function (.{1,})\(/;
+            let results  = (funcNameRegex).exec(this["constructor"].toString());
+            return (results && results.length > 1) ? results[1] : "";
+        }
+
+        public getDom()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "dom"
+            );
+        }
+
+        public getAjax()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "ajax"
+            );
+        }
+
+        public getEm()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "em"
+            );
+        }
+
+        public getContainer()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "container"
+            );
+        }
+
+        /**
+         * 
+         * @param name 
+         */
+        public getTag(tag : any)
+        {
+            if (tag instanceof Northwind.Html.Component) {
+        	    return Northwind.Service.DependencyInjector.get().get("tag").tag(
+                    tag
+                );
+            } else {
+        	    return Northwind.Service.DependencyInjector.get().get(
+                    "tag"
+                );
+            }
+        }
+
+        /**
+         * 
+         * @param tag 
+         */
+        public getEvent(tag : any = false)
+        {
+            let events = Northwind.Service.DependencyInjector.get().get(
+                "event"
+            );
+            if (tag instanceof Northwind.Html.Component) {
+        	    return events.tag(tag);
+            } else {
+        	    return events;
+            }
+        }
+
+        public getDi()
+        {
+            return Northwind.Service.DependencyInjector.get();
         }
     }
 }

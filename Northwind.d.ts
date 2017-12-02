@@ -75,33 +75,8 @@ declare namespace Northwind.Events {
         trigger(controller: any, event: any, callback: any): any;
     }
 }
-declare namespace Northwind.Service {
-    class InjectorComponents {
-        tagElement: any;
-        ajaxNative: any;
-        domNative: any;
-        diNative: any;
-        eventNative: any;
-        containerNative: any;
-        emNative: any;
-        setDi(di: Service.Container): void;
-        getDi(): any;
-        setDom(dom: any): void;
-        getDom(): any;
-        setTag(tag: any): void;
-        getTag(): any;
-        setEvent(event: any): void;
-        getEvent(): any;
-        setEm(em: any): void;
-        getEm(): any;
-        setContainer(container: any): void;
-        getContainer(): any;
-        setAjax(ajax: any): void;
-        getAjax(): any;
-    }
-}
 declare namespace Northwind {
-    class Events extends Northwind.Service.InjectorComponents {
+    class Events {
         private events;
         private params;
         private others;
@@ -112,7 +87,7 @@ declare namespace Northwind {
         private static ONDELETE;
         private static ONCHANGE;
         private nativeEvents;
-        contructor(): void;
+        contructor(element?: any): void;
         /**
          *
          */
@@ -141,6 +116,7 @@ declare namespace Northwind {
          *
          */
         tag(component: any): this;
+        private setEventToElement(eventName, fn);
         /**
          *
          * @param  {Function} fn [description]
@@ -182,6 +158,35 @@ declare namespace Northwind {
          * @return {[type]} [description]
          */
         focus(fn: any): this;
+        /**
+         *
+         * @param fn
+         */
+        submit(fn: any): this;
+        /**
+         * [getClassName description]
+         * @return {[type]} [description]
+         */
+        getClassName(): string;
+        getDom(): any;
+        getAjax(): any;
+        getEm(): any;
+        getContainer(): any;
+        /**
+         *
+         * @param name
+         */
+        getTag(tag: any): any;
+        /**
+         *
+         */
+        getUrl(): any;
+        /**
+         *
+         * @param tag
+         */
+        getEvent(tag?: any): any;
+        getDi(): Service.Container;
     }
 }
 declare namespace Northwind.Events {
@@ -247,27 +252,12 @@ declare namespace Northwind.Mvc {
     class Application {
     }
 }
-declare namespace Northwind.Service {
-    class Container {
-        private service;
-        set(serviceName: any, content: any): void;
-        get(serviceName: any): any;
-        hasKey(serviceName: any): boolean;
-        setPersistent(serviceName: any, content: any): void;
-        getPersistent(serviceName: any): any;
-    }
-}
-declare namespace Northwind.Network {
-    class Ajax extends Service.InjectorComponents {
-        private httpRequest;
-        private context;
-        private method;
-        private parameters;
-        private error;
-        private url;
-        private container;
-        responseFn: Function;
-        bfSendFn: Function;
+declare namespace Northwind.Mvc {
+    class Controller {
+        /**
+         *
+         */
+        private globals;
         /**
          *
          */
@@ -275,333 +265,474 @@ declare namespace Northwind.Network {
         /**
          *
          */
-        setContext(ctx: Object): void;
+        setGlobals(globals: any): this;
         /**
          *
          */
-        getContext(): Object;
-        /**
-         *
-         */
-        setUrl(url: any): this;
-        /**
-         *
-         */
-        getUrl(): string;
-        /**
-         *
-         */
-        set(key: any, value: any): void;
-        /**
-         *
-         */
-        get(key: any): any;
-        /**
-         *
-         */
-        setParams(params: any, value?: any): this;
-        /**
-         *
-         */
-        POST(): this;
-        /**
-         *
-         */
-        PUT(): this;
-        /**
-         *
-         */
-        DELETE(): this;
-        /**
-         *
-         */
-        GET(): this;
-        /**
-         *
-         */
-        setMethod(method: string): this;
-        addContext(): void;
-        /**
-         *
-         */
-        response(responseFunction: Function): this;
-        /**
-         *
-         */
-        beforeSend(fn: Function): void;
-        /**
-         *
-         */
-        private setHeaders();
-        /**
-         *
-         */
-        getError(errorFunction: any): void;
-        clear(): void;
-        /**
-         *
-         */
-        send(fn?: any): void;
-    }
-}
-declare namespace Northwind.Html {
-    /**
-     *
-     * @type
-     */
-    class Component extends Northwind.Service.InjectorComponents {
-        /**
-         *
-         */
-        static NO_CONTEXT: number;
-        /**
-         * Node javascript element
-         */
-        element: any;
-        /**
-         * Controller
-         */
-        context: any;
-        /**
-         *
-         */
-        id: any;
-        /**
-         *
-         */
-        args: any;
-        /**
-         *
-         */
-        private deny;
-        /**
-         *
-         * @type
-         */
-        private url;
-        /**
-         * @type
-         */
-        private className;
-        /**
-         * @type
-         */
-        private globals;
-        /**
-         *
-         */
-        private di;
-        /**
-         *
-         * @param
-         * @return
-         */
-        constructor(name?: any, newClone?: boolean);
+        getGlobals(param?: any): any;
         /**
          *
          */
         initialize(): void;
         /**
-         *
-         */
-        setGlobals(globals: any): this;
-        /**
-         *
-         */
-        getGlobals(): any;
-        /**
-         *
-         */
-        getArguments(args: any): false | any[];
-        /**
-         *
-         */
-        setId(id: string): this;
-        /**
-         *
-         */
-        getId(): any;
-        /**
-         *
-         */
-        setArgs(args: any): this;
-        /**
-         *
-         */
-        getArgs(): any;
-        /**
-         *
-         */
-        setElement(element: any): this;
-        /**
-         *
-         */
-        setRequired(req: any): this;
-        /**
-         *
-         */
-        getRequired(): any;
-        /**
-         *
-         */
-        show(): this;
-        /**
-         *
-         */
-        hide(): this;
-        /**
-         *
-         */
-        create(tag: string): this;
-        /**
-         * Create html component like jquery object
-         *
-         * @param  {string} element [description]
-         * @param  {string} name    [description]
-         * @return ViewElement
-         */
-        init(element: string, name: string): HTMLElement;
-        /**
-         *
-         * @return
-         */
-        getType(): any;
-        /**
-         * Set class
-         * @param  {string} attrClass
-         * @return {this}  [description]
-         */
-        class(attrClass: string): this;
-        /**
-         *
-         */
-        addClass(attrClass: string): this;
-        /**
-         * Set inner html throught
-         */
-        setInnerHtml(html: any): any;
-        /**
-         *
-         */
-        getAttribute(attr: any): any;
-        /**
-         *
+         * [getClassName description]
          * @return {[type]} [description]
          */
-        addChild(element: any): this;
-        destroyEvent(event: any): void;
+        getClassName(): string;
+        getDom(): any;
+        getAjax(): any;
+        getEm(): any;
+        getContainer(): any;
+        /**
+         *
+         * @param name
+         */
+        getTag(tag: any): any;
         /**
          *
          */
-        removeAttr(attr: any): this;
-        /**
-         * [get description]
-         * @return {[type]} [description]
-         */
-        getElement(): any;
-        /**
-         * Append elements
-         * @param value append
-         * @return this
-         */
-        append(append: any): this;
+        getUrl(): any;
         /**
          *
+         * @param tag
          */
-        data(key: any, value?: boolean): this;
-        /**
-         *
-         */
-        private checkAppendValue(append);
-        /**
-         *
-         * @param  html [description]
-         * @return
-         */
-        html(html?: any): any;
-        /**
-         *
-         */
-        verifyElement(append: any, type?: string): void;
-        /**
-         *
-         */
-        private removeChildNodes();
-        /**
-         *
-         */
-        private removeChilds(element, childs);
-        /**
-         *
-         * @param attr
-         * @return
-         */
-        attr(attr: any, value?: any): any;
-        /**
-         * [css description]
-         * @param   css [description]
-         * @return
-         */
-        css(css: any, value?: any): any;
-        /**
-         *
-         * @param  {[type]} event [description]
-         * @return {[type]}       [description]
-         */
-        unbind(event: any): this;
+        getEvent(tag?: any): any;
+        getDi(): Service.Container;
+    }
+}
+declare namespace Northwind.Mvc {
+    class Component extends Northwind.Mvc.Controller {
+        constructor(context?: Northwind.Mvc.Controller | any);
+    }
+}
+declare namespace Northwind.Mvc {
+    class RawModel {
+        state: number;
+        identify: string;
+        initialize(): void;
+        beforeInsert(): void;
+        beforeFind(): void;
+        beforeUpdate(): void;
+        beforeDelete(): void;
         /**
          * [getClassName description]
          * @return {[type]} [description]
          */
         getClassName(): string;
         /**
-         * [validateAndSet description]
-         * @param  {[type]} config [description]
-         * @return {[type]}        [description]
-         */
-        validateAndSet(config: any): void;
-        /**
-         * [clone description]
-         * @return {[type]} [description]
-         */
-        clone(newIdentify?: string): Component;
-        /**
-         *
-         * @param  {any = null}        val [description]
-         * @return {[type]}   [description]
-         */
-        val(val?: any): any;
-        /**
-         * zzzz
-         * @param  {any = null}        text [description]
-         * @return {[type]}   [description]
-         */
-        text(text?: any): any;
-        /**
          *
          */
-        empty(): this;
-        /**
-         *
-         */
-        getChilds(): any[];
-        getParent(): any;
-        /**
-         *
-         */
-        getAsObject(): any[];
-        /**
-         *
-         */
-        getAsJson(): string;
-        /**
-         *
-         */
-        getRandomString(): string;
+        getIdentify(): string;
+    }
+}
+declare namespace Northwind.Mvc {
+    class AjaxModel extends Northwind.Mvc.RawModel implements Northwind.Mvc.ModelInterface {
+        source: string;
+        insertUrl: string;
+        deleteUrl: string;
+        updateUrl: string;
+        findUrl: string;
+        findOneUrl: string;
+        countUrl: string;
+        params: Object;
+        internalId: string;
+        method: string;
+        constructor();
+        setSource(data: any): void;
+        setInsertUrl(url: string): void;
+        setFindUrl(url: string): void;
+        setFindOneUrl(url: string): void;
+        setCountUrl(url: string): void;
+        setDeleteUrl(url: string): void;
+        setUpdateUrl(url: string): void;
+        getInsertUrl(): string;
+        getFindUrl(): string;
+        getDeleteUrl(): string;
+        getUpdateUrl(): string;
+        setParams(params: Object): void;
+        getParams(): Object;
+        setMethod(method: string): void;
+        getMethod(): string;
+    }
+}
+declare namespace Northwind.Mvc {
+    class StaticModel extends Northwind.Mvc.RawModel implements Service.InjectionAwareInterface {
+        private index;
+        private container;
+        di: Service.Container;
         /**
          *
          */
-        remove(element?: boolean): void;
+        constructor(di: Service.Container);
+        /**
+         *
+         */
+        setData(data: any): void;
+        /**
+         *
+         */
+        getData(): any;
+        /**
+         *
+         */
+        getObjectData(): any;
+        /**
+         *
+         */
+        setDi(di: Service.Container): void;
+        /**
+         *
+         */
+        getDi(): Service.Container;
+        /**
+         *
+         */
+        setIndex(index: any): void;
+        /**
+         *
+         */
+        getIndex(): number;
+        /**
+         *
+         */
+        setContainer(container: any): void;
+        /**
+         *
+         */
+        getContainer(): Service.Container;
+    }
+}
+declare namespace Northwind.Mvc {
+    class AjaxModelPersistent extends Northwind.Mvc.StaticModel implements Northwind.Mvc.ModelInterface {
+        source: string;
+        insertUrl: string;
+        deleteUrl: string;
+        updateUrl: string;
+        findUrl: string;
+        params: Object;
+        internalId: string;
+        method: string;
+        setSource(data: any): void;
+        setAjaxInit(value: boolean): void;
+        getAjaxInit(): boolean;
+        setInsertUrl(url: string): void;
+        setFindUrl(url: string): void;
+        setDeleteUrl(url: string): void;
+        setUpdateUrl(url: string): void;
+        getInsertUrl(): string;
+        getFindUrl(): string;
+        getDeleteUrl(): string;
+        getUpdateUrl(): string;
+        setParams(params: Object): void;
+        getParams(): Object;
+        setMethod(method: string): void;
+        getMethod(): string;
+    }
+}
+declare namespace Northwind.Builder {
+    class Transaction {
+        constructor();
+        get(row: any): void;
+    }
+}
+declare namespace Northwind.Builder {
+    class And extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class ComparisonOperators {
+        static AND: string;
+        static OR: string;
+        static EQUAL: string;
+        static DIFFERENT: string;
+    }
+}
+declare namespace Northwind.Builder {
+    class DataType {
+        static BOOLEAN: number;
+        static INTEGER: number;
+        static STRING: number;
+        static OBJECT: number;
+        static ARRAY: number;
+        static CLASS: number;
+        static BOOLEAN_TYPE: string;
+        static INTEGER_TYPE: string;
+        static STRING_TYPE: string;
+        static OBJECT_TYPE: string;
+        /**
+         *
+         */
+        static getValueByType(value: any): any;
+    }
+}
+declare namespace Northwind.Builder {
+    class Group extends Northwind.Builder.Transaction {
+        constructor();
+        get(): void;
+    }
+}
+declare namespace Northwind.Builder {
+    class Gt extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Gte extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class In extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private conditions;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: Object);
+        get(): string;
+    }
+}
+declare namespace Northwind.Builder {
+    class Like extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Lt extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Lte extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Not extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class NotIn extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private conditions;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: Object);
+        get(): string;
+    }
+}
+declare namespace Northwind.Builder {
+    class Operators {
+        static OR: string;
+        static AND: string;
+        static SORT: string;
+        static IS_NOT: string;
+        static LIMIT: string;
+        static COLUMNS: string;
+        static CONDITIONAL: string;
+    }
+}
+declare namespace Northwind.Builder {
+    class Or extends Northwind.Builder.Transaction {
+        /**
+         *
+         */
+        private condition;
+        /**
+         *
+         * @param condition
+         */
+        constructor(condition: any);
+        /**
+         *
+         */
+        get(row: any): boolean;
+    }
+}
+declare namespace Northwind.Builder {
+    class Sort {
+        static ASC: number;
+        static DESC: number;
+        static sortByField(data: any, field: any): any[];
+    }
+}
+declare namespace Northwind.Mvc {
+    class Deny {
+        static getDeny(): string[];
+    }
+}
+declare namespace Northwind.Mvc {
+    interface ModelInterface {
+        insertUrl: string;
+        deleteUrl: string;
+        updateUrl: string;
+        findUrl: string;
+        state: number;
+        internalId: string;
+        setSource(source: Object): void;
+        setFindUrl(url: string): void;
+        setInsertUrl(url: string): void;
+        setUpdateUrl(url: string): void;
+        setDeleteUrl(url: string): void;
+        getFindUrl(): string;
+        getInsertUrl(): string;
+        getUpdateUrl(): string;
+        getDeleteUrl(): string;
+    }
+}
+declare namespace Northwind.Mvc {
+    class Query {
+        private lim;
+        private sort;
+        private data;
+        private cols;
+        private conds;
+        private sortConds;
+        private transactions;
+        private negativeConds;
+        private negativeTransactions;
+        /**
+         *
+         * @param data
+         */
+        constructor(data?: any);
+        /**
+         *
+         */
+        columns(cols: any): this;
+        /**
+         *
+         */
+        getColumns(): string[];
+        /**
+         *
+         * @param row
+         */
+        private resolveColumns(row);
+        /**
+         *
+         * @param condClass
+         */
+        where(conditions: any): this;
+        limit(limit: any): this;
+        private addOperator(length, operator);
+        /**
+         *
+         * @param conditions
+         */
+        orderBy(sortContent: Object): void;
+        /**
+         *
+         */
+        private resolveSort(results);
+        /**
+         *
+         * @param row
+         */
+        private miniChecksum(row);
+        /**
+         *
+         * @param result
+         * @param row
+         */
+        private ifExistOnResult(result, row);
+        /**
+         *
+         */
+        get(): any[];
     }
 }
 declare namespace Northwind.Tag {
@@ -1792,26 +1923,6 @@ declare namespace Northwind.Tag {
         constructor();
     }
 }
-declare namespace Northwind.Mvc {
-    class RawModel {
-        state: number;
-        identify: string;
-        initialize(): void;
-        beforeInsert(): void;
-        beforeFind(): void;
-        beforeUpdate(): void;
-        beforeDelete(): void;
-        /**
-         * [getClassName description]
-         * @return {[type]} [description]
-         */
-        getClassName(): string;
-        /**
-         *
-         */
-        getIdentify(): string;
-    }
-}
 declare namespace Northwind.Tag {
     class Select extends Northwind.Tag.FormTag {
         private choose;
@@ -2028,11 +2139,10 @@ declare namespace Northwind.Tag {
          * @return {[type]}     [description]
          */
         colspan(cols: any): this;
-        /**
-         *
-         * @param  {[type]} row [description]
-         * @return {[type]}     [description]
-         */
+        /** no pedi las hamburguesas soy un mk acompalene a comprar
+        * @param  {[type]} row [description]
+        * @return {[type]}     [description]
+        */
         rowspan(rows: any): this;
     }
 }
@@ -2208,13 +2318,7 @@ declare namespace Northwind.Tag {
         /**
          *
          */
-        di: any;
-        /**
-         *
-         */
         constructor(element: any);
-        setDi(di: any): this;
-        getDi(): any;
         /**
          *
          */
@@ -2222,7 +2326,288 @@ declare namespace Northwind.Tag {
     }
 }
 declare namespace Northwind.Html {
-    class Dom extends Northwind.Service.InjectorComponents {
+    /**
+     *
+     * @type
+     */
+    class Component {
+        /**
+         *
+         */
+        static NO_CONTEXT: number;
+        /**
+         * Node javascript element
+         */
+        element: any;
+        /**
+         * Controller
+         */
+        context: any;
+        /**
+         *
+         */
+        id: any;
+        /**
+         *
+         */
+        args: any;
+        /**
+         *
+         */
+        private deny;
+        /**
+         *
+         * @type
+         */
+        private url;
+        /**
+         * @type
+         */
+        private className;
+        /**
+         * @type
+         */
+        private globals;
+        /**
+         *
+         */
+        private di;
+        /**
+         *
+         * @param
+         * @return
+         */
+        constructor(name?: any, newClone?: boolean);
+        /**
+         *
+         */
+        initialize(): void;
+        /**
+         *
+         */
+        setGlobals(globals: any): this;
+        /**
+         *
+         */
+        getGlobals(): any;
+        /**
+         *
+         */
+        getArguments(args: any): false | any[];
+        /**
+         *
+         */
+        setId(id: string): this;
+        /**
+         *
+         */
+        getId(): any;
+        /**
+         *
+         */
+        setArgs(args: any): this;
+        /**
+         *
+         */
+        getArgs(): any;
+        /**
+         *
+         */
+        setElement(element: any): this;
+        /**
+         *
+         */
+        setRequired(req: any): this;
+        /**
+         *
+         */
+        getRequired(): any;
+        /**
+         *
+         */
+        show(): this;
+        /**
+         *
+         */
+        hide(): this;
+        /**
+         *
+         */
+        create(tag: string): this;
+        /**
+         * Create html component like jquery object
+         *
+         * @param  {string} element [description]
+         * @param  {string} name    [description]
+         * @return ViewElement
+         */
+        init(element: string, name: string): HTMLElement;
+        /**
+         *
+         * @return
+         */
+        getType(): any;
+        /**
+         * Set class
+         * @param  {string} attrClass
+         * @return {this}  [description]
+         */
+        class(attrClass: string): this;
+        /**
+         *
+         */
+        addClass(attrClass: string): this;
+        /**
+         * Set inner html throught
+         */
+        setInnerHtml(html: any): any;
+        /**
+         *
+         */
+        getAttribute(attr: any): any;
+        /**
+         *
+         * @return {[type]} [description]
+         */
+        addChild(element: any): this;
+        destroyEvent(event: any): void;
+        /**
+         *
+         */
+        removeAttr(attr: any): this;
+        /**
+         * [get description]
+         * @return {[type]} [description]
+         */
+        getElement(): any;
+        /**
+         * Append elements
+         * @param value append
+         * @return this
+         */
+        append(append: any): this;
+        /**
+         *
+         */
+        data(key: any, value?: boolean): this;
+        /**
+         *
+         */
+        private checkAppendValue(append);
+        /**
+         *
+         * @param  html [description]
+         * @return
+         */
+        html(html?: any): any;
+        /**
+         *
+         */
+        verifyElement(append: any, type?: string): void;
+        /**
+         *
+         */
+        private removeChildNodes();
+        /**
+         *
+         */
+        private removeChilds(element, childs);
+        /**
+         *
+         * @param attr
+         * @return
+         */
+        attr(attr: any, value?: any): any;
+        /**
+         * [css description]
+         * @param   css [description]
+         * @return
+         */
+        css(css: any, value?: any): any;
+        /**
+         *
+         * @param  {[type]} event [description]
+         * @return {[type]}       [description]
+         */
+        unbind(event: any): this;
+        /**
+         * [getClassName description]
+         * @return {[type]} [description]
+         */
+        getClassName(): string;
+        /**
+         * [validateAndSet description]
+         * @param  {[type]} config [description]
+         * @return {[type]}        [description]
+         */
+        validateAndSet(config: any): void;
+        /**
+         * [clone description]
+         * @return {[type]} [description]
+         */
+        clone(newIdentify?: string): Component;
+        /**
+         *
+         * @param  {any = null}        val [description]
+         * @return {[type]}   [description]
+         */
+        val(val?: any): any;
+        /**
+         *
+         */
+        valAsInt(): number;
+        /**
+         * zzzz
+         * @param  {any = null}        text [description]
+         * @return {[type]}   [description]
+         */
+        text(text?: any): any;
+        /**
+         *
+         */
+        empty(): this;
+        /**
+         *
+         */
+        getChilds(): any[];
+        getSiblings(): false | any[];
+        getParent(): any;
+        /**
+         *
+         */
+        getAsObject(): any[];
+        /**
+         *
+         */
+        getAsJson(): string;
+        /**
+         *
+         */
+        remove(element?: boolean): void;
+        getMyId(): void;
+        getDom(): any;
+        getAjax(): any;
+        getEm(): any;
+        getContainer(): any;
+        /**
+         *
+         * @param name
+         */
+        getTag(tag: any): any;
+        /**
+         *
+         */
+        getUrl(): any;
+        /**
+         *
+         * @param tag
+         */
+        getEvent(tag?: any): any;
+        getDi(): Service.Container;
+    }
+}
+declare namespace Northwind.Html {
+    class Dom {
         /**
          *
          */
@@ -2248,483 +2633,40 @@ declare namespace Northwind.Html {
         /**
          *
          */
+        getByName(name: string, context?: any): any;
+        /**
+         *
+         */
         getElement(): any;
         /**
          *
          * @param element
          */
         setElement(element: any): void;
-    }
-}
-declare namespace Northwind.Tag {
-    class FactoryTag {
-        di: any;
         /**
-         *
+         * [getClassName description]
+         * @return {[type]} [description]
          */
-        private context;
-        /**
-         *
-         */
-        constructor(ctx: any);
-        setDi(di: any): this;
-        getDi(): any;
-        /**
-         *
-         */
-        get(tagName: any): Html.Component;
-    }
-}
-declare namespace Northwind.Service {
-    class FactoryDefault extends Northwind.Service.Container {
-        di: any;
-        constructor();
+        getClassName(): string;
         getDom(): any;
         getAjax(): any;
         getEm(): any;
         getContainer(): any;
-        getTag(name: string): any;
-        getEvent(): any;
-        setDi(di: any): this;
-        getDi(): any;
-    }
-}
-declare namespace Northwind.Mvc {
-    class Controller extends Service.FactoryDefault {
+        /**
+         *
+         * @param name
+         */
+        getTag(tag: any): any;
         /**
          *
          */
-        private globals;
+        getUrl(): any;
         /**
          *
+         * @param tag
          */
-        constructor();
-        /**
-         *
-         */
-        setGlobals(globals: any): this;
-        /**
-         *
-         */
-        getGlobals(): any;
-        /**
-         *
-         */
-        initialize(): void;
-    }
-}
-declare namespace Northwind.Mvc {
-    class Component extends Northwind.Mvc.Controller {
-    }
-}
-declare namespace Northwind.Mvc {
-    class AjaxModel extends Northwind.Mvc.RawModel implements Northwind.Mvc.ModelInterface {
-        source: string;
-        insertUrl: string;
-        deleteUrl: string;
-        updateUrl: string;
-        findUrl: string;
-        findOneUrl: string;
-        countUrl: string;
-        params: Object;
-        internalId: string;
-        method: string;
-        constructor();
-        setSource(data: any): void;
-        setInsertUrl(url: string): void;
-        setFindUrl(url: string): void;
-        setFindOneUrl(url: string): void;
-        setCountUrl(url: string): void;
-        setDeleteUrl(url: string): void;
-        setUpdateUrl(url: string): void;
-        getInsertUrl(): string;
-        getFindUrl(): string;
-        getDeleteUrl(): string;
-        getUpdateUrl(): string;
-        setParams(params: Object): void;
-        getParams(): Object;
-        setMethod(method: string): void;
-        getMethod(): string;
-    }
-}
-declare namespace Northwind.Mvc {
-    class StaticModel extends Northwind.Mvc.RawModel implements Service.InjectionAwareInterface {
-        private index;
-        private container;
-        di: Service.Container;
-        /**
-         *
-         */
-        constructor(di: Service.Container);
-        /**
-         *
-         */
-        setData(data: any): void;
-        /**
-         *
-         */
-        getData(): any;
-        /**
-         *
-         */
-        getObjectData(): any;
-        /**
-         *
-         */
-        setDi(di: Service.Container): void;
-        /**
-         *
-         */
+        getEvent(tag?: any): any;
         getDi(): Service.Container;
-        /**
-         *
-         */
-        setIndex(index: any): void;
-        /**
-         *
-         */
-        getIndex(): number;
-        /**
-         *
-         */
-        setContainer(container: any): void;
-        /**
-         *
-         */
-        getContainer(): Service.Container;
-    }
-}
-declare namespace Northwind.Mvc {
-    class AjaxModelPersistent extends Northwind.Mvc.StaticModel implements Northwind.Mvc.ModelInterface {
-        source: string;
-        insertUrl: string;
-        deleteUrl: string;
-        updateUrl: string;
-        findUrl: string;
-        params: Object;
-        internalId: string;
-        method: string;
-        setSource(data: any): void;
-        setAjaxInit(value: boolean): void;
-        getAjaxInit(): boolean;
-        setInsertUrl(url: string): void;
-        setFindUrl(url: string): void;
-        setDeleteUrl(url: string): void;
-        setUpdateUrl(url: string): void;
-        getInsertUrl(): string;
-        getFindUrl(): string;
-        getDeleteUrl(): string;
-        getUpdateUrl(): string;
-        setParams(params: Object): void;
-        getParams(): Object;
-        setMethod(method: string): void;
-        getMethod(): string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Transaction {
-        constructor();
-        get(row: any): void;
-    }
-}
-declare namespace Northwind.Builder {
-    class And extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class ComparisonOperators {
-        static AND: string;
-        static OR: string;
-        static EQUAL: string;
-        static DIFFERENT: string;
-    }
-}
-declare namespace Northwind.Builder {
-    class DataType {
-        static BOOLEAN: number;
-        static INTEGER: number;
-        static STRING: number;
-        static OBJECT: number;
-        static ARRAY: number;
-        static CLASS: number;
-        static BOOLEAN_TYPE: string;
-        static INTEGER_TYPE: string;
-        static STRING_TYPE: string;
-        static OBJECT_TYPE: string;
-        /**
-         *
-         */
-        static getValueByType(value: any): any;
-    }
-}
-declare namespace Northwind.Builder {
-    class Group extends Northwind.Builder.Transaction {
-        constructor();
-        get(): void;
-    }
-}
-declare namespace Northwind.Builder {
-    class Gt extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Gte extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class In extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private conditions;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: Object);
-        get(): string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Like extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Lt extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Lte extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Not extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class NotIn extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private conditions;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: Object);
-        get(): string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Operators {
-        static OR: string;
-        static AND: string;
-        static SORT: string;
-        static IS_NOT: string;
-        static LIMIT: string;
-        static COLUMNS: string;
-        static CONDITIONAL: string;
-    }
-}
-declare namespace Northwind.Builder {
-    class Or extends Northwind.Builder.Transaction {
-        /**
-         *
-         */
-        private condition;
-        /**
-         *
-         * @param condition
-         */
-        constructor(condition: any);
-        /**
-         *
-         */
-        get(row: any): boolean;
-    }
-}
-declare namespace Northwind.Builder {
-    class Sort {
-        static ASC: number;
-        static DESC: number;
-        static sortByField(data: any, field: any): any[];
-    }
-}
-declare namespace Northwind.Mvc {
-    class Deny {
-        static getDeny(): string[];
-    }
-}
-declare namespace Northwind.Mvc {
-    interface ModelInterface {
-        insertUrl: string;
-        deleteUrl: string;
-        updateUrl: string;
-        findUrl: string;
-        state: number;
-        internalId: string;
-        setSource(source: Object): void;
-        setFindUrl(url: string): void;
-        setInsertUrl(url: string): void;
-        setUpdateUrl(url: string): void;
-        setDeleteUrl(url: string): void;
-        getFindUrl(): string;
-        getInsertUrl(): string;
-        getUpdateUrl(): string;
-        getDeleteUrl(): string;
-    }
-}
-declare namespace Northwind.Mvc {
-    class Query {
-        private lim;
-        private sort;
-        private data;
-        private cols;
-        private conds;
-        private sortConds;
-        private transactions;
-        private negativeConds;
-        private negativeTransactions;
-        /**
-         *
-         * @param data
-         */
-        constructor(data?: any);
-        /**
-         *
-         */
-        columns(cols: any): this;
-        /**
-         *
-         */
-        getColumns(): string[];
-        /**
-         *
-         * @param row
-         */
-        private resolveColumns(row);
-        /**
-         *
-         * @param condClass
-         */
-        where(conditions: any): this;
-        limit(limit: any): this;
-        private addOperator(length, operator);
-        /**
-         *
-         * @param conditions
-         */
-        orderBy(sortContent: Object): void;
-        /**
-         *
-         */
-        private resolveSort(results);
-        /**
-         *
-         * @param row
-         */
-        private miniChecksum(row);
-        /**
-         *
-         * @param result
-         * @param row
-         */
-        private ifExistOnResult(result, row);
-        /**
-         *
-         */
-        get(): any[];
     }
 }
 declare namespace Northwind.Tag {
@@ -2772,9 +2714,133 @@ declare namespace Northwind.Tag {
         constructor();
     }
 }
+declare namespace Northwind.Tag {
+    class FactoryTag {
+        di: any;
+        /**
+         *
+         */
+        private context;
+        /**
+         *
+         */
+        constructor(ctx: any);
+        /**
+         *
+         */
+        get(tagName: any): Html.Component;
+    }
+}
 declare namespace Northwind.Interfaces {
     interface ITagSignature {
         new (context: any, params?: Object): any;
+    }
+}
+declare namespace Northwind.Network {
+    class Ajax {
+        private httpRequest;
+        private context;
+        private method;
+        private parameters;
+        private error;
+        private url;
+        private container;
+        responseFn: Function;
+        bfSendFn: Function;
+        /**
+         *
+         */
+        constructor();
+        /**
+         *
+         */
+        setContext(ctx: Object): void;
+        /**
+         *
+         */
+        getContext(): Object;
+        /**
+         *
+         */
+        setUrl(url: any): this;
+        /**
+         *
+         */
+        getUrl(): string;
+        /**
+         *
+         */
+        set(key: any, value: any): void;
+        /**
+         *
+         */
+        get(key: any): any;
+        /**
+         *
+         */
+        setParams(params: any, value?: any): this;
+        /**
+         *
+         */
+        POST(): this;
+        /**
+         *
+         */
+        PUT(): this;
+        /**
+         *
+         */
+        DELETE(): this;
+        /**
+         *
+         */
+        GET(): this;
+        /**
+         *
+         */
+        setMethod(method: string): this;
+        addContext(): void;
+        /**
+         *
+         */
+        response(responseFunction: Function): this;
+        /**
+         *
+         */
+        beforeSend(fn: Function): void;
+        /**
+         *
+         */
+        private setHeaders();
+        /**
+         *
+         */
+        getError(errorFunction: any): void;
+        clear(): void;
+        /**
+         *
+         */
+        send(fn?: any): void;
+        /**
+         * [getClassName description]
+         * @return {[type]} [description]
+         */
+        getClassName(): string;
+        getDom(): any;
+        getAjax(): any;
+        getEm(): any;
+        getContainer(): any;
+        /**
+         *
+         * @param name
+         */
+        getTag(tag: any): any;
+        /**
+         *
+         * @param tag
+         */
+        getEvent(tag?: any): any;
+        getDi(): Service.Container;
     }
 }
 declare namespace Northwind.Network {
@@ -2783,6 +2849,16 @@ declare namespace Northwind.Network {
         static GET: string;
         static PUT: string;
         static DELETE: string;
+    }
+}
+declare namespace Northwind.Service {
+    class Container {
+        private service;
+        set(serviceName: any, content: any): void;
+        get(serviceName: any): any;
+        hasKey(serviceName: any): boolean;
+        setPersistent(serviceName: any, content: any): void;
+        getPersistent(serviceName: any): any;
     }
 }
 declare namespace Northwind {
@@ -2818,11 +2894,19 @@ declare namespace Northwind {
         /**
          *
          */
+        private controllers;
+        /**
+         *
+         */
         constructor();
         /**
          *
          */
         setScope(env: number): void;
+        /**
+         *
+         */
+        setControllers(controller?: any): void;
         /**
          *
          */
@@ -2842,24 +2926,25 @@ declare namespace Northwind {
         /**
          *
          */
-        private resolveConfig(di);
-        private addCharset(di);
+        private resolveConfig();
+        private addCharset();
         /**
          *
          */
-        private resolveUrl(di, urls);
+        private resolveUrl(urls);
         /**
          *
          */
-        private resolveControllers(di, controllers);
+        private resolveControllers(controllers);
+        private setControllerInstance(temp);
         /**
          *
          */
-        private resolvePropertiesController(controller, di);
+        private resolvePropertiesController(controller);
         /**
          *
          */
-        private resolveServices(di, service);
+        private resolveServices(service);
         /**
          *
          */
@@ -2976,7 +3061,8 @@ declare namespace Northwind.Persistence {
     }
 }
 declare namespace Northwind.Persistence {
-    class EntityManager extends Service.InjectorComponents implements EntityManagerInterface {
+    class EntityManager implements EntityManagerInterface {
+        private container;
         uow: Northwind.Persistence.UnitOfWork;
         private ajax;
         private hydrator;
@@ -2988,6 +3074,10 @@ declare namespace Northwind.Persistence {
          * Entity manager is a class
          */
         constructor();
+        /**
+         *
+         */
+        private getContainer();
         /**
          *
          * @param model
@@ -3076,6 +3166,29 @@ declare namespace Northwind.Persistence {
          */
         forget(): boolean;
         checksum(obj: any): string;
+        /**
+         * [getClassName description]
+         * @return {[type]} [description]
+         */
+        getClassName(): string;
+        getDom(): any;
+        getAjax(): any;
+        getEm(): any;
+        /**
+         *
+         * @param name
+         */
+        getTag(tag: any): any;
+        /**
+         *
+         */
+        getUrl(): any;
+        /**
+         *
+         * @param tag
+         */
+        getEvent(tag?: any): any;
+        getDi(): Service.Container;
     }
     interface EntityManagerInterface {
         uow: Object;
@@ -3110,6 +3223,18 @@ declare namespace Northwind.Reflection {
          *
          */
         getChecksum(): Object;
+    }
+}
+declare namespace Northwind.Service {
+    class Allocator {
+        constructor();
+    }
+}
+declare namespace Northwind.Service {
+    class DependencyInjector {
+        private static di;
+        static getInstance(): Container;
+        static get(): Container;
     }
 }
 declare namespace Northwind.Service {

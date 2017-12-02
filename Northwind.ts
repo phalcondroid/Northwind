@@ -46,7 +46,7 @@ namespace Northwind
         /**
          *
          */
-        private 
+        private controllers : any = false;
 
         /**
          *
@@ -85,6 +85,7 @@ namespace Northwind
                 "setGlobals",
                 "getGlobals"
             ];
+            new Northwind.Service.Allocator();
             window.onbeforeunload = function () {
                 sessionStorage.clear();
             }
@@ -96,6 +97,14 @@ namespace Northwind
         public setScope(env : number)
         {
             this.env = env;
+        }
+
+        /**
+         *
+         */
+        public setControllers(controller : any = false)
+        {
+            this.controllers = controller;
         }
 
         /**
@@ -134,9 +143,9 @@ namespace Northwind
         /**
          *
          */
-        private resolveConfig(di)
+        private resolveConfig()
         {
-            this.addCharset(di);
+            this.addCharset();
             let positionArray = new Array();
             let configData = this.config;
 
@@ -144,23 +153,19 @@ namespace Northwind
                 switch (key) {
                     case "urls":
                             this.resolveUrl(
-                                di,
                                 configData[key]
                             );
                         break;
                     case "services":
                             this.resolveServices(
-                                di,
                                 configData[key]
                             );
                         break;
                 }
             }
 
-            //controllers executed in the final section
             if (configData.hasOwnProperty("controllers")) {
                 this.resolveControllers(
-                    di,
                     configData["controllers"]
                 );
             } else {
@@ -168,9 +173,8 @@ namespace Northwind
             }
         }
 
-        private addCharset(di)
+        private addCharset()
         {
-            this.domManager.setDi(di);
             let header = this.domManager.getByTag("head");
             header.append(
                 new Northwind.Tag.Meta().attr({
@@ -182,7 +186,7 @@ namespace Northwind
         /**
          *
          */
-        private resolveUrl(di, urls)
+        private resolveUrl(urls)
         {
             let url = new Northwind.Url.Url();
             if (Array.isArray(urls)) {
@@ -206,7 +210,7 @@ namespace Northwind
             } else {
                 throw "Url data unrecognized"
             }
-            di.set(
+            Northwind.Service.DependencyInjector.get().set(
                 "url",
                 url
             );
@@ -215,7 +219,7 @@ namespace Northwind
         /**
          *
          */
-        private resolveControllers(di, controllers : any[])
+        private resolveControllers(controllers : any[])
         {
             if (controllers.length == 0) {
                 throw "You must load your controllers";
@@ -225,21 +229,27 @@ namespace Northwind
                 let i = 1;
                 for (let key in controllers) {
                     if (typeof controllers[key] != "undefined") {
-                        let temp = new controllers[key];
-                        if (temp instanceof Northwind.Mvc.Controller) {
-                            temp.setDi(di);
-                            temp.setGlobals(this.getGlobals());
-                            temp.initialize();
-                            this.resolvePropertiesController(
-                                temp,
-                                di
-                            );
+                        if (this.controllers == false) {
+                            let temp = new controllers[key];
+                            this.setControllerInstance(temp);
                         } else {
-                            throw "Controller #" + i + " must be extend from View.Controller class";
+                            if (Array.isArray(this.controllers)) {
+                                for (let item of this.controllers) {
+                                    let temp = new controllers[key];
+                                    if (item == temp.getClassName()) {
+                                        this.setControllerInstance(temp);
+                                    }
+                                }
+                            } else if (typeof this.controllers == "string") {
+                                let temp = new controllers[key];
+                                if (temp.getClassName() == this.controllers) {
+                                    this.setControllerInstance(temp);
+                                }
+                            }
                         }
                         i++;
                     } else {
-                        throw "Config => Controller => 'name' must be initialized with View.Controller class"
+                        throw "Config => Controller => 'name' must be initialized with Northwind.Mvc.Controller class"
                     }
                 }
             } else {
@@ -247,16 +257,29 @@ namespace Northwind
             }
         }
 
+        private setControllerInstance(temp)
+        {
+            if (temp instanceof Northwind.Mvc.Controller) {
+                console.log(temp.getClassName(), Northwind.Service.DependencyInjector);
+                temp.setGlobals(this.getGlobals());
+                temp.initialize();
+                this.resolvePropertiesController(
+                    temp
+                );
+            } else {
+                throw "Controller #" + temp.getClassName() + " must be extend from View.Controller class";
+            }
+        }
+
         /**
          *
          */
-        private resolvePropertiesController(controller : Northwind.Mvc.Controller, di)
+        private resolvePropertiesController(controller : Northwind.Mvc.Controller)
         {
             for (let key in controller) {
                 switch (typeof controller[key]) {
                     case "function":
                         if (!Northwind.Helper.ArrayHelper.inArray(this.restricted, key)) {
-                            this.domManager.setDi(controller.getDi());
                             let component = this.domManager.getById(key);
                             if (component != false) {
                                 component.setDi(controller.getDi());
@@ -273,9 +296,11 @@ namespace Northwind
         /**
          * 
          */
-        private resolveServices(di, service)
+        private resolveServices(service)
         {
-            new service().initialize(di);
+            new service().initialize(
+                Northwind.Service.DependencyInjector.get()
+            );
         }
 
         /**
@@ -294,7 +319,7 @@ namespace Northwind
         {
             try {
                 let di = new Northwind.Service.Container;
-                this.resolveConfig(di);
+                this.resolveConfig();
             } catch (e) {
                 this.catchErrors(e);
             }

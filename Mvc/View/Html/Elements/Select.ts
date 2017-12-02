@@ -1,6 +1,4 @@
-///<reference path="../Component.ts"/>
-///<reference path="../../../Controller.ts"/>
-///<reference path="../../../Model/RawModel.ts"/>
+///<reference path="../../Component.ts"/>
 
 namespace Northwind.Tag {
 

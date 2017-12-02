@@ -1,8 +1,7 @@
-///<reference path="../Service/InjectorComponents.ts" />
 
 namespace Northwind
 {
-    export class Events extends Northwind.Service.InjectorComponents
+    export class Events
     {
         private events  : Object = {};
         private params  : Object = {};
@@ -15,8 +14,12 @@ namespace Northwind
         private static ONCHANGE = 5;
         private nativeEvents = [];
 
-        public contructor()
+        public contructor(element = null)
         {
+            if (element instanceof Northwind.Html.Component) {
+                this.element = element;
+            }
+
             this.nativeEvents = [
                 "click",
                 "doubleClick",
@@ -26,7 +29,8 @@ namespace Northwind
                 "keyup",
                 "paste",
                 "blur",
-                "focus"
+                "focus",
+                "submit"
             ];
         }
         
@@ -96,6 +100,24 @@ namespace Northwind
             throw "Component must be a instance of Northwind.Html.Component or Northwind.Tag";
         }
 
+        private setEventToElement(eventName, fn)
+        {
+            if (Array.isArray(this.element)) {
+                for (let item of this.element) {
+                    this.element.getElement().addEventListener(
+                        eventName,
+                        fn.bind(this)
+                    );
+                }
+            } else {
+                this.element.getElement().addEventListener(
+                    eventName,
+                    fn.bind(this)
+                );
+            }
+            return this;
+        }
+
         /**
          * 
          * @param  {Function} fn [description]
@@ -103,9 +125,9 @@ namespace Northwind
          */
         public click(fn)
         {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "click",
-                fn.bind(this)
+                fn
             );
             return this;
         }
@@ -115,9 +137,9 @@ namespace Northwind
          */
         public doubleClick(fn)
         {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "dblclick",
-                fn.bind(this)
+                fn
             );
             return this;
         }
@@ -128,9 +150,9 @@ namespace Northwind
          */
         public change(fn)
         {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "change",
-                fn.bind(this)
+                fn
             );
             return this;
         }
@@ -141,9 +163,9 @@ namespace Northwind
          */
         public keypress(fn)
         {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "keypress",
-                fn.bind(this)
+                fn
             );
             return this;
         }
@@ -153,9 +175,9 @@ namespace Northwind
          * @return {[type]} [description]
          */
         public keydown(fn) {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "keydown",
-                fn.bind(this)
+                fn
             );
             return this;
         }
@@ -165,18 +187,18 @@ namespace Northwind
          * @return {[type]} [description]
          */
         public keyup(fn) {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "keyup",
-                fn.bind(this)
+                fn
             );
             return this;
         }
 
         public paste(fn)
         {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "paste",
-                fn.bind(this)
+                fn
             );
             return this;
         }
@@ -187,9 +209,9 @@ namespace Northwind
          */
         public blur(fn)
         {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "blur",
-                fn.bind(this)
+                fn
             );
             return this;
         }
@@ -200,11 +222,111 @@ namespace Northwind
          */
         public focus(fn)
         {
-            this.element.getElement().addEventListener(
+            this.setEventToElement(
                 "focus",
-                fn.bind(this)
+                fn
             );
             return this;
+        }
+
+        /**
+         * 
+         * @param fn
+         */
+        public submit(fn)
+        {
+            this.setEventToElement(
+                "submit",
+                fn
+            );
+            return this;
+        }
+
+        /**
+         * [getClassName description]
+         * @return {[type]} [description]
+         */
+        public getClassName() {
+            let funcNameRegex = /function (.{1,})\(/;
+            let results  = (funcNameRegex).exec(this["constructor"].toString());
+            return (results && results.length > 1) ? results[1] : "";
+        }
+
+        public getDom()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "dom"
+            );
+        }
+
+        public getAjax()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "ajax"
+            );
+        }
+
+        public getEm()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "em"
+            );
+        }
+
+        public getContainer()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "container"
+            );
+        }
+
+        /**
+         * 
+         * @param name 
+         */
+        public getTag(tag : any)
+        {
+            if (tag instanceof Northwind.Html.Component) {
+        	    return Northwind.Service.DependencyInjector.get().get("tag").tag(
+                    tag
+                );
+            } else {
+        	    return Northwind.Service.DependencyInjector.get().get(
+                    "tag"
+                );
+            }
+        }
+
+        /**
+         *  
+         */
+        public getUrl()
+        {
+            let url = Northwind.Service.DependencyInjector.get().get(
+                "url"
+            );
+            return url;
+        }
+
+        /**
+         * 
+         * @param tag 
+         */
+        public getEvent(tag : any = false)
+        {
+            let events = Northwind.Service.DependencyInjector.get().get(
+                "event"
+            );
+            if (tag instanceof Northwind.Html.Component) {
+        	    return events.tag(tag);
+            } else {
+        	    return events;
+            }
+        }
+
+        public getDi()
+        {
+            return Northwind.Service.DependencyInjector.get();
         }
     }
 }

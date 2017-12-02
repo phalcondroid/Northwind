@@ -1,5 +1,5 @@
 
-///<reference path="./Component.ts"/>
+///<reference path="./../Component.ts"/>
 ///<reference path="./Elements/A.ts"/>
 ///<reference path="./Elements/Abbr.ts"/>
 ///<reference path="./Elements/Address.ts"/>
@@ -122,17 +122,6 @@ namespace Northwind.Tag
         public constructor(ctx)
         {
             this.context = ctx;
-        }
-
-        public setDi(di)
-        {
-            this.di = di;
-            return this;
-        }
-
-        public getDi()
-        {
-            return this.di;
         }
 
         /**
@@ -462,7 +451,6 @@ namespace Northwind.Tag
                         instance.create(tagName);
                     break;
             }
-            instance.setDi(this.di);
             return instance;
         }
     }

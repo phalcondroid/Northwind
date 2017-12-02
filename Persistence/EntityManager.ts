@@ -1,5 +1,4 @@
 
-/// <reference path="../Service/InjectorComponents.ts" />
 /// <reference path="../Reflection/Reflection.ts" />
 /// <reference path="../Service/Container.ts" />
 /// <reference path="../Mvc/Model/StaticModel.ts" />
@@ -11,8 +10,9 @@
 
 namespace Northwind.Persistence
 {
-    export class EntityManager extends Service.InjectorComponents implements EntityManagerInterface
+    export class EntityManager implements EntityManagerInterface
     {
+        private container  = new Northwind.Service.Container();
         uow                : Northwind.Persistence.UnitOfWork;
         private ajax       : Northwind.Network.Ajax         = null;
         private hydrator   : Northwind.Persistence.Hydrator = null;
@@ -26,8 +26,15 @@ namespace Northwind.Persistence
          */
         public constructor()
         {
-            super();
             this.uow = new Northwind.Persistence.UnitOfWork;
+        }
+
+        /**
+         * 
+         */
+        private getContainer()
+        {
+            return this.container;
         }
 
         /**
@@ -115,7 +122,6 @@ namespace Northwind.Persistence
         private callAjax(objModel : any, type, params)
         {
             this.ajax = new Network.Ajax();
-            this.ajax.setDi(this.getDi());
             var url = null;
             switch (type) {
                 case "find":
@@ -194,15 +200,14 @@ namespace Northwind.Persistence
 
             if (model instanceof Northwind.Mvc.AjaxModel) {
                 this.ajax = new Northwind.Network.Ajax();
-                this.ajax.setDi(this.getDi());
                 var modelName = model.getClassName();
 
                 switch (model.state) {
                     case Northwind.Persistence.UnitOfWork.NEW:
                             var url = model.getInsertUrl();
                             if (url == null) {
-                                url = this.getDi().get("url").get("baseUrl")+
-                                modelName +
+                                url = this.getDi().get("url").get("baseUrl") +
+                                this.lcfirst(modelName) +
                                 "Insert";
                             }
                             this.ajax.setUrl(
@@ -272,7 +277,6 @@ namespace Northwind.Persistence
 
             if (model instanceof Northwind.Mvc.AjaxModel) {
                 this.ajax = new Network.Ajax();
-                this.ajax.setDi(this.getDi());
                 var modelName = model.getClassName();
 
                 var url = model.getDeleteUrl();
@@ -583,6 +587,86 @@ namespace Northwind.Persistence
                 output.push(obj[prop]);
             }
             return JSON.stringify(output);
+        }
+
+        /**
+         * [getClassName description]
+         * @return {[type]} [description]
+         */
+        public getClassName() {
+            let funcNameRegex = /function (.{1,})\(/;
+            let results  = (funcNameRegex).exec(this["constructor"].toString());
+            return (results && results.length > 1) ? results[1] : "";
+        }
+
+        public getDom()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "dom"
+            );
+        }
+
+        public getAjax()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "ajax"
+            );
+        }
+
+        public getEm()
+        {
+            return Northwind.Service.DependencyInjector.get().get(
+                "em"
+            );
+        }
+
+        /**
+         * 
+         * @param name 
+         */
+        public getTag(tag : any)
+        {
+            if (tag instanceof Northwind.Html.Component) {
+        	    return Northwind.Service.DependencyInjector.get().get("tag").tag(
+                    tag
+                );
+            } else {
+        	    return Northwind.Service.DependencyInjector.get().get(
+                    "tag"
+                );
+            }
+        }
+
+        /**
+         *  
+         */
+        public getUrl()
+        {
+            let url = Northwind.Service.DependencyInjector.get().get(
+                "url"
+            );
+            return url;
+        }
+
+        /**
+         * 
+         * @param tag 
+         */
+        public getEvent(tag : any = false)
+        {
+            let events = Northwind.Service.DependencyInjector.get().get(
+                "event"
+            );
+            if (tag instanceof Northwind.Html.Component) {
+        	    return events.tag(tag);
+            } else {
+        	    return events;
+            }
+        }
+
+        public getDi()
+        {
+            return Northwind.Service.DependencyInjector.get();
         }
     }
 

@@ -116,25 +116,9 @@ namespace Northwind.Tag
         /**
          *
          */
-        public di;
-
-        /**
-         *
-         */
         public constructor(element)
         {
             this.element = element;
-        }
-
-        public setDi(di)
-        {
-            this.di = di;
-            return this;
-        }
-
-        public getDi()
-        {
-            return this.di;
         }
 
         /**
@@ -467,7 +451,6 @@ namespace Northwind.Tag
                             break;
                     }
                     instance.setElement(this.element);
-                    instance.setDi(this.di);
                     return instance;
                 } else {
                     return false;
