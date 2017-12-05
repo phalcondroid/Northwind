@@ -1,13 +1,11 @@
 
-///<reference path="../../0.ts"/>
-
 namespace Northwind.Tag
 {
 
     /**
      *
      */
-    export class A extends Northwind.Html.Component
+    export class A
     {
 
         /**
