@@ -277,15 +277,9 @@ namespace Northwind.Network
          */
         public getTag(tag : any)
         {
-            if (tag instanceof Northwind.Html.Component) {
-        	    return Northwind.Service.DependencyInjector.get().get("tag").tag(
-                    tag
-                );
-            } else {
-        	    return Northwind.Service.DependencyInjector.get().get(
-                    "tag"
-                );
-            }
+            return Northwind.Service.DependencyInjector.get().get("tag").tag(
+                tag
+            );
         }
 
         /**
@@ -297,11 +291,7 @@ namespace Northwind.Network
             let events = Northwind.Service.DependencyInjector.get().get(
                 "event"
             );
-            if (tag instanceof Northwind.Html.Component) {
-        	    return events.tag(tag);
-            } else {
-        	    return events;
-            }
+        	return events.tag(tag);
         }
 
         public getDi()

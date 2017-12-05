@@ -1,8 +1,8 @@
-///<reference path="./Container.ts"/>
+///<reference path="./Container.ts" />
 
 namespace Northwind.Service
 {
-    export class DependencyInjector
+    export class Di
     {
         private static di = new Service.Container;
 
@@ -13,7 +13,7 @@ namespace Northwind.Service
 
         public static get()
         {
-            return DependencyInjector.di;
+            return Di.di;
         }
     }
 }

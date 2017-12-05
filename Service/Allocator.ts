@@ -1,3 +1,5 @@
+/// <reference path="../Mvc/View/Html/Factory/FactoryTag.ts" />
+
 namespace Northwind.Service
 {
     export class Allocator

@@ -1,13 +1,36 @@
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Northwind;
 (function (Northwind) {
     var Environment;
     (function (Environment) {
-        var Config = (function () {
+        var Scope = /** @class */ (function () {
+            function Scope() {
+            }
+            Scope.LOCAL = 0;
+            Scope.DEV = 1;
+            Scope.TEST = 2;
+            Scope.QA = 3;
+            Scope.STAGING = 4;
+            Scope.PRODUCTION = 5;
+            return Scope;
+        }());
+        Environment.Scope = Scope;
+    })(Environment = Northwind.Environment || (Northwind.Environment = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Environment;
+    (function (Environment) {
+        var Config = /** @class */ (function () {
             function Config() {
                 this.config = {};
             }
@@ -38,27 +61,340 @@ var Northwind;
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var Environment;
-    (function (Environment) {
-        var Scope = (function () {
-            function Scope() {
+    var Helper;
+    (function (Helper) {
+        var ArrayHelper = /** @class */ (function () {
+            function ArrayHelper() {
             }
-            return Scope;
+            ArrayHelper.inArray = function (container, element) {
+                for (var key in container) {
+                    if (container[key] == element) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            return ArrayHelper;
         }());
-        Scope.LOCAL = 0;
-        Scope.DEV = 1;
-        Scope.TEST = 2;
-        Scope.QA = 3;
-        Scope.STAGING = 4;
-        Scope.PRODUCTION = 5;
-        Environment.Scope = Scope;
-    })(Environment = Northwind.Environment || (Northwind.Environment = {}));
+        Helper.ArrayHelper = ArrayHelper;
+    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Service;
+    (function (Service) {
+        var Container = /** @class */ (function () {
+            function Container() {
+                this.service = [];
+            }
+            Container.prototype.set = function (serviceName, content) {
+                this.service[serviceName] = content;
+            };
+            Container.prototype.get = function (serviceName) {
+                return this.service[serviceName];
+            };
+            Container.prototype.hasKey = function (serviceName) {
+                if (typeof this.service[serviceName] == "undefined") {
+                    return false;
+                }
+                return true;
+            };
+            Container.prototype.setPersistent = function (serviceName, content) {
+                sessionStorage.setItem(serviceName, content);
+            };
+            Container.prototype.getPersistent = function (serviceName) {
+                return sessionStorage.getItem(serviceName);
+            };
+            return Container;
+        }());
+        Service.Container = Container;
+    })(Service = Northwind.Service || (Northwind.Service = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="./Environment/Scope.ts"/>
+///<reference path="./Environment/Config.ts"/>
+///<reference path="./Helper/ArrayHelper.ts"/>
+///<reference path="./Service/Container.ts"/>
+var Northwind;
+///<reference path="./Environment/Scope.ts"/>
+///<reference path="./Environment/Config.ts"/>
+///<reference path="./Helper/ArrayHelper.ts"/>
+///<reference path="./Service/Container.ts"/>
+(function (Northwind) {
+    var Application = /** @class */ (function () {
+        /**
+         *
+         */
+        function Application() {
+            /**
+             *
+             */
+            this.config = {};
+            /**
+             *
+             */
+            this.try = 0;
+            /**
+             *
+             */
+            this.env = Northwind.Environment.Scope.LOCAL;
+            /**
+             *
+             */
+            this.catchErrors = function () { };
+            /**
+             *
+             */
+            this.domManager = new Northwind.Html.Dom;
+            /**
+             *
+             */
+            this.restricted = new Array;
+            /**
+             *
+             */
+            this.globals = new Array;
+            /**
+             *
+             */
+            this.controllers = false;
+            this.restricted = [
+                "constructor",
+                "initialize",
+                "getById",
+                "getByTag",
+                "getByClass",
+                "getDi",
+                "hasKey",
+                "setPersistent",
+                "getPersistent",
+                "get",
+                "set",
+                "setDi",
+                "getUrl",
+                "setUrl",
+                "getAjax",
+                "setAjax",
+                "getDom",
+                "setDom",
+                "setEm",
+                "getEm",
+                "setEntityManager",
+                "getEntityManager",
+                "setContainer",
+                "getContainer",
+                "setTag",
+                "getTag",
+                "setEvent",
+                "getEvent",
+                "setGlobals",
+                "getGlobals"
+            ];
+            new Northwind.Service.Allocator();
+            window.onbeforeunload = function () {
+                sessionStorage.clear();
+            };
+        }
+        /**
+         *
+         */
+        Application.prototype.setScope = function (env) {
+            this.env = env;
+        };
+        /**
+         *
+         */
+        Application.prototype.setControllers = function (controller) {
+            if (controller === void 0) { controller = false; }
+            this.controllers = controller;
+        };
+        /**
+         *
+         */
+        Application.prototype.setConfig = function (config) {
+            this.config = config.getConfig(this.env);
+        };
+        /**
+         *
+         */
+        Application.prototype.getConfig = function () {
+            return this.config;
+        };
+        /**
+         *
+         */
+        Application.prototype.setGlobals = function (globals) {
+            this.globals = globals;
+            return this;
+        };
+        /**
+         *
+         */
+        Application.prototype.getGlobals = function () {
+            return this.globals;
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveConfig = function () {
+            this.addCharset();
+            var positionArray = new Array();
+            var configData = this.config;
+            for (var key in configData) {
+                switch (key) {
+                    case "urls":
+                        this.resolveUrl(configData[key]);
+                        break;
+                    case "services":
+                        this.resolveServices(configData[key]);
+                        break;
+                }
+            }
+            if (configData.hasOwnProperty("controllers")) {
+                this.resolveControllers(configData["controllers"]);
+            }
+            else {
+                throw "Config must have controllers item attached";
+            }
+        };
+        Application.prototype.addCharset = function () {
+            var header = this.domManager.getByTag("head");
+            header.append(new Northwind.Tag.Meta().attr({
+                "charset": "utf-8"
+            }));
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveUrl = function (urls) {
+            var url = new Northwind.Url.Url();
+            if (Array.isArray(urls)) {
+                for (var key in urls) {
+                    if (typeof urls[key] == "string") {
+                        url.set(key, urls[key]);
+                    }
+                    else {
+                        throw "Url must be string : " + urls[key];
+                    }
+                }
+            }
+            else if (typeof url == "object") {
+                for (var keyUrlFor in urls) {
+                    url.set(keyUrlFor, urls[keyUrlFor]);
+                }
+            }
+            else {
+                throw "Url data unrecognized";
+            }
+            Northwind.Service.DependencyInjector.get().set("url", url);
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveControllers = function (controllers) {
+            if (controllers.length == 0) {
+                throw "You must load your controllers";
+            }
+            if (Array.isArray(controllers)) {
+                var i = 1;
+                for (var key in controllers) {
+                    if (typeof controllers[key] != "undefined") {
+                        if (this.controllers == false) {
+                            var temp = new controllers[key];
+                            this.setControllerInstance(temp);
+                        }
+                        else {
+                            if (Array.isArray(this.controllers)) {
+                                for (var _i = 0, _a = this.controllers; _i < _a.length; _i++) {
+                                    var item = _a[_i];
+                                    var temp = new controllers[key];
+                                    if (item == temp.getClassName()) {
+                                        this.setControllerInstance(temp);
+                                    }
+                                }
+                            }
+                            else if (typeof this.controllers == "string") {
+                                var temp = new controllers[key];
+                                if (temp.getClassName() == this.controllers) {
+                                    this.setControllerInstance(temp);
+                                }
+                            }
+                        }
+                        i++;
+                    }
+                    else {
+                        throw "Config => Controller => 'name' must be initialized with Northwind.Mvc.Controller class";
+                    }
+                }
+            }
+            else {
+                throw "Config => controllers must be array";
+            }
+        };
+        Application.prototype.setControllerInstance = function (temp) {
+            if (temp instanceof Northwind.Mvc.Controller) {
+                console.log(temp.getClassName(), Northwind.Service.DependencyInjector);
+                temp.setGlobals(this.getGlobals());
+                temp.initialize();
+                this.resolvePropertiesController(temp);
+            }
+            else {
+                throw "Controller #" + temp.getClassName() + " must be extend from View.Controller class";
+            }
+        };
+        /**
+         *
+         */
+        Application.prototype.resolvePropertiesController = function (controller) {
+            for (var key in controller) {
+                switch (typeof controller[key]) {
+                    case "function":
+                        if (!Northwind.Helper.ArrayHelper.inArray(this.restricted, key)) {
+                            var component = this.domManager.getById(key);
+                            if (component != false) {
+                                component.setDi(controller.getDi());
+                                if (component) {
+                                    controller[key](component);
+                                }
+                            }
+                        }
+                        break;
+                }
+            }
+        };
+        /**
+         *
+         */
+        Application.prototype.resolveServices = function (service) {
+            new service().initialize(Northwind.Service.DependencyInjector.get());
+        };
+        /**
+         *
+         */
+        Application.prototype.catch = function (fn) {
+            this.catchErrors = fn;
+            return this;
+        };
+        /**
+         *
+         */
+        Application.prototype.start = function () {
+            try {
+                var di = new Northwind.Service.Container;
+                this.resolveConfig();
+            }
+            catch (e) {
+                this.catchErrors(e);
+            }
+        };
+        return Application;
+    }());
+    Northwind.Application = Application;
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
     var Errors;
     (function (Errors) {
-        var Message = (function () {
+        var Message = /** @class */ (function () {
             function Message() {
             }
             Message.getCodeMessage = function (code, custom) {
@@ -72,11 +408,11 @@ var Northwind;
                         return Message.NOT_VALID_OBJECT + custom;
                 }
             };
+            Message.NOT_VALID_ARRAY = "The object returned in the transaction is not array";
+            Message.NOT_VALID_ARRAY_OBJECT = "The objects returned in the transaction into array are not objects, every row must be object key, value";
+            Message.NOT_VALID_OBJECT = "The received variable is not an object";
             return Message;
         }());
-        Message.NOT_VALID_ARRAY = "The object returned in the transaction is not array";
-        Message.NOT_VALID_ARRAY_OBJECT = "The objects returned in the transaction into array are not objects, every row must be object key, value";
-        Message.NOT_VALID_OBJECT = "The received variable is not an object";
         Errors.Message = Message;
     })(Errors = Northwind.Errors || (Northwind.Errors = {}));
 })(Northwind || (Northwind = {}));
@@ -84,20 +420,20 @@ var Northwind;
 (function (Northwind) {
     var Errors;
     (function (Errors) {
-        var MessageCode = (function () {
+        var MessageCode = /** @class */ (function () {
             function MessageCode() {
             }
+            MessageCode.NOT_VALID_ARRAY = 1;
+            MessageCode.NOT_VALID_ARRAY_OBJECT = 2;
+            MessageCode.NOT_VALID_OBJECT = 3;
             return MessageCode;
         }());
-        MessageCode.NOT_VALID_ARRAY = 1;
-        MessageCode.NOT_VALID_ARRAY_OBJECT = 2;
-        MessageCode.NOT_VALID_OBJECT = 3;
         Errors.MessageCode = MessageCode;
     })(Errors = Northwind.Errors || (Northwind.Errors = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var Events = (function () {
+    var Events = /** @class */ (function () {
         function Events() {
             this.events = {};
             this.params = {};
@@ -321,41 +657,20 @@ var Northwind;
         Events.prototype.getDi = function () {
             return Northwind.Service.DependencyInjector.get();
         };
+        Events.AFTER = 1;
+        Events.BEFORE = 2;
+        Events.ONCREATE = 3;
+        Events.ONDELETE = 4;
+        Events.ONCHANGE = 5;
         return Events;
     }());
-    Events.AFTER = 1;
-    Events.BEFORE = 2;
-    Events.ONCREATE = 3;
-    Events.ONDELETE = 4;
-    Events.ONCHANGE = 5;
     Northwind.Events = Events;
 })(Northwind || (Northwind = {}));
-/// <reference path="./EventManagerInterface.ts"/>
 var Northwind;
 (function (Northwind) {
     var Helper;
     (function (Helper) {
-        var ArrayHelper = (function () {
-            function ArrayHelper() {
-            }
-            ArrayHelper.inArray = function (container, element) {
-                for (var key in container) {
-                    if (container[key] == element) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-            return ArrayHelper;
-        }());
-        Helper.ArrayHelper = ArrayHelper;
-    })(Helper = Northwind.Helper || (Northwind.Helper = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Helper;
-    (function (Helper) {
-        var MathHelper = (function () {
+        var MathHelper = /** @class */ (function () {
             function MathHelper() {
             }
             MathHelper.getRandom = function (init, last) {
@@ -381,7 +696,7 @@ var Northwind;
 (function (Northwind) {
     var Helper;
     (function (Helper) {
-        var StringHelper = (function () {
+        var StringHelper = /** @class */ (function () {
             function StringHelper() {
             }
             /**
@@ -411,7 +726,7 @@ var Northwind;
 (function (Northwind) {
     var Helper;
     (function (Helper) {
-        var Uuid = (function () {
+        var Uuid = /** @class */ (function () {
             function Uuid() {
             }
             Uuid.get = function () {
@@ -432,7 +747,7 @@ var Northwind;
 (function (Northwind) {
     var Helper;
     (function (Helper) {
-        var Validator = (function () {
+        var Validator = /** @class */ (function () {
             function Validator() {
             }
             Validator.validStructArray = function (data) {
@@ -459,37 +774,12 @@ var Northwind;
         Helper.Validator = Validator;
     })(Helper = Northwind.Helper || (Northwind.Helper = {}));
 })(Northwind || (Northwind = {}));
-/*
-function sealed(constructor: Function) {
-    Object.seal(constructor);
-    Object.seal(constructor.prototype);
-}
-*/
-var Northwind;
-/*
-function sealed(constructor: Function) {
-    Object.seal(constructor);
-    Object.seal(constructor.prototype);
-}
-*/
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        //@sealed
-        var Application = (function () {
-            function Application() {
-            }
-            return Application;
-        }());
-        Mvc.Application = Application;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
     var Mvc;
     (function (Mvc) {
         //@sealed
-        var Controller = (function () {
+        var Controller = /** @class */ (function () {
             /**
              *
              */
@@ -542,12 +832,7 @@ var Northwind;
              * @param name
              */
             Controller.prototype.getTag = function (tag) {
-                if (tag instanceof Northwind.Html.Component) {
-                    return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
-                }
-                else {
-                    return Northwind.Service.DependencyInjector.get().get("tag");
-                }
+                return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
             };
             /**
              *
@@ -563,12 +848,7 @@ var Northwind;
             Controller.prototype.getEvent = function (tag) {
                 if (tag === void 0) { tag = false; }
                 var events = Northwind.Service.DependencyInjector.get().get("event");
-                if (tag instanceof Northwind.Html.Component) {
-                    return events.tag(tag);
-                }
-                else {
-                    return events;
-                }
+                return events.tag(tag);
             };
             Controller.prototype.getDi = function () {
                 return Northwind.Service.DependencyInjector.get();
@@ -584,7 +864,7 @@ var Northwind;
 (function (Northwind) {
     var Mvc;
     (function (Mvc) {
-        var Component = (function (_super) {
+        var Component = /** @class */ (function (_super) {
             __extends(Component, _super);
             function Component(context) {
                 if (context === void 0) { context = false; }
@@ -595,358 +875,11 @@ var Northwind;
         Mvc.Component = Component;
     })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
-/// <reference path="../../Helper/Uuid.ts" />
-var Northwind;
-/// <reference path="../../Helper/Uuid.ts" />
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var RawModel = (function () {
-            function RawModel() {
-                this.state = 1;
-                this.identify = Northwind.Helper.Uuid.get();
-            }
-            RawModel.prototype.initialize = function () {
-            };
-            RawModel.prototype.beforeInsert = function () {
-            };
-            RawModel.prototype.beforeFind = function () {
-            };
-            RawModel.prototype.beforeUpdate = function () {
-            };
-            RawModel.prototype.beforeDelete = function () {
-            };
-            /**
-             * [getClassName description]
-             * @return {[type]} [description]
-             */
-            RawModel.prototype.getClassName = function () {
-                var funcNameRegex = /function (.{1,})\(/;
-                var results = (funcNameRegex).exec(this["constructor"].toString());
-                return (results && results.length > 1) ? results[1] : "";
-            };
-            /**
-             *
-             */
-            RawModel.prototype.getIdentify = function () {
-                return this.identify;
-            };
-            return RawModel;
-        }());
-        Mvc.RawModel = RawModel;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
-/// <reference path="./RawModel.ts"/>
-var Northwind;
-/// <reference path="./RawModel.ts"/>
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var AjaxModel = (function (_super) {
-            __extends(AjaxModel, _super);
-            function AjaxModel() {
-                var _this = _super.call(this) || this;
-                _this.insertUrl = null;
-                _this.deleteUrl = null;
-                _this.updateUrl = null;
-                _this.findUrl = null;
-                _this.findOneUrl = null;
-                _this.countUrl = null;
-                _this.method = "POST";
-                _this.initialize();
-                return _this;
-            }
-            AjaxModel.prototype.setSource = function (data) {
-                this.setInsertUrl(data.insert);
-                this.setUpdateUrl(data.update);
-                this.setInsertUrl(data.insert);
-                this.setCountUrl(data.count);
-                this.setFindOneUrl(data.findOne);
-                this.setFindUrl(data.find);
-            };
-            AjaxModel.prototype.setInsertUrl = function (url) {
-                this.insertUrl = url;
-            };
-            AjaxModel.prototype.setFindUrl = function (url) {
-                this.findUrl = url;
-            };
-            AjaxModel.prototype.setFindOneUrl = function (url) {
-                this.findOneUrl = url;
-            };
-            AjaxModel.prototype.setCountUrl = function (url) {
-                this.countUrl = url;
-            };
-            AjaxModel.prototype.setDeleteUrl = function (url) {
-                this.deleteUrl = url;
-            };
-            AjaxModel.prototype.setUpdateUrl = function (url) {
-                this.updateUrl = url;
-            };
-            AjaxModel.prototype.getInsertUrl = function () {
-                return this.insertUrl;
-            };
-            AjaxModel.prototype.getFindUrl = function () {
-                return this.findUrl;
-            };
-            AjaxModel.prototype.getDeleteUrl = function () {
-                return this.deleteUrl;
-            };
-            AjaxModel.prototype.getUpdateUrl = function () {
-                return this.updateUrl;
-            };
-            AjaxModel.prototype.setParams = function (params) {
-                this.params = params;
-            };
-            AjaxModel.prototype.getParams = function () {
-                return this.params;
-            };
-            AjaxModel.prototype.setMethod = function (method) {
-                this.method = method;
-            };
-            AjaxModel.prototype.getMethod = function () {
-                return this.method;
-            };
-            return AjaxModel;
-        }(Northwind.Mvc.RawModel));
-        Mvc.AjaxModel = AjaxModel;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
-/// <reference path="./RawModel.ts"/>
-var Northwind;
-/// <reference path="./RawModel.ts"/>
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var StaticModel = (function (_super) {
-            __extends(StaticModel, _super);
-            /**
-             *
-             */
-            function StaticModel(di) {
-                var _this = _super.call(this) || this;
-                _this.setContainer(new Northwind.Service.Container());
-                _this.initialize();
-                return _this;
-            }
-            /**
-             *
-             */
-            StaticModel.prototype.setData = function (data) {
-                this.getContainer().setPersistent("Models_Identify_" + this.getClassName(), JSON.stringify(data));
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getData = function () {
-                var data = this.getContainer().getPersistent("Models_Identify_" + this.getClassName());
-                if (typeof data == "string") {
-                }
-                return data;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getObjectData = function () {
-                return JSON.parse(this.getContainer().getPersistent("Models_Identify_" + this.getClassName()));
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.setDi = function (di) {
-                this.di = di;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getDi = function () {
-                return this.di;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.setIndex = function (index) {
-                this.index = index;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getIndex = function () {
-                return this.index;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.setContainer = function (container) {
-                this.container = container;
-            };
-            /**
-             *
-             */
-            StaticModel.prototype.getContainer = function () {
-                return this.container;
-            };
-            return StaticModel;
-        }(Northwind.Mvc.RawModel));
-        Mvc.StaticModel = StaticModel;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
-/// <reference path="./StaticModel.ts"/>
-var Northwind;
-/// <reference path="./StaticModel.ts"/>
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var AjaxModelPersistent = (function (_super) {
-            __extends(AjaxModelPersistent, _super);
-            function AjaxModelPersistent() {
-                var _this = _super.apply(this, arguments) || this;
-                _this.insertUrl = null;
-                _this.deleteUrl = null;
-                _this.updateUrl = null;
-                _this.findUrl = null;
-                _this.method = "POST";
-                return _this;
-            }
-            AjaxModelPersistent.prototype.setSource = function (data) {
-                this.setInsertUrl(data.find);
-                this.setUpdateUrl(data.update);
-                this.setInsertUrl(data.insert);
-                this.setFindUrl(data.insert);
-            };
-            AjaxModelPersistent.prototype.setAjaxInit = function (value) {
-                this.getContainer().setPersistent("ajaxInit_" + this.getClassName(), value);
-            };
-            AjaxModelPersistent.prototype.getAjaxInit = function () {
-                return this.getContainer().getPersistent("ajaxInit_" + this.getClassName());
-            };
-            AjaxModelPersistent.prototype.setInsertUrl = function (url) {
-                this.insertUrl = url;
-            };
-            AjaxModelPersistent.prototype.setFindUrl = function (url) {
-                this.findUrl = url;
-            };
-            AjaxModelPersistent.prototype.setDeleteUrl = function (url) {
-                this.deleteUrl = url;
-            };
-            AjaxModelPersistent.prototype.setUpdateUrl = function (url) {
-                this.updateUrl = url;
-            };
-            AjaxModelPersistent.prototype.getInsertUrl = function () {
-                return this.insertUrl;
-            };
-            AjaxModelPersistent.prototype.getFindUrl = function () {
-                return this.findUrl;
-            };
-            AjaxModelPersistent.prototype.getDeleteUrl = function () {
-                return this.deleteUrl;
-            };
-            AjaxModelPersistent.prototype.getUpdateUrl = function () {
-                return this.updateUrl;
-            };
-            AjaxModelPersistent.prototype.setParams = function (params) {
-                this.params = params;
-            };
-            AjaxModelPersistent.prototype.getParams = function () {
-                return this.params;
-            };
-            AjaxModelPersistent.prototype.setMethod = function (method) {
-                this.method = method;
-            };
-            AjaxModelPersistent.prototype.getMethod = function () {
-                return this.method;
-            };
-            return AjaxModelPersistent;
-        }(Northwind.Mvc.StaticModel));
-        Mvc.AjaxModelPersistent = AjaxModelPersistent;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Transaction = (function () {
-            function Transaction() {
-            }
-            Transaction.prototype.get = function (row) {
-            };
-            return Transaction;
-        }());
-        Builder.Transaction = Transaction;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
-var Northwind;
-///<reference path="Transaction.ts"/>
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var And = (function (_super) {
-            __extends(And, _super);
-            /**
-             *
-             * @param condition
-             */
-            function And(condition) {
-                var _this = _super.call(this) || this;
-                /**
-                 *
-                 */
-                _this.condition = {};
-                if (typeof condition == "object") {
-                    _this.condition = condition;
-                }
-                else {
-                    throw "And condition must be an object";
-                }
-                return _this;
-            }
-            /**
-             *
-             */
-            And.prototype.get = function (row) {
-                var result = new Array();
-                var size = Object.keys(this.condition).length;
-                for (var key in row) {
-                    if (row[key] == this.condition[key]) {
-                        result.push(true);
-                    }
-                }
-                if (result.length != size) {
-                    return false;
-                }
-                for (var i = 1; i <= size; i++) {
-                    if (result[i] == false) {
-                        return false;
-                    }
-                }
-                return true;
-            };
-            return And;
-        }(Northwind.Builder.Transaction));
-        Builder.And = And;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var ComparisonOperators = (function () {
-            function ComparisonOperators() {
-            }
-            return ComparisonOperators;
-        }());
-        ComparisonOperators.AND = "&&";
-        ComparisonOperators.OR = "||";
-        ComparisonOperators.EQUAL = "==";
-        ComparisonOperators.DIFFERENT = "!=";
-        Builder.ComparisonOperators = ComparisonOperators;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var DataType = (function () {
+        var DataType = /** @class */ (function () {
             function DataType() {
             }
             /**
@@ -961,37 +894,68 @@ var Northwind;
                 }
                 return value;
             };
+            DataType.BOOLEAN = 1;
+            DataType.INTEGER = 2;
+            DataType.STRING = 3;
+            DataType.OBJECT = 4;
+            DataType.ARRAY = 5;
+            DataType.CLASS = 6;
+            DataType.BOOLEAN_TYPE = "boolean";
+            DataType.INTEGER_TYPE = "number";
+            DataType.STRING_TYPE = "string";
+            DataType.OBJECT_TYPE = "object";
             return DataType;
         }());
-        DataType.BOOLEAN = 1;
-        DataType.INTEGER = 2;
-        DataType.STRING = 3;
-        DataType.OBJECT = 4;
-        DataType.ARRAY = 5;
-        DataType.CLASS = 6;
-        DataType.BOOLEAN_TYPE = "boolean";
-        DataType.INTEGER_TYPE = "number";
-        DataType.STRING_TYPE = "string";
-        DataType.OBJECT_TYPE = "object";
         Builder.DataType = DataType;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
 var Northwind;
-///<reference path="Transaction.ts"/>
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Group = (function (_super) {
-            __extends(Group, _super);
-            function Group() {
-                return _super.call(this) || this;
+        var ComparisonOperators = /** @class */ (function () {
+            function ComparisonOperators() {
             }
-            Group.prototype.get = function () {
+            ComparisonOperators.AND = "&&";
+            ComparisonOperators.OR = "||";
+            ComparisonOperators.EQUAL = "==";
+            ComparisonOperators.DIFFERENT = "!=";
+            return ComparisonOperators;
+        }());
+        Builder.ComparisonOperators = ComparisonOperators;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Operators = /** @class */ (function () {
+            function Operators() {
+            }
+            Operators.OR = "$or";
+            Operators.AND = "$and";
+            Operators.SORT = "$sort";
+            Operators.IS_NOT = "$isNot";
+            Operators.LIMIT = "$limit";
+            Operators.COLUMNS = "$columns";
+            Operators.CONDITIONAL = "$conditions";
+            return Operators;
+        }());
+        Builder.Operators = Operators;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Transaction = /** @class */ (function () {
+            function Transaction() {
+            }
+            Transaction.prototype.get = function (row) {
             };
-            return Group;
-        }(Northwind.Builder.Transaction));
-        Builder.Group = Group;
+            return Transaction;
+        }());
+        Builder.Transaction = Transaction;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
 ///<reference path="DataType.ts" />
@@ -1002,7 +966,7 @@ var Northwind;
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Gt = (function (_super) {
+        var Gt = /** @class */ (function (_super) {
             __extends(Gt, _super);
             /**
              *
@@ -1054,7 +1018,7 @@ var Northwind;
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Gte = (function (_super) {
+        var Gte = /** @class */ (function (_super) {
             __extends(Gte, _super);
             /**
              *
@@ -1100,106 +1064,13 @@ var Northwind;
         Builder.Gte = Gte;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
-var Northwind;
-///<reference path="Transaction.ts"/>
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var In = (function (_super) {
-            __extends(In, _super);
-            /**
-             *
-             * @param condition
-             */
-            function In(condition) {
-                var _this = _super.call(this) || this;
-                /**
-                 *
-                 */
-                _this.conditions = new Array;
-                if (typeof condition == "object") {
-                    for (var key in condition) {
-                        if (condition[key] instanceof Array) {
-                            var row = condition[key];
-                            for (var key2 in row) {
-                                var value2 = Builder.DataType.getValueByType(row[key2]);
-                                _this.conditions.push("row[\"" + key + "\"]" + " == " + value2);
-                            }
-                        }
-                        else {
-                            throw "Not in value should be array";
-                        }
-                    }
-                }
-                else {
-                    throw "Not condition must be an object";
-                }
-                return _this;
-            }
-            In.prototype.get = function () {
-                return "(" + this.conditions.join(" || ") + ")";
-            };
-            return In;
-        }(Northwind.Builder.Transaction));
-        Builder.In = In;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="Transaction.ts"/>
-var Northwind;
-///<reference path="Transaction.ts"/>
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Like = (function (_super) {
-            __extends(Like, _super);
-            /**
-             *
-             * @param condition
-             */
-            function Like(condition) {
-                var _this = _super.call(this) || this;
-                /**
-                 *
-                 */
-                _this.condition = {};
-                if (typeof condition == "object") {
-                    _this.condition = condition;
-                    return _this;
-                }
-                throw "And condition must be an object";
-                return _this;
-            }
-            /**
-             *
-             */
-            Like.prototype.get = function (row) {
-                var result = new Array();
-                var size = Object.keys(this.condition).length;
-                for (var key in this.condition) {
-                    if (this.condition[key] != "" && typeof row[key] == "string") {
-                        //console.log("->", row[key], this.condition[key], this.condition[key].replace(/[^A-Za-z0-9\s]/g, ""));
-                        var regexp = new RegExp(this.condition[key], "i");
-                        if (regexp.test(row[key].replace(/([^a-z_0-9\s]+)/gi, ''))) {
-                            return true;
-                        }
-                        return false;
-                    }
-                }
-                return false;
-            };
-            return Like;
-        }(Northwind.Builder.Transaction));
-        Builder.Like = Like;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
 ///<reference path="DataType.ts" />
 var Northwind;
 ///<reference path="DataType.ts" />
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Lt = (function (_super) {
+        var Lt = /** @class */ (function (_super) {
             __extends(Lt, _super);
             /**
              *
@@ -1251,7 +1122,7 @@ var Northwind;
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Lte = (function (_super) {
+        var Lte = /** @class */ (function (_super) {
             __extends(Lte, _super);
             /**
              *
@@ -1303,7 +1174,104 @@ var Northwind;
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Not = (function (_super) {
+        var And = /** @class */ (function (_super) {
+            __extends(And, _super);
+            /**
+             *
+             * @param condition
+             */
+            function And(condition) {
+                var _this = _super.call(this) || this;
+                /**
+                 *
+                 */
+                _this.condition = {};
+                if (typeof condition == "object") {
+                    _this.condition = condition;
+                }
+                else {
+                    throw "And condition must be an object";
+                }
+                return _this;
+            }
+            /**
+             *
+             */
+            And.prototype.get = function (row) {
+                var result = new Array();
+                var size = Object.keys(this.condition).length;
+                for (var key in row) {
+                    if (row[key] == this.condition[key]) {
+                        result.push(true);
+                    }
+                }
+                if (result.length != size) {
+                    return false;
+                }
+                for (var i = 1; i <= size; i++) {
+                    if (result[i] == false) {
+                        return false;
+                    }
+                }
+                return true;
+            };
+            return And;
+        }(Northwind.Builder.Transaction));
+        Builder.And = And;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="DataType.ts" />
+var Northwind;
+///<reference path="DataType.ts" />
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var NotIn = /** @class */ (function (_super) {
+            __extends(NotIn, _super);
+            /**
+             *
+             * @param condition
+             */
+            function NotIn(condition) {
+                var _this = _super.call(this) || this;
+                /**
+                 *
+                 */
+                _this.conditions = new Array;
+                if (typeof condition == "object") {
+                    for (var key in condition) {
+                        if (condition[key] instanceof Array) {
+                            var row = condition[key];
+                            for (var key2 in row) {
+                                var value2 = Builder.DataType.getValueByType(row[key2]);
+                                _this.conditions.push("row[\"" + key + "\"]" + " != " + value2);
+                            }
+                        }
+                        else {
+                            throw "Not in value should be array";
+                        }
+                    }
+                }
+                else {
+                    throw "Not condition must be an object";
+                }
+                return _this;
+            }
+            NotIn.prototype.get = function () {
+                return "(" + this.conditions.join(" && ") + ")";
+            };
+            return NotIn;
+        }(Northwind.Builder.Transaction));
+        Builder.NotIn = NotIn;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="Transaction.ts"/>
+var Northwind;
+///<reference path="Transaction.ts"/>
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Not = /** @class */ (function (_super) {
             __extends(Not, _super);
             /**
              *
@@ -1346,19 +1314,19 @@ var Northwind;
         Builder.Not = Not;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="DataType.ts" />
+///<reference path="Transaction.ts"/>
 var Northwind;
-///<reference path="DataType.ts" />
+///<reference path="Transaction.ts"/>
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var NotIn = (function (_super) {
-            __extends(NotIn, _super);
+        var In = /** @class */ (function (_super) {
+            __extends(In, _super);
             /**
              *
              * @param condition
              */
-            function NotIn(condition) {
+            function In(condition) {
                 var _this = _super.call(this) || this;
                 /**
                  *
@@ -1370,7 +1338,7 @@ var Northwind;
                             var row = condition[key];
                             for (var key2 in row) {
                                 var value2 = Builder.DataType.getValueByType(row[key2]);
-                                _this.conditions.push("row[\"" + key + "\"]" + " != " + value2);
+                                _this.conditions.push("row[\"" + key + "\"]" + " == " + value2);
                             }
                         }
                         else {
@@ -1383,95 +1351,19 @@ var Northwind;
                 }
                 return _this;
             }
-            NotIn.prototype.get = function () {
-                return "(" + this.conditions.join(" && ") + ")";
+            In.prototype.get = function () {
+                return "(" + this.conditions.join(" || ") + ")";
             };
-            return NotIn;
+            return In;
         }(Northwind.Builder.Transaction));
-        Builder.NotIn = NotIn;
+        Builder.In = In;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
     var Builder;
     (function (Builder) {
-        var Operators = (function () {
-            function Operators() {
-            }
-            return Operators;
-        }());
-        Operators.OR = "$or";
-        Operators.AND = "$and";
-        Operators.SORT = "$sort";
-        Operators.IS_NOT = "$isNot";
-        Operators.LIMIT = "$limit";
-        Operators.COLUMNS = "$columns";
-        Operators.CONDITIONAL = "$conditions";
-        Builder.Operators = Operators;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="DataType.ts" />
-var Northwind;
-///<reference path="DataType.ts" />
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Or = (function (_super) {
-            __extends(Or, _super);
-            /**
-             *
-             * @param condition
-             */
-            function Or(condition) {
-                var _this = _super.call(this) || this;
-                /**
-                 *
-                 */
-                _this.condition = {};
-                if (typeof condition == "object") {
-                    _this.condition = condition;
-                }
-                else {
-                    throw "And condition must be an object";
-                }
-                return _this;
-            }
-            /**
-             *
-             */
-            Or.prototype.get = function (row) {
-                var result = new Array();
-                var size = Object.keys(this.condition).length;
-                if (this.condition instanceof Builder.Transaction) {
-                    result.push(this.condition.get(row));
-                }
-                for (var key in row) {
-                    if (this.condition[key] instanceof Builder.Transaction) {
-                        result.push(this.condition[key].get(row));
-                    }
-                    else {
-                        if (row[key] == this.condition[key]) {
-                            result.push(true);
-                        }
-                    }
-                }
-                for (var i = 0; i < size; i++) {
-                    if (result[i] == true) {
-                        return true;
-                    }
-                }
-                return false;
-            };
-            return Or;
-        }(Northwind.Builder.Transaction));
-        Builder.Or = Or;
-    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Builder;
-    (function (Builder) {
-        var Sort = (function () {
+        var Sort = /** @class */ (function () {
             function Sort() {
             }
             Sort.sortByField = function (data, field) {
@@ -1502,38 +1394,13 @@ var Northwind;
                 }
                 return result;
             };
+            Sort.ASC = 1;
+            Sort.DESC = -1;
             return Sort;
         }());
-        Sort.ASC = 1;
-        Sort.DESC = -1;
         Builder.Sort = Sort;
     })(Builder = Northwind.Builder || (Northwind.Builder = {}));
 })(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
-    var Mvc;
-    (function (Mvc) {
-        var Deny = (function () {
-            function Deny() {
-            }
-            Deny.getDeny = function () {
-                return [
-                    "state",
-                    "source",
-                    "insertUrl",
-                    "deleteUrl",
-                    "updateUrl",
-                    "findUrl",
-                    "params",
-                    "internalId",
-                    "method"
-                ];
-            };
-            return Deny;
-        }());
-        Mvc.Deny = Deny;
-    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
-})(Northwind || (Northwind = {}));
 /// <reference path="./Model/Builder/DataType.ts" />
 /// <reference path="./Model/Builder/ComparisonOperators.ts" />
 /// <reference path="./Model/Builder/Operators.ts" />
@@ -1562,7 +1429,7 @@ var Northwind;
 (function (Northwind) {
     var Mvc;
     (function (Mvc) {
-        var Query = (function () {
+        var Query = /** @class */ (function () {
             /**
              *
              * @param data
@@ -1771,16 +1638,1095 @@ var Northwind;
         Mvc.Query = Query;
     })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../0.ts"/>
+/// <reference path="../../Helper/Uuid.ts" />
 var Northwind;
-///<reference path="../../0.ts"/>
+/// <reference path="../../Helper/Uuid.ts" />
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var RawModel = /** @class */ (function () {
+            function RawModel() {
+                this.state = 1;
+                this.identify = Northwind.Helper.Uuid.get();
+            }
+            RawModel.prototype.initialize = function () {
+            };
+            RawModel.prototype.beforeInsert = function () {
+            };
+            RawModel.prototype.beforeFind = function () {
+            };
+            RawModel.prototype.beforeUpdate = function () {
+            };
+            RawModel.prototype.beforeDelete = function () {
+            };
+            /**
+             * [getClassName description]
+             * @return {[type]} [description]
+             */
+            RawModel.prototype.getClassName = function () {
+                var funcNameRegex = /function (.{1,})\(/;
+                var results = (funcNameRegex).exec(this["constructor"].toString());
+                return (results && results.length > 1) ? results[1] : "";
+            };
+            /**
+             *
+             */
+            RawModel.prototype.getIdentify = function () {
+                return this.identify;
+            };
+            return RawModel;
+        }());
+        Mvc.RawModel = RawModel;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="./RawModel.ts"/>
+var Northwind;
+/// <reference path="./RawModel.ts"/>
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var AjaxModel = /** @class */ (function (_super) {
+            __extends(AjaxModel, _super);
+            function AjaxModel() {
+                var _this = _super.call(this) || this;
+                _this.insertUrl = null;
+                _this.deleteUrl = null;
+                _this.updateUrl = null;
+                _this.findUrl = null;
+                _this.findOneUrl = null;
+                _this.countUrl = null;
+                _this.method = "POST";
+                _this.initialize();
+                return _this;
+            }
+            AjaxModel.prototype.setSource = function (data) {
+                this.setInsertUrl(data.insert);
+                this.setUpdateUrl(data.update);
+                this.setInsertUrl(data.insert);
+                this.setCountUrl(data.count);
+                this.setFindOneUrl(data.findOne);
+                this.setFindUrl(data.find);
+            };
+            AjaxModel.prototype.setInsertUrl = function (url) {
+                this.insertUrl = url;
+            };
+            AjaxModel.prototype.setFindUrl = function (url) {
+                this.findUrl = url;
+            };
+            AjaxModel.prototype.setFindOneUrl = function (url) {
+                this.findOneUrl = url;
+            };
+            AjaxModel.prototype.setCountUrl = function (url) {
+                this.countUrl = url;
+            };
+            AjaxModel.prototype.setDeleteUrl = function (url) {
+                this.deleteUrl = url;
+            };
+            AjaxModel.prototype.setUpdateUrl = function (url) {
+                this.updateUrl = url;
+            };
+            AjaxModel.prototype.getInsertUrl = function () {
+                return this.insertUrl;
+            };
+            AjaxModel.prototype.getFindUrl = function () {
+                return this.findUrl;
+            };
+            AjaxModel.prototype.getDeleteUrl = function () {
+                return this.deleteUrl;
+            };
+            AjaxModel.prototype.getUpdateUrl = function () {
+                return this.updateUrl;
+            };
+            AjaxModel.prototype.setParams = function (params) {
+                this.params = params;
+            };
+            AjaxModel.prototype.getParams = function () {
+                return this.params;
+            };
+            AjaxModel.prototype.setMethod = function (method) {
+                this.method = method;
+            };
+            AjaxModel.prototype.getMethod = function () {
+                return this.method;
+            };
+            return AjaxModel;
+        }(Northwind.Mvc.RawModel));
+        Mvc.AjaxModel = AjaxModel;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="./RawModel.ts"/>
+var Northwind;
+/// <reference path="./RawModel.ts"/>
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var StaticModel = /** @class */ (function (_super) {
+            __extends(StaticModel, _super);
+            /**
+             *
+             */
+            function StaticModel(di) {
+                var _this = _super.call(this) || this;
+                _this.setContainer(new Northwind.Service.Container());
+                _this.initialize();
+                return _this;
+            }
+            /**
+             *
+             */
+            StaticModel.prototype.setData = function (data) {
+                this.getContainer().setPersistent("Models_Identify_" + this.getClassName(), JSON.stringify(data));
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getData = function () {
+                var data = this.getContainer().getPersistent("Models_Identify_" + this.getClassName());
+                if (typeof data == "string") {
+                    //return this.getObjectData();
+                }
+                return data;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getObjectData = function () {
+                return JSON.parse(this.getContainer().getPersistent("Models_Identify_" + this.getClassName()));
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.setDi = function (di) {
+                this.di = di;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getDi = function () {
+                return this.di;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.setIndex = function (index) {
+                this.index = index;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getIndex = function () {
+                return this.index;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.setContainer = function (container) {
+                this.container = container;
+            };
+            /**
+             *
+             */
+            StaticModel.prototype.getContainer = function () {
+                return this.container;
+            };
+            return StaticModel;
+        }(Northwind.Mvc.RawModel));
+        Mvc.StaticModel = StaticModel;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+/// <reference path="./StaticModel.ts"/>
+var Northwind;
+/// <reference path="./StaticModel.ts"/>
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var AjaxModelPersistent = /** @class */ (function (_super) {
+            __extends(AjaxModelPersistent, _super);
+            function AjaxModelPersistent() {
+                var _this = _super !== null && _super.apply(this, arguments) || this;
+                _this.insertUrl = null;
+                _this.deleteUrl = null;
+                _this.updateUrl = null;
+                _this.findUrl = null;
+                _this.method = "POST";
+                return _this;
+            }
+            AjaxModelPersistent.prototype.setSource = function (data) {
+                this.setInsertUrl(data.find);
+                this.setUpdateUrl(data.update);
+                this.setInsertUrl(data.insert);
+                this.setFindUrl(data.insert);
+            };
+            AjaxModelPersistent.prototype.setAjaxInit = function (value) {
+                this.getContainer().setPersistent("ajaxInit_" + this.getClassName(), value);
+            };
+            AjaxModelPersistent.prototype.getAjaxInit = function () {
+                return this.getContainer().getPersistent("ajaxInit_" + this.getClassName());
+            };
+            AjaxModelPersistent.prototype.setInsertUrl = function (url) {
+                this.insertUrl = url;
+            };
+            AjaxModelPersistent.prototype.setFindUrl = function (url) {
+                this.findUrl = url;
+            };
+            AjaxModelPersistent.prototype.setDeleteUrl = function (url) {
+                this.deleteUrl = url;
+            };
+            AjaxModelPersistent.prototype.setUpdateUrl = function (url) {
+                this.updateUrl = url;
+            };
+            AjaxModelPersistent.prototype.getInsertUrl = function () {
+                return this.insertUrl;
+            };
+            AjaxModelPersistent.prototype.getFindUrl = function () {
+                return this.findUrl;
+            };
+            AjaxModelPersistent.prototype.getDeleteUrl = function () {
+                return this.deleteUrl;
+            };
+            AjaxModelPersistent.prototype.getUpdateUrl = function () {
+                return this.updateUrl;
+            };
+            AjaxModelPersistent.prototype.setParams = function (params) {
+                this.params = params;
+            };
+            AjaxModelPersistent.prototype.getParams = function () {
+                return this.params;
+            };
+            AjaxModelPersistent.prototype.setMethod = function (method) {
+                this.method = method;
+            };
+            AjaxModelPersistent.prototype.getMethod = function () {
+                return this.method;
+            };
+            return AjaxModelPersistent;
+        }(Northwind.Mvc.StaticModel));
+        Mvc.AjaxModelPersistent = AjaxModelPersistent;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var Mvc;
+    (function (Mvc) {
+        var Deny = /** @class */ (function () {
+            function Deny() {
+            }
+            Deny.getDeny = function () {
+                return [
+                    "state",
+                    "source",
+                    "insertUrl",
+                    "deleteUrl",
+                    "updateUrl",
+                    "findUrl",
+                    "params",
+                    "internalId",
+                    "method"
+                ];
+            };
+            return Deny;
+        }());
+        Mvc.Deny = Deny;
+    })(Mvc = Northwind.Mvc || (Northwind.Mvc = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="Transaction.ts"/>
+var Northwind;
+///<reference path="Transaction.ts"/>
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Group = /** @class */ (function (_super) {
+            __extends(Group, _super);
+            function Group() {
+                return _super.call(this) || this;
+            }
+            Group.prototype.get = function () {
+            };
+            return Group;
+        }(Northwind.Builder.Transaction));
+        Builder.Group = Group;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="Transaction.ts"/>
+var Northwind;
+///<reference path="Transaction.ts"/>
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Like = /** @class */ (function (_super) {
+            __extends(Like, _super);
+            /**
+             *
+             * @param condition
+             */
+            function Like(condition) {
+                var _this = _super.call(this) || this;
+                /**
+                 *
+                 */
+                _this.condition = {};
+                if (typeof condition == "object") {
+                    _this.condition = condition;
+                    return _this;
+                }
+                throw "And condition must be an object";
+                return _this;
+            }
+            /**
+             *
+             */
+            Like.prototype.get = function (row) {
+                var result = new Array();
+                var size = Object.keys(this.condition).length;
+                for (var key in this.condition) {
+                    if (this.condition[key] != "" && typeof row[key] == "string") {
+                        //console.log("->", row[key], this.condition[key], this.condition[key].replace(/[^A-Za-z0-9\s]/g, ""));
+                        var regexp = new RegExp(this.condition[key], "i");
+                        if (regexp.test(row[key].replace(/([^a-z_0-9\s]+)/gi, ''))) {
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+                return false;
+            };
+            return Like;
+        }(Northwind.Builder.Transaction));
+        Builder.Like = Like;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="DataType.ts" />
+var Northwind;
+///<reference path="DataType.ts" />
+(function (Northwind) {
+    var Builder;
+    (function (Builder) {
+        var Or = /** @class */ (function (_super) {
+            __extends(Or, _super);
+            /**
+             *
+             * @param condition
+             */
+            function Or(condition) {
+                var _this = _super.call(this) || this;
+                /**
+                 *
+                 */
+                _this.condition = {};
+                if (typeof condition == "object") {
+                    _this.condition = condition;
+                }
+                else {
+                    throw "And condition must be an object";
+                }
+                return _this;
+            }
+            /**
+             *
+             */
+            Or.prototype.get = function (row) {
+                var result = new Array();
+                var size = Object.keys(this.condition).length;
+                if (this.condition instanceof Builder.Transaction) {
+                    result.push(this.condition.get(row));
+                }
+                for (var key in row) {
+                    if (this.condition[key] instanceof Builder.Transaction) {
+                        result.push(this.condition[key].get(row));
+                    }
+                    else {
+                        if (row[key] == this.condition[key]) {
+                            result.push(true);
+                        }
+                    }
+                }
+                for (var i = 0; i < size; i++) {
+                    if (result[i] == true) {
+                        return true;
+                    }
+                }
+                return false;
+            };
+            return Or;
+        }(Northwind.Builder.Transaction));
+        Builder.Or = Or;
+    })(Builder = Northwind.Builder || (Northwind.Builder = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="./Container.ts"/>
+var Northwind;
+///<reference path="./Container.ts"/>
+(function (Northwind) {
+    var Service;
+    (function (Service) {
+        var DependencyInjector = /** @class */ (function () {
+            function DependencyInjector() {
+            }
+            DependencyInjector.getInstance = function () {
+                return new Northwind.Service.Container;
+            };
+            DependencyInjector.get = function () {
+                return DependencyInjector.di;
+            };
+            DependencyInjector.di = new Service.Container;
+            return DependencyInjector;
+        }());
+        Service.DependencyInjector = DependencyInjector;
+    })(Service = Northwind.Service || (Northwind.Service = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../../../Helper/ArrayHelper.ts"/>
+///<reference path="../../../Service/DependencyInjector.ts"/>
+var Northwind;
+///<reference path="../../../Helper/ArrayHelper.ts"/>
+///<reference path="../../../Service/DependencyInjector.ts"/>
+(function (Northwind) {
+    var Html;
+    (function (Html) {
+        /**
+         *
+         * @type
+         */
+        var Component = /** @class */ (function () {
+            /**
+             *
+             * @param
+             * @return
+             */
+            function Component(name, newClone) {
+                if (name === void 0) { name = ""; }
+                if (newClone === void 0) { newClone = false; }
+                /**
+                 *
+                 */
+                this.deny = ["Table", "Td", "Div", "Thead", "Tbody", "Tfoot", "Tr", "Td", "Th", "Label", "Span", "I", "A"];
+                /**
+                 *
+                 * @type
+                 */
+                this.url = "";
+                if (typeof name.nodeName != "undefined") {
+                    this.id = name.getAttribute("id");
+                    this.element = this.init(name.nodeName, this.id);
+                }
+                else if (typeof name.target != "undefined") {
+                    this.element = name.target;
+                }
+                else if (typeof name == "string") {
+                    this.id = name;
+                    this.element = this.init(name, name);
+                }
+                else {
+                    this.id = name;
+                    this.element = this.init(this.getClassName(), name);
+                }
+                return this;
+            }
+            /**
+             *
+             */
+            Component.prototype.initialize = function () {
+            };
+            /**
+             *
+             */
+            Component.prototype.setGlobals = function (globals) {
+                this.globals = globals;
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.getGlobals = function () {
+                return this.globals;
+            };
+            /**
+             *
+            public getArguments(args)
+            {
+                if (typeof args == "object") {
+                    let argsTemp = new Array();
+                    for (let i = 0; i < args.length; i++) {
+                        if (args[i] != "atmpnil" && !(args[i] instanceof Northwind.Mvc.Controller)) {
+                            argsTemp.push(args[i]);
+                        }
+                    }
+                    return argsTemp;
+                } else {
+                    return false
+                }
+            }
+            */
+            /**
+             *
+             */
+            Component.prototype.setId = function (id) {
+                this.attr("id", id);
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.getId = function () {
+                return this.attr("id");
+            };
+            /**
+             *
+             */
+            Component.prototype.setArgs = function (args) {
+                this.args = args;
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.getArgs = function () {
+                return this.args;
+            };
+            /**
+             *
+             */
+            Component.prototype.setElement = function (element) {
+                this.element = element;
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.setRequired = function (req) {
+                this.element.required = req;
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.getRequired = function () {
+                return this.element.required;
+            };
+            /**
+             *
+             */
+            Component.prototype.show = function () {
+                this.element.style.display = "";
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.hide = function () {
+                this.element.style.display = "none";
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.create = function (tag) {
+                this.element = this.init(tag, this.id);
+                return this;
+            };
+            /**
+             * Create html component like jquery object
+             *
+             * @param  {string} element [description]
+             * @param  {string} name    [description]
+             * @return ViewElement
+             */
+            Component.prototype.init = function (element, name) {
+                this.className = element;
+                var docElement = document.createElement(element);
+                if (element === "Button") {
+                    docElement.setAttribute("type", "button");
+                }
+                if (name !== "") {
+                    if (Northwind.Helper.ArrayHelper.inArray(this.deny, element)) {
+                        docElement.setAttribute("name", name);
+                    }
+                    docElement.setAttribute("id", name);
+                }
+                return docElement;
+            };
+            /**
+             *
+             * @return
+             */
+            Component.prototype.getType = function () {
+                return this.className;
+            };
+            /**
+             * Set class
+             * @param  {string} attrClass
+             * @return {this}  [description]
+             */
+            Component.prototype.class = function (attrClass) {
+                this.element.setAttribute("class", attrClass);
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.addClass = function (attrClass) {
+                var strClass = this.element.getAttribute("class");
+                strClass += " " + attrClass;
+                this.element.setAttribute("class", strClass);
+                return this;
+            };
+            /**
+             * Set inner html throught
+             */
+            Component.prototype.setInnerHtml = function (html) {
+                this.element.innerHTML = html;
+                return this.element;
+            };
+            /**
+             *
+             */
+            Component.prototype.getAttribute = function (attr) {
+                return this.element.getAttribute(attr);
+            };
+            /**
+             *
+             * @return {[type]} [description]
+             */
+            Component.prototype.addChild = function (element) {
+                this.element.append(element);
+                return this;
+            };
+            /*
+            public valueListener(fn : Function)
+            {
+                valueListenerNative.bind(this)(fn);
+                return this;
+            }
+            */
+            Component.prototype.destroyEvent = function (event) {
+                var nameEvent = "on" + event;
+                this.element.removeEventListener("click", this.element.nameEvent);
+            };
+            /**
+             *
+             */
+            Component.prototype.removeAttr = function (attr) {
+                this.element.removeAttribute(attr);
+                return this;
+            };
+            /**
+             * [get description]
+             * @return {[type]} [description]
+             */
+            Component.prototype.getElement = function () {
+                return this.element;
+            };
+            /**
+             * Append elements
+             * @param value append
+             * @return this
+             */
+            Component.prototype.append = function (append) {
+                if (Array.isArray(append) || (append instanceof HTMLCollection)) {
+                    for (var key in append) {
+                        this.checkAppendValue(append[key]);
+                    }
+                }
+                else {
+                    this.checkAppendValue(append);
+                }
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.data = function (key, value) {
+                if (value === void 0) { value = false; }
+                if (value) {
+                    this.getElement().data(key, value);
+                }
+                else {
+                    this.getElement().data(key);
+                }
+                return this;
+            };
+            /**
+             *
+             */
+            Component.prototype.checkAppendValue = function (append) {
+                switch (typeof append) {
+                    case "string":
+                        this.element.appendChild(document.createTextNode(append));
+                        break;
+                    case "number":
+                        this.element.appendChild(document.createTextNode(append.toString()));
+                        break;
+                    case "object":
+                        if (typeof append.getElement() != "undefined") {
+                            this.verifyElement(append.getElement());
+                        }
+                        else {
+                            this.verifyElement(append);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            };
+            /**
+             *
+             * @param  html [description]
+             * @return
+             */
+            Component.prototype.html = function (html) {
+                if (html === void 0) { html = null; }
+                if (html != null) {
+                    this.removeChildNodes();
+                    this.append(html);
+                    return this;
+                }
+                else {
+                    return this.element.innerHTML;
+                }
+            };
+            /**
+             *
+             */
+            Component.prototype.verifyElement = function (append, type) {
+                if (type === void 0) { type = "append"; }
+                if (this.element instanceof HTMLCollection) {
+                    for (var key in this.element) {
+                        if (typeof this.element[key].nodeType != "undefined") {
+                            if (this.element[key].nodeType == 1) {
+                                this.element[key].appendChild(append);
+                            }
+                        }
+                    }
+                }
+                else {
+                    this.element.appendChild(append);
+                }
+            };
+            /**
+             *
+             */
+            Component.prototype.removeChildNodes = function () {
+                if (this.element instanceof HTMLCollection) {
+                    for (var key in this.element) {
+                        this.removeChilds(this.element[key], this.element[key].childNodes);
+                    }
+                }
+                else {
+                    this.removeChilds(this.element, this.element.childNodes);
+                }
+            };
+            /**
+             *
+             */
+            Component.prototype.removeChilds = function (element, childs) {
+                while (element.firstChild) {
+                    element.removeChild(element.firstChild);
+                }
+            };
+            /**
+             *
+             * @param attr
+             * @return
+             */
+            Component.prototype.attr = function (attr, value) {
+                if (value === void 0) { value = false; }
+                if (typeof attr == "object" && value == false) {
+                    for (var key in attr) {
+                        this.element.setAttribute(key, attr[key]);
+                    }
+                }
+                else if (typeof attr == "string" && value != false) {
+                    this.element.setAttribute(attr, value);
+                }
+                else if (typeof attr == "string" && value == false) {
+                    return this.element.getAttribute(attr);
+                }
+                return this;
+            };
+            /**
+             * [css description]
+             * @param   css [description]
+             * @return
+             */
+            Component.prototype.css = function (css, value) {
+                if (value === void 0) { value = null; }
+                if (typeof css == "object") {
+                    for (var key in css) {
+                        this.element.style[key] = css[key];
+                    }
+                }
+                else if (typeof css == "string" && value != null) {
+                    this.element.style[css] = value;
+                }
+                else if (typeof css == "string" && value == null) {
+                    return this.element.style[css];
+                }
+                return this;
+            };
+            /**
+             *
+             * @param  {[type]} event [description]
+             * @return {[type]}       [description]
+             */
+            Component.prototype.unbind = function (event) {
+                this.element.destroyEvent(event);
+                return this;
+            };
+            /**
+             * [getClassName description]
+             * @return {[type]} [description]
+             */
+            Component.prototype.getClassName = function () {
+                var funcNameRegex = /function (.{1,})\(/;
+                var results = (funcNameRegex).exec(this["constructor"].toString());
+                return (results && results.length > 1) ? results[1] : "";
+            };
+            /**
+             * [validateAndSet description]
+             * @param  {[type]} config [description]
+             * @return {[type]}        [description]
+             */
+            Component.prototype.validateAndSet = function (config) {
+                try {
+                    if (typeof config.name === "undefined") {
+                        throw "The identify is required";
+                    }
+                    else if (typeof config.element === "undefined") {
+                        throw "The type element is required";
+                    }
+                    else if (typeof config.event !== "undefined") {
+                    }
+                }
+                catch (e) {
+                    console.log(e);
+                }
+            };
+            /**
+             *
+             * @param  {any = null}        val [description]
+             * @return {[type]}   [description]
+             */
+            Component.prototype.val = function (val) {
+                if (val === void 0) { val = false; }
+                if (val || typeof val == "string") {
+                    this.element.value = val;
+                    this.attr("value", val);
+                    return this;
+                }
+                else {
+                    return this.element.value;
+                }
+            };
+            /**
+             *
+             */
+            Component.prototype.valAsInt = function () {
+                return parseInt(this.val());
+            };
+            /**
+             * zzzz
+             * @param  {any = null}        text [description]
+             * @return {[type]}   [description]
+             */
+            Component.prototype.text = function (text) {
+                if (text === void 0) { text = false; }
+                if (text) {
+                    this.element.innerHtml = text;
+                    return this;
+                }
+                else {
+                    return this.element.innerHtml;
+                }
+            };
+            /**
+             *
+             */
+            Component.prototype.empty = function () {
+                this.removeChildNodes();
+                return this;
+            };
+            /**
+             *
+             *
+             * */
+            Component.prototype.getChilds = function () {
+                var childNodes = this.element.childNodes;
+                var childs = new Array();
+                for (var key in childNodes) {
+                    if (childNodes[key].nodeType == 1) {
+                        var adapter = new Northwind.Tag.TagAdapter(childNodes[key]);
+                        var tagObject = adapter.get();
+                        tagObject.setDi(this.getDi());
+                        childs.push(tagObject);
+                    }
+                }
+                return childs;
+            };
+            /*
+            public getSiblings()
+            {
+                let siblings = this.getParent().getChilds();
+                if (siblings.length > 0) {
+                    let aux = new Array;
+                    for (let item of siblings) {
+                        if (item.getElement() != this.getElement()) {
+                            aux.push(item);
+                        }
+                    }
+                    return aux;
+                }
+                return false;
+            }
+            */
+            /*
+            public getParent()
+            {
+                let parent = this.element.parentElement;
+                if (parent.nodeType == 1) {
+                    let adapter = new Northwind.Tag.TagAdapter(
+                        parent
+                    );
+                    let tagObject = adapter.get();
+                    tagObject.setDi(this.getDi());
+                    return tagObject;
+                }
+                return false;
+            }
+            */
+            /**
+             *
+            public getAsObject() : any[]
+            {
+                let childs = this.element.childNodes;
+                let obj    = new Array();
+    
+                if (childs instanceof NodeList) {
+                    for (let key in childs) {
+                        if (typeof childs[key].nodeType != "undefined") {
+                            switch (childs[key].nodeType) {
+                                case Node.ELEMENT_NODE:
+                                        let adapter = new Northwind.Tag.TagAdapter(
+                                            childs[key]
+                                        );
+                                        let auxElement = adapter.get();
+                                        auxElement.setDi(
+                                            this.getDi()
+                                        );
+                                        let finalObj  = {};
+                                        let auxObject = auxElement.getAsObject();
+                                        finalObj[auxElement.getClassName().toLowerCase()] = auxObject;
+                                        if (auxObject.length > 0) {
+                                            obj.push(finalObj);
+                                        }
+                                    break;
+                                case Node.TEXT_NODE:
+                                        obj.push(
+                                            childs[key].nodeValue
+                                        );
+                                    break;
+                            }
+                        }
+                    }
+                }
+                return obj;
+            }
+            */
+            /**
+             *
+            public getAsJson()
+            {
+                let objects = this.getAsObject();
+                return JSON.stringify(
+                    objects
+                );
+            }
+            */
+            /**
+             *
+             */
+            Component.prototype.remove = function (element) {
+                if (element === void 0) { element = false; }
+                if (element) {
+                    this.getElement().removeChild(element);
+                }
+                else {
+                    this.getElement().parentElement.removeChild(this.getElement());
+                }
+            };
+            Component.prototype.getMyId = function () {
+                var str = this.getClassName() + JSON.stringify(this);
+                window.btoa(encodeURIComponent(str));
+            };
+            Component.prototype.getDom = function () {
+                return Northwind.Service.DependencyInjector.get().get("dom");
+            };
+            Component.prototype.getAjax = function () {
+                return Northwind.Service.DependencyInjector.get().get("ajax");
+            };
+            Component.prototype.getEm = function () {
+                return Northwind.Service.DependencyInjector.get().get("em");
+            };
+            Component.prototype.getContainer = function () {
+                return Northwind.Service.DependencyInjector.get().get("container");
+            };
+            /**
+             *
+             * @param name
+            public getTag(tag : any)
+            {
+                if (tag instanceof Northwind.Html.Component) {
+                    return Northwind.Service.DependencyInjector.get().get("tag").tag(
+                        tag
+                    );
+                } else {
+                    return Northwind.Service.DependencyInjector.get().get(
+                        "tag"
+                    );
+                }
+            }
+            */
+            /**
+             *
+             */
+            Component.prototype.getUrl = function () {
+                var url = Northwind.Service.DependencyInjector.get().get("url");
+                return url;
+            };
+            /**
+             *
+             * @param tag
+            public getEvent(tag : any = false)
+            {
+                let events = Northwind.Service.DependencyInjector.get().get(
+                    "event"
+                );
+                if (tag instanceof Northwind.Html.Component) {
+                    return events.tag(tag);
+                } else {
+                    return events;
+                }
+            }
+            */
+            Component.prototype.getDi = function () {
+                return Northwind.Service.DependencyInjector.get();
+            };
+            /**
+             *
+             */
+            Component.NO_CONTEXT = 1;
+            return Component;
+        }());
+        Html.Component = Component;
+    })(Html = Northwind.Html || (Northwind.Html = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../Component.ts"/>
+var Northwind;
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
         /**
          *
          */
-        var A = (function (_super) {
+        var A = /** @class */ (function (_super) {
             __extends(A, _super);
             /**
              *
@@ -1788,7 +2734,6 @@ var Northwind;
             function A() {
                 var _this = _super.call(this, "A") || this;
                 _this.href("");
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1816,9 +2761,9 @@ var Northwind;
         Tag.A = A;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1826,14 +2771,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Abbr = (function (_super) {
+        var Abbr = /** @class */ (function (_super) {
             __extends(Abbr, _super);
             /**
              *
              */
             function Abbr() {
                 var _this = _super.call(this, "ABBR") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1842,9 +2786,9 @@ var Northwind;
         Tag.Abbr = Abbr;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1852,14 +2796,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Address = (function (_super) {
+        var Address = /** @class */ (function (_super) {
             __extends(Address, _super);
             /**
              *
              */
             function Address() {
                 var _this = _super.call(this, "ADDRESS") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1868,9 +2811,9 @@ var Northwind;
         Tag.Address = Address;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1878,14 +2821,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Area = (function (_super) {
+        var Area = /** @class */ (function (_super) {
             __extends(Area, _super);
             /**
              *
              */
             function Area() {
                 var _this = _super.call(this, "AREA") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1894,9 +2836,9 @@ var Northwind;
         Tag.Area = Area;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1904,14 +2846,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Article = (function (_super) {
+        var Article = /** @class */ (function (_super) {
             __extends(Article, _super);
             /**
              *
              */
             function Article() {
                 var _this = _super.call(this, "ARTICLE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1920,9 +2861,9 @@ var Northwind;
         Tag.Article = Article;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1930,14 +2871,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Aside = (function (_super) {
+        var Aside = /** @class */ (function (_super) {
             __extends(Aside, _super);
             /**
              *
              */
             function Aside() {
                 var _this = _super.call(this, "ASIDE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1946,9 +2886,9 @@ var Northwind;
         Tag.Aside = Aside;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1956,14 +2896,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Audio = (function (_super) {
+        var Audio = /** @class */ (function (_super) {
             __extends(Audio, _super);
             /**
              *
              */
             function Audio() {
                 var _this = _super.call(this, "AUDIO") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1972,9 +2911,9 @@ var Northwind;
         Tag.Audio = Audio;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -1982,14 +2921,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var B = (function (_super) {
+        var B = /** @class */ (function (_super) {
             __extends(B, _super);
             /**
              *
              */
             function B() {
                 var _this = _super.call(this, "B") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -1998,9 +2936,9 @@ var Northwind;
         Tag.B = B;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2008,14 +2946,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Base = (function (_super) {
+        var Base = /** @class */ (function (_super) {
             __extends(Base, _super);
             /**
              *
              */
             function Base() {
                 var _this = _super.call(this, "BASE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2024,9 +2961,9 @@ var Northwind;
         Tag.Base = Base;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2034,14 +2971,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Bdi = (function (_super) {
+        var Bdi = /** @class */ (function (_super) {
             __extends(Bdi, _super);
             /**
              *
              */
             function Bdi() {
                 var _this = _super.call(this, "BDI") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2050,9 +2986,9 @@ var Northwind;
         Tag.Bdi = Bdi;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2060,14 +2996,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Bdo = (function (_super) {
+        var Bdo = /** @class */ (function (_super) {
             __extends(Bdo, _super);
             /**
              *
              */
             function Bdo() {
                 var _this = _super.call(this, "BDO") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2076,9 +3011,9 @@ var Northwind;
         Tag.Bdo = Bdo;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2086,14 +3021,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Blockquote = (function (_super) {
+        var Blockquote = /** @class */ (function (_super) {
             __extends(Blockquote, _super);
             /**
              *
              */
             function Blockquote() {
                 var _this = _super.call(this, "BLOCKQUOTE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2102,9 +3036,9 @@ var Northwind;
         Tag.Blockquote = Blockquote;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2112,12 +3046,11 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Body = (function (_super) {
+        var Body = /** @class */ (function (_super) {
             __extends(Body, _super);
             function Body() {
                 var _this = _super.call(this) || this;
                 _this.element = document.body;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2126,9 +3059,9 @@ var Northwind;
         Tag.Body = Body;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2136,14 +3069,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Br = (function (_super) {
+        var Br = /** @class */ (function (_super) {
             __extends(Br, _super);
             /**
              *
              */
             function Br() {
                 var _this = _super.call(this, "BR") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2152,16 +3084,16 @@ var Northwind;
         Tag.Br = Br;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
         /**
          *
          */
-        var Button = (function (_super) {
+        var Button = /** @class */ (function (_super) {
             __extends(Button, _super);
             /**
              *
@@ -2169,7 +3101,6 @@ var Northwind;
             function Button() {
                 var _this = _super.call(this, "BUTTON") || this;
                 _this.attr("type", "button");
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2245,9 +3176,9 @@ var Northwind;
         Tag.Button = Button;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2255,14 +3186,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Canvas = (function (_super) {
+        var Canvas = /** @class */ (function (_super) {
             __extends(Canvas, _super);
             /**
              *
              */
             function Canvas() {
                 var _this = _super.call(this, "CANVAS") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2271,9 +3201,9 @@ var Northwind;
         Tag.Canvas = Canvas;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2281,14 +3211,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Caption = (function (_super) {
+        var Caption = /** @class */ (function (_super) {
             __extends(Caption, _super);
             /**
              *
              */
             function Caption() {
                 var _this = _super.call(this, "CAPTION") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2297,9 +3226,9 @@ var Northwind;
         Tag.Caption = Caption;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2307,14 +3236,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Cite = (function (_super) {
+        var Cite = /** @class */ (function (_super) {
             __extends(Cite, _super);
             /**
              *
              */
             function Cite() {
                 var _this = _super.call(this, "CITE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2323,9 +3251,9 @@ var Northwind;
         Tag.Cite = Cite;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2333,14 +3261,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Code = (function (_super) {
+        var Code = /** @class */ (function (_super) {
             __extends(Code, _super);
             /**
              *
              */
             function Code() {
                 var _this = _super.call(this, "CODE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2349,9 +3276,9 @@ var Northwind;
         Tag.Code = Code;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2359,14 +3286,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Col = (function (_super) {
+        var Col = /** @class */ (function (_super) {
             __extends(Col, _super);
             /**
              *
              */
             function Col() {
                 var _this = _super.call(this, "COL") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2375,9 +3301,9 @@ var Northwind;
         Tag.Col = Col;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2385,14 +3311,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var ColGroup = (function (_super) {
+        var ColGroup = /** @class */ (function (_super) {
             __extends(ColGroup, _super);
             /**
              *
              */
             function ColGroup() {
                 var _this = _super.call(this, "COLGROUP") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2401,9 +3326,9 @@ var Northwind;
         Tag.ColGroup = ColGroup;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2411,14 +3336,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Datalist = (function (_super) {
+        var Datalist = /** @class */ (function (_super) {
             __extends(Datalist, _super);
             /**
              *
              */
             function Datalist() {
                 var _this = _super.call(this, "DETAILS") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2427,9 +3351,9 @@ var Northwind;
         Tag.Datalist = Datalist;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2437,14 +3361,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Db = (function (_super) {
+        var Db = /** @class */ (function (_super) {
             __extends(Db, _super);
             /**
              *
              */
             function Db() {
                 var _this = _super.call(this, "DB") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2453,9 +3376,9 @@ var Northwind;
         Tag.Db = Db;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2463,14 +3386,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Del = (function (_super) {
+        var Del = /** @class */ (function (_super) {
             __extends(Del, _super);
             /**
              *
              */
             function Del() {
                 var _this = _super.call(this, "DEL") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2479,9 +3401,9 @@ var Northwind;
         Tag.Del = Del;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2489,14 +3411,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Details = (function (_super) {
+        var Details = /** @class */ (function (_super) {
             __extends(Details, _super);
             /**
              *
              */
             function Details() {
                 var _this = _super.call(this, "DETAILS") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2505,9 +3426,9 @@ var Northwind;
         Tag.Details = Details;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2515,14 +3436,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Dfn = (function (_super) {
+        var Dfn = /** @class */ (function (_super) {
             __extends(Dfn, _super);
             /**
              *
              */
             function Dfn() {
                 var _this = _super.call(this, "DFN") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2531,9 +3451,9 @@ var Northwind;
         Tag.Dfn = Dfn;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2541,14 +3461,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Dialog = (function (_super) {
+        var Dialog = /** @class */ (function (_super) {
             __extends(Dialog, _super);
             /**
              *
              */
             function Dialog() {
                 var _this = _super.call(this, "DIALOG") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2557,9 +3476,9 @@ var Northwind;
         Tag.Dialog = Dialog;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2567,14 +3486,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Div = (function (_super) {
+        var Div = /** @class */ (function (_super) {
             __extends(Div, _super);
             /**
              *
              */
             function Div() {
                 var _this = _super.call(this, "DIV") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2583,9 +3501,9 @@ var Northwind;
         Tag.Div = Div;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2593,14 +3511,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Dl = (function (_super) {
+        var Dl = /** @class */ (function (_super) {
             __extends(Dl, _super);
             /**
              *
              */
             function Dl() {
                 var _this = _super.call(this, "DL") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2609,9 +3526,9 @@ var Northwind;
         Tag.Dl = Dl;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2619,14 +3536,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Dt = (function (_super) {
+        var Dt = /** @class */ (function (_super) {
             __extends(Dt, _super);
             /**
              *
              */
             function Dt() {
                 var _this = _super.call(this, "DT") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2635,9 +3551,9 @@ var Northwind;
         Tag.Dt = Dt;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2645,14 +3561,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Em = (function (_super) {
+        var Em = /** @class */ (function (_super) {
             __extends(Em, _super);
             /**
              *
              */
             function Em() {
                 var _this = _super.call(this, "EM") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2661,9 +3576,9 @@ var Northwind;
         Tag.Em = Em;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2671,14 +3586,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Embed = (function (_super) {
+        var Embed = /** @class */ (function (_super) {
             __extends(Embed, _super);
             /**
              *
              */
             function Embed() {
                 var _this = _super.call(this, "EMBED") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2687,9 +3601,9 @@ var Northwind;
         Tag.Embed = Embed;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2697,14 +3611,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Fieldset = (function (_super) {
+        var Fieldset = /** @class */ (function (_super) {
             __extends(Fieldset, _super);
             /**
              *
              */
             function Fieldset() {
                 var _this = _super.call(this, "FIELDSET") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2713,9 +3626,9 @@ var Northwind;
         Tag.Fieldset = Fieldset;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2723,14 +3636,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Figcaption = (function (_super) {
+        var Figcaption = /** @class */ (function (_super) {
             __extends(Figcaption, _super);
             /**
              *
              */
             function Figcaption() {
                 var _this = _super.call(this, "FIGCAPTION") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2739,9 +3651,9 @@ var Northwind;
         Tag.Figcaption = Figcaption;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2749,14 +3661,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Figure = (function (_super) {
+        var Figure = /** @class */ (function (_super) {
             __extends(Figure, _super);
             /**
              *
              */
             function Figure() {
                 var _this = _super.call(this, "FIGURE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2765,9 +3676,9 @@ var Northwind;
         Tag.Figure = Figure;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2775,14 +3686,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Footer = (function (_super) {
+        var Footer = /** @class */ (function (_super) {
             __extends(Footer, _super);
             /**
              *
              */
             function Footer() {
                 var _this = _super.call(this, "FOOTER") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2791,7 +3701,7 @@ var Northwind;
         Tag.Footer = Footer;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 /*
 function ValidationDecorator<TFunction extends Function>(target: TFunction): TFunction {
     Object.defineProperty(target.prototype, 'test', {
@@ -2804,7 +3714,7 @@ function ValidationDecorator<TFunction extends Function>(target: TFunction): TFu
 }
 */
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 /*
 function ValidationDecorator<TFunction extends Function>(target: TFunction): TFunction {
     Object.defineProperty(target.prototype, 'test', {
@@ -2823,7 +3733,7 @@ function ValidationDecorator<TFunction extends Function>(target: TFunction): TFu
          *
          * @type
          */
-        var Form = (function (_super) {
+        var Form = /** @class */ (function (_super) {
             __extends(Form, _super);
             /**
              *
@@ -2834,7 +3744,6 @@ function ValidationDecorator<TFunction extends Function>(target: TFunction): TFu
                  *
                  */
                 _this.invalidElements = new Array;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2917,9 +3826,9 @@ function ValidationDecorator<TFunction extends Function>(target: TFunction): TFu
         Tag.Form = Form;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2927,14 +3836,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var H1 = (function (_super) {
+        var H1 = /** @class */ (function (_super) {
             __extends(H1, _super);
             /**
              *
              */
             function H1() {
                 var _this = _super.call(this, "H1") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2943,9 +3851,9 @@ var Northwind;
         Tag.H1 = H1;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2953,14 +3861,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var H2 = (function (_super) {
+        var H2 = /** @class */ (function (_super) {
             __extends(H2, _super);
             /**
              *
              */
             function H2() {
                 var _this = _super.call(this, "H2") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2969,9 +3876,9 @@ var Northwind;
         Tag.H2 = H2;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -2979,14 +3886,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var H3 = (function (_super) {
+        var H3 = /** @class */ (function (_super) {
             __extends(H3, _super);
             /**
              *
              */
             function H3() {
                 var _this = _super.call(this, "H3") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -2995,9 +3901,9 @@ var Northwind;
         Tag.H3 = H3;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3005,14 +3911,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var H4 = (function (_super) {
+        var H4 = /** @class */ (function (_super) {
             __extends(H4, _super);
             /**
              *
              */
             function H4() {
                 var _this = _super.call(this, "H4") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3021,9 +3926,9 @@ var Northwind;
         Tag.H4 = H4;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3031,14 +3936,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var H5 = (function (_super) {
+        var H5 = /** @class */ (function (_super) {
             __extends(H5, _super);
             /**
              *
              */
             function H5() {
                 var _this = _super.call(this, "H5") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3047,9 +3951,9 @@ var Northwind;
         Tag.H5 = H5;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3057,14 +3961,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var H6 = (function (_super) {
+        var H6 = /** @class */ (function (_super) {
             __extends(H6, _super);
             /**
              *
              */
             function H6() {
                 var _this = _super.call(this, "H6") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3073,9 +3976,9 @@ var Northwind;
         Tag.H6 = H6;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3083,14 +3986,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Head = (function (_super) {
+        var Head = /** @class */ (function (_super) {
             __extends(Head, _super);
             /**
              *
              */
             function Head() {
                 var _this = _super.call(this, "HEAD") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3099,9 +4001,9 @@ var Northwind;
         Tag.Head = Head;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3109,14 +4011,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Header = (function (_super) {
+        var Header = /** @class */ (function (_super) {
             __extends(Header, _super);
             /**
              *
              */
             function Header() {
                 var _this = _super.call(this, "HEADER") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3125,9 +4026,9 @@ var Northwind;
         Tag.Header = Header;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3135,14 +4036,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var I = (function (_super) {
+        var I = /** @class */ (function (_super) {
             __extends(I, _super);
             /**
              *
              */
             function I() {
                 var _this = _super.call(this, "I") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3151,9 +4051,9 @@ var Northwind;
         Tag.I = I;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3161,14 +4061,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Iframe = (function (_super) {
+        var Iframe = /** @class */ (function (_super) {
             __extends(Iframe, _super);
             /**
              *
              */
             function Iframe() {
                 var _this = _super.call(this, "IFRAME") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3177,9 +4076,9 @@ var Northwind;
         Tag.Iframe = Iframe;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3187,14 +4086,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Img = (function (_super) {
+        var Img = /** @class */ (function (_super) {
             __extends(Img, _super);
             /**
              *
              */
             function Img() {
                 var _this = _super.call(this, "IMG") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3215,16 +4113,16 @@ var Northwind;
         Tag.Img = Img;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-/// <reference path="../../../Component.ts" />
+/// <reference path="../../Component.ts" />
 var Northwind;
-/// <reference path="../../../Component.ts" />
+/// <reference path="../../Component.ts" />
 (function (Northwind) {
     var Tag;
     (function (Tag) {
-        var FormTag = (function (_super) {
+        var FormTag = /** @class */ (function (_super) {
             __extends(FormTag, _super);
             function FormTag() {
-                return _super.apply(this, arguments) || this;
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             /**
              * Set form element property readonly
@@ -3408,10 +4306,10 @@ var Northwind;
         Tag.FormTag = FormTag;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 ///<reference path="./forms/FormTag.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 ///<reference path="./forms/FormTag.ts"/>
 (function (Northwind) {
     var Tag;
@@ -3420,14 +4318,13 @@ var Northwind;
          *
          * @type
          */
-        var Input = (function (_super) {
+        var Input = /** @class */ (function (_super) {
             __extends(Input, _super);
             /**
              *
              */
             function Input() {
                 var _this = _super.call(this, "INPUT") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3490,19 +4387,19 @@ var Northwind;
                 this.attr("type", "file");
                 return this;
             };
+            Input.NUMBERS = 0;
+            Input.TEXT = 1;
+            Input.NO_SPECIAL_CHARACTERS = 2;
+            Input.TEXT_NO_SPECIAL_CHARACTERS = 3;
+            Input.NUMBERS_NO_SPECIAL_CHARACTERS = 4;
             return Input;
         }(Northwind.Tag.FormTag));
-        Input.NUMBERS = 0;
-        Input.TEXT = 1;
-        Input.NO_SPECIAL_CHARACTERS = 2;
-        Input.TEXT_NO_SPECIAL_CHARACTERS = 3;
-        Input.NUMBERS_NO_SPECIAL_CHARACTERS = 4;
         Tag.Input = Input;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3510,14 +4407,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Ins = (function (_super) {
+        var Ins = /** @class */ (function (_super) {
             __extends(Ins, _super);
             /**
              *
              */
             function Ins() {
                 var _this = _super.call(this, "INS") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3526,9 +4422,9 @@ var Northwind;
         Tag.Ins = Ins;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3536,14 +4432,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Kbd = (function (_super) {
+        var Kbd = /** @class */ (function (_super) {
             __extends(Kbd, _super);
             /**
              *
              */
             function Kbd() {
                 var _this = _super.call(this, "KBD") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3552,9 +4447,9 @@ var Northwind;
         Tag.Kbd = Kbd;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3562,14 +4457,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Keygen = (function (_super) {
+        var Keygen = /** @class */ (function (_super) {
             __extends(Keygen, _super);
             /**
              *
              */
             function Keygen() {
                 var _this = _super.call(this, "KEYGEN") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3578,9 +4472,9 @@ var Northwind;
         Tag.Keygen = Keygen;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3588,14 +4482,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Label = (function (_super) {
+        var Label = /** @class */ (function (_super) {
             __extends(Label, _super);
             /**
              *
              */
             function Label() {
                 var _this = _super.call(this, "LABEL") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3604,9 +4497,9 @@ var Northwind;
         Tag.Label = Label;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3614,14 +4507,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Leyend = (function (_super) {
+        var Leyend = /** @class */ (function (_super) {
             __extends(Leyend, _super);
             /**
              *
              */
             function Leyend() {
                 var _this = _super.call(this, "LEYEND") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3630,9 +4522,9 @@ var Northwind;
         Tag.Leyend = Leyend;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3640,14 +4532,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Li = (function (_super) {
+        var Li = /** @class */ (function (_super) {
             __extends(Li, _super);
             /**
              *
              */
             function Li() {
                 var _this = _super.call(this, "LI") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3656,9 +4547,9 @@ var Northwind;
         Tag.Li = Li;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3666,14 +4557,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Link = (function (_super) {
+        var Link = /** @class */ (function (_super) {
             __extends(Link, _super);
             /**
              *
              */
             function Link() {
                 var _this = _super.call(this, "LINK") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3682,9 +4572,9 @@ var Northwind;
         Tag.Link = Link;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3692,14 +4582,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Main = (function (_super) {
+        var Main = /** @class */ (function (_super) {
             __extends(Main, _super);
             /**
              *
              */
             function Main() {
                 var _this = _super.call(this, "MAIN") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3708,9 +4597,9 @@ var Northwind;
         Tag.Main = Main;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3718,14 +4607,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Map = (function (_super) {
+        var Map = /** @class */ (function (_super) {
             __extends(Map, _super);
             /**
              *
              */
             function Map() {
                 var _this = _super.call(this, "MAP") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3734,9 +4622,9 @@ var Northwind;
         Tag.Map = Map;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3744,14 +4632,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Menu = (function (_super) {
+        var Menu = /** @class */ (function (_super) {
             __extends(Menu, _super);
             /**
              *
              */
             function Menu() {
                 var _this = _super.call(this, "MENU") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3760,9 +4647,9 @@ var Northwind;
         Tag.Menu = Menu;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3770,14 +4657,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Menuitem = (function (_super) {
+        var Menuitem = /** @class */ (function (_super) {
             __extends(Menuitem, _super);
             /**
              *
              */
             function Menuitem() {
                 var _this = _super.call(this, "MENUITEM") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3786,9 +4672,9 @@ var Northwind;
         Tag.Menuitem = Menuitem;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3796,14 +4682,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Meta = (function (_super) {
+        var Meta = /** @class */ (function (_super) {
             __extends(Meta, _super);
             /**
              *
              */
             function Meta() {
                 var _this = _super.call(this, "META") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3812,9 +4697,9 @@ var Northwind;
         Tag.Meta = Meta;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3822,14 +4707,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Meter = (function (_super) {
+        var Meter = /** @class */ (function (_super) {
             __extends(Meter, _super);
             /**
              *
              */
             function Meter() {
                 var _this = _super.call(this, "METER") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3838,9 +4722,9 @@ var Northwind;
         Tag.Meter = Meter;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3848,14 +4732,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Nav = (function (_super) {
+        var Nav = /** @class */ (function (_super) {
             __extends(Nav, _super);
             /**
              *
              */
             function Nav() {
                 var _this = _super.call(this, "NAV") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3864,9 +4747,9 @@ var Northwind;
         Tag.Nav = Nav;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3874,14 +4757,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Noscrip = (function (_super) {
+        var Noscrip = /** @class */ (function (_super) {
             __extends(Noscrip, _super);
             /**
              *
              */
             function Noscrip() {
                 var _this = _super.call(this, "NOSCRIP") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3890,9 +4772,9 @@ var Northwind;
         Tag.Noscrip = Noscrip;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3900,14 +4782,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Obj = (function (_super) {
+        var Obj = /** @class */ (function (_super) {
             __extends(Obj, _super);
             /**
              *
              */
             function Obj() {
                 var _this = _super.call(this, "OBJ") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3916,9 +4797,9 @@ var Northwind;
         Tag.Obj = Obj;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3926,14 +4807,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Ol = (function (_super) {
+        var Ol = /** @class */ (function (_super) {
             __extends(Ol, _super);
             /**
              *
              */
             function Ol() {
                 var _this = _super.call(this, "OL") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3942,9 +4822,9 @@ var Northwind;
         Tag.Ol = Ol;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3952,14 +4832,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Optgroup = (function (_super) {
+        var Optgroup = /** @class */ (function (_super) {
             __extends(Optgroup, _super);
             /**
              *
              */
             function Optgroup() {
                 var _this = _super.call(this, "OPTGROUP") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -3968,9 +4847,9 @@ var Northwind;
         Tag.Optgroup = Optgroup;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -3978,14 +4857,13 @@ var Northwind;
          *
          * @type
          */
-        var Option = (function (_super) {
+        var Option = /** @class */ (function (_super) {
             __extends(Option, _super);
             /**
              *
              */
             function Option() {
                 var _this = _super.call(this, "OPTION") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4017,9 +4895,9 @@ var Northwind;
         Tag.Option = Option;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4027,14 +4905,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Output = (function (_super) {
+        var Output = /** @class */ (function (_super) {
             __extends(Output, _super);
             /**
              *
              */
             function Output() {
                 var _this = _super.call(this, "OUTPUT") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4043,9 +4920,9 @@ var Northwind;
         Tag.Output = Output;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4053,14 +4930,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var P = (function (_super) {
+        var P = /** @class */ (function (_super) {
             __extends(P, _super);
             /**
              *
              */
             function P() {
                 var _this = _super.call(this, "P") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4069,9 +4945,9 @@ var Northwind;
         Tag.P = P;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4079,14 +4955,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Param = (function (_super) {
+        var Param = /** @class */ (function (_super) {
             __extends(Param, _super);
             /**
              *
              */
             function Param() {
                 var _this = _super.call(this, "PARAM") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4095,9 +4970,9 @@ var Northwind;
         Tag.Param = Param;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4105,14 +4980,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Pre = (function (_super) {
+        var Pre = /** @class */ (function (_super) {
             __extends(Pre, _super);
             /**
              *
              */
             function Pre() {
                 var _this = _super.call(this, "PRE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4121,9 +4995,9 @@ var Northwind;
         Tag.Pre = Pre;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4131,14 +5005,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Progress = (function (_super) {
+        var Progress = /** @class */ (function (_super) {
             __extends(Progress, _super);
             /**
              *
              */
             function Progress() {
                 var _this = _super.call(this, "PROGRESS") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4147,9 +5020,9 @@ var Northwind;
         Tag.Progress = Progress;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4157,14 +5030,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Q = (function (_super) {
+        var Q = /** @class */ (function (_super) {
             __extends(Q, _super);
             /**
              *
              */
             function Q() {
                 var _this = _super.call(this, "Q") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4173,9 +5045,9 @@ var Northwind;
         Tag.Q = Q;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4183,14 +5055,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Rp = (function (_super) {
+        var Rp = /** @class */ (function (_super) {
             __extends(Rp, _super);
             /**
              *
              */
             function Rp() {
                 var _this = _super.call(this, "RP") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4199,9 +5070,9 @@ var Northwind;
         Tag.Rp = Rp;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4209,14 +5080,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Rt = (function (_super) {
+        var Rt = /** @class */ (function (_super) {
             __extends(Rt, _super);
             /**
              *
              */
             function Rt() {
                 var _this = _super.call(this, "RT") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4225,9 +5095,9 @@ var Northwind;
         Tag.Rt = Rt;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4235,14 +5105,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Ruby = (function (_super) {
+        var Ruby = /** @class */ (function (_super) {
             __extends(Ruby, _super);
             /**
              *
              */
             function Ruby() {
                 var _this = _super.call(this, "RUBY") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4251,9 +5120,9 @@ var Northwind;
         Tag.Ruby = Ruby;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4261,14 +5130,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var S = (function (_super) {
+        var S = /** @class */ (function (_super) {
             __extends(S, _super);
             /**
              *
              */
             function S() {
                 var _this = _super.call(this, "S") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4277,9 +5145,9 @@ var Northwind;
         Tag.S = S;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4287,14 +5155,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Samp = (function (_super) {
+        var Samp = /** @class */ (function (_super) {
             __extends(Samp, _super);
             /**
              *
              */
             function Samp() {
                 var _this = _super.call(this, "SAMP") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4303,9 +5170,9 @@ var Northwind;
         Tag.Samp = Samp;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4313,14 +5180,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Script = (function (_super) {
+        var Script = /** @class */ (function (_super) {
             __extends(Script, _super);
             /**
              *
              */
             function Script() {
                 var _this = _super.call(this, "SCRIPT") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4329,9 +5195,9 @@ var Northwind;
         Tag.Script = Script;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4339,14 +5205,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Section = (function (_super) {
+        var Section = /** @class */ (function (_super) {
             __extends(Section, _super);
             /**
              *
              */
             function Section() {
                 var _this = _super.call(this, "SECTION") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4355,13 +5220,13 @@ var Northwind;
         Tag.Section = Section;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
-        var Select = (function (_super) {
+        var Select = /** @class */ (function (_super) {
             __extends(Select, _super);
             /**
              *
@@ -4369,7 +5234,6 @@ var Northwind;
             function Select() {
                 var _this = _super.call(this, "SELECT") || this;
                 _this.choose = "Choose...";
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4441,9 +5305,9 @@ var Northwind;
         Tag.Select = Select;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4451,14 +5315,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Small = (function (_super) {
+        var Small = /** @class */ (function (_super) {
             __extends(Small, _super);
             /**
              *
              */
             function Small() {
                 var _this = _super.call(this, "SMALL") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4467,9 +5330,9 @@ var Northwind;
         Tag.Small = Small;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4477,14 +5340,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Source = (function (_super) {
+        var Source = /** @class */ (function (_super) {
             __extends(Source, _super);
             /**
              *
              */
             function Source() {
                 var _this = _super.call(this, "SOURCE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4493,9 +5355,9 @@ var Northwind;
         Tag.Source = Source;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4503,14 +5365,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Span = (function (_super) {
+        var Span = /** @class */ (function (_super) {
             __extends(Span, _super);
             /**
              *
              */
             function Span() {
                 var _this = _super.call(this, "SPAN") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4519,9 +5380,9 @@ var Northwind;
         Tag.Span = Span;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4529,14 +5390,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Strong = (function (_super) {
+        var Strong = /** @class */ (function (_super) {
             __extends(Strong, _super);
             /**
              *
              */
             function Strong() {
                 var _this = _super.call(this, "STRONG") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4545,9 +5405,9 @@ var Northwind;
         Tag.Strong = Strong;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4555,14 +5415,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Style = (function (_super) {
+        var Style = /** @class */ (function (_super) {
             __extends(Style, _super);
             /**
              *
              */
             function Style() {
                 var _this = _super.call(this, "STYLE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4571,9 +5430,9 @@ var Northwind;
         Tag.Style = Style;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4581,14 +5440,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Sub = (function (_super) {
+        var Sub = /** @class */ (function (_super) {
             __extends(Sub, _super);
             /**
              *
              */
             function Sub() {
                 var _this = _super.call(this, "SUB") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4597,9 +5455,9 @@ var Northwind;
         Tag.Sub = Sub;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4607,7 +5465,7 @@ var Northwind;
          * [Table description]
          * @type {[type]}
          */
-        var Table = (function (_super) {
+        var Table = /** @class */ (function (_super) {
             __extends(Table, _super);
             /**
              *
@@ -4618,7 +5476,6 @@ var Northwind;
                 _this.thead = new Northwind.Tag.Thead();
                 _this.tbody = new Northwind.Tag.Tbody();
                 _this.tfoot = new Northwind.Tag.Tfoot();
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4820,9 +5677,9 @@ var Northwind;
         Tag.Table = Table;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4830,14 +5687,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Tbody = (function (_super) {
+        var Tbody = /** @class */ (function (_super) {
             __extends(Tbody, _super);
             /**
              *
              */
             function Tbody() {
                 var _this = _super.call(this, "TBODY") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4846,9 +5702,9 @@ var Northwind;
         Tag.Tbody = Tbody;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4856,14 +5712,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Td = (function (_super) {
+        var Td = /** @class */ (function (_super) {
             __extends(Td, _super);
             /**
              *
              */
             function Td() {
                 var _this = _super.call(this, "TD") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4893,9 +5748,9 @@ var Northwind;
         Tag.Td = Td;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4903,14 +5758,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Textarea = (function (_super) {
+        var Textarea = /** @class */ (function (_super) {
             __extends(Textarea, _super);
             /**
              *
              */
             function Textarea() {
                 var _this = _super.call(this, "TEXTAREA") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4919,9 +5773,9 @@ var Northwind;
         Tag.Textarea = Textarea;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4929,14 +5783,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Tfoot = (function (_super) {
+        var Tfoot = /** @class */ (function (_super) {
             __extends(Tfoot, _super);
             /**
              *
              */
             function Tfoot() {
                 var _this = _super.call(this, "TFOOT") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4945,9 +5798,9 @@ var Northwind;
         Tag.Tfoot = Tfoot;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -4955,14 +5808,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Th = (function (_super) {
+        var Th = /** @class */ (function (_super) {
             __extends(Th, _super);
             /**
              *
              */
             function Th() {
                 var _this = _super.call(this, "TH") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -4993,9 +5845,9 @@ var Northwind;
         Tag.Th = Th;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5003,14 +5855,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Thead = (function (_super) {
+        var Thead = /** @class */ (function (_super) {
             __extends(Thead, _super);
             /**
              *
              */
             function Thead() {
                 var _this = _super.call(this, "THEAD") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5019,9 +5870,9 @@ var Northwind;
         Tag.Thead = Thead;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5029,14 +5880,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Time = (function (_super) {
+        var Time = /** @class */ (function (_super) {
             __extends(Time, _super);
             /**
              *
              */
             function Time() {
                 var _this = _super.call(this, "TIME") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5045,9 +5895,9 @@ var Northwind;
         Tag.Time = Time;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5055,14 +5905,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Title = (function (_super) {
+        var Title = /** @class */ (function (_super) {
             __extends(Title, _super);
             /**
              *
              */
             function Title() {
                 var _this = _super.call(this, "TITLE") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5071,9 +5920,9 @@ var Northwind;
         Tag.Title = Title;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5081,14 +5930,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Tr = (function (_super) {
+        var Tr = /** @class */ (function (_super) {
             __extends(Tr, _super);
             /**
              *
              */
             function Tr() {
                 var _this = _super.call(this, "TR") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5097,9 +5945,9 @@ var Northwind;
         Tag.Tr = Tr;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5107,14 +5955,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Track = (function (_super) {
+        var Track = /** @class */ (function (_super) {
             __extends(Track, _super);
             /**
              *
              */
             function Track() {
                 var _this = _super.call(this, "TRACK") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5123,9 +5970,9 @@ var Northwind;
         Tag.Track = Track;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5133,14 +5980,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var U = (function (_super) {
+        var U = /** @class */ (function (_super) {
             __extends(U, _super);
             /**
              *
              */
             function U() {
                 var _this = _super.call(this, "U") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5149,9 +5995,9 @@ var Northwind;
         Tag.U = U;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5159,14 +6005,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Ul = (function (_super) {
+        var Ul = /** @class */ (function (_super) {
             __extends(Ul, _super);
             /**
              *
              */
             function Ul() {
                 var _this = _super.call(this, "UL") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5175,9 +6020,9 @@ var Northwind;
         Tag.Ul = Ul;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5185,14 +6030,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Var = (function (_super) {
+        var Var = /** @class */ (function (_super) {
             __extends(Var, _super);
             /**
              *
              */
             function Var() {
                 var _this = _super.call(this, "VAR") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5201,9 +6045,9 @@ var Northwind;
         Tag.Var = Var;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5211,14 +6055,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Video = (function (_super) {
+        var Video = /** @class */ (function (_super) {
             __extends(Video, _super);
             /**
              *
              */
             function Video() {
                 var _this = _super.call(this, "VIDEO") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5227,9 +6070,9 @@ var Northwind;
         Tag.Video = Video;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
+///<reference path="../Component.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
@@ -5237,14 +6080,13 @@ var Northwind;
          * [ViewElement description]
          * @type {[type]}
          */
-        var Wbr = (function (_super) {
+        var Wbr = /** @class */ (function (_super) {
             __extends(Wbr, _super);
             /**
              *
              */
             function Wbr() {
                 var _this = _super.call(this, "WBR") || this;
-                _this.setArgs(_this.getArguments(arguments));
                 _this.initialize();
                 return _this;
             }
@@ -5253,219 +6095,219 @@ var Northwind;
         Tag.Wbr = Wbr;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="./Elements/A.ts"/>
-///<reference path="./Elements/Abbr.ts"/>
-///<reference path="./Elements/Address.ts"/>
-///<reference path="./Elements/Area.ts"/>
-///<reference path="./Elements/Article.ts"/>
-///<reference path="./Elements/Aside.ts"/>
-///<reference path="./Elements/Audio.ts"/>
-///<reference path="./Elements/B.ts"/>
-///<reference path="./Elements/Base.ts"/>
-///<reference path="./Elements/Bdi.ts"/>
-///<reference path="./Elements/Bdo.ts"/>
-///<reference path="./Elements/Blockquote.ts"/>
-///<reference path="./Elements/Body.ts"/>
-///<reference path="./Elements/Br.ts"/>
-///<reference path="./Elements/Button.ts"/>
-///<reference path="./Elements/Canvas.ts"/>
-///<reference path="./Elements/Caption.ts"/>
-///<reference path="./Elements/Cite.ts"/>
-///<reference path="./Elements/Code.ts"/>
-///<reference path="./Elements/Col.ts"/>
-///<reference path="./Elements/ColGroup.ts"/>
-///<reference path="./Elements/Datalist.ts"/>
-///<reference path="./Elements/Db.ts"/>
-///<reference path="./Elements/Del.ts"/>
-///<reference path="./Elements/Details.ts"/>
-///<reference path="./Elements/Dfn.ts"/>
-///<reference path="./Elements/Dialog.ts"/>
-///<reference path="./Elements/Div.ts"/>
-///<reference path="./Elements/Dl.ts"/>
-///<reference path="./Elements/Dt.ts"/>
-///<reference path="./Elements/Em.ts"/>
-///<reference path="./Elements/Embed.ts"/>
-///<reference path="./Elements/Fieldset.ts"/>
-///<reference path="./Elements/Figcaption.ts"/>
-///<reference path="./Elements/Figure.ts"/>
-///<reference path="./Elements/Footer.ts"/>
-///<reference path="./Elements/Form.ts"/>
-///<reference path="./Elements/H1.ts"/>
-///<reference path="./Elements/H2.ts"/>
-///<reference path="./Elements/H3.ts"/>
-///<reference path="./Elements/H4.ts"/>
-///<reference path="./Elements/H5.ts"/>
-///<reference path="./Elements/H6.ts"/>
-///<reference path="./Elements/Head.ts"/>
-///<reference path="./Elements/Header.ts"/>
-///<reference path="./Elements/I.ts"/>
-///<reference path="./Elements/Iframe.ts"/>
-///<reference path="./Elements/Img.ts"/>
-///<reference path="./Elements/Input.ts"/>
-///<reference path="./Elements/Ins.ts"/>
-///<reference path="./Elements/Kbd.ts"/>
-///<reference path="./Elements/Keygen.ts"/>
-///<reference path="./Elements/Label.ts"/>
-///<reference path="./Elements/Leyend.ts"/>
-///<reference path="./Elements/Li.ts"/>
-///<reference path="./Elements/Link.ts"/>
-///<reference path="./Elements/Main.ts"/>
-///<reference path="./Elements/Map.ts"/>
-///<reference path="./Elements/Menu.ts"/>
-///<reference path="./Elements/MenuItem.ts"/>
-///<reference path="./Elements/Meta.ts"/>
-///<reference path="./Elements/Meter.ts"/>
-///<reference path="./Elements/Nav.ts"/>
-///<reference path="./Elements/Noscrip.ts"/>
-///<reference path="./Elements/Obj.ts"/>
-///<reference path="./Elements/Ol.ts"/>
-///<reference path="./Elements/Optgroup.ts"/>
-///<reference path="./Elements/Option.ts"/>
-///<reference path="./Elements/Output.ts"/>
-///<reference path="./Elements/P.ts"/>
-///<reference path="./Elements/Param.ts"/>
-///<reference path="./Elements/Pre.ts"/>
-///<reference path="./Elements/Progress.ts"/>
-///<reference path="./Elements/Q.ts"/>
-///<reference path="./Elements/Rp.ts"/>
-///<reference path="./Elements/Rt.ts"/>
-///<reference path="./Elements/Ruby.ts"/>
-///<reference path="./Elements/S.ts"/>
-///<reference path="./Elements/Samp.ts"/>
-///<reference path="./Elements/Script.ts"/>
-///<reference path="./Elements/Section.ts"/>
-///<reference path="./Elements/Select.ts"/>
-///<reference path="./Elements/Small.ts"/>
-///<reference path="./Elements/Source.ts"/>
-///<reference path="./Elements/Span.ts"/>
-///<reference path="./Elements/Strong.ts"/>
-///<reference path="./Elements/Style.ts"/>
-///<reference path="./Elements/Sub.ts"/>
-///<reference path="./Elements/Table.ts"/>
-///<reference path="./Elements/Tbody.ts"/>
-///<reference path="./Elements/Td.ts"/>
-///<reference path="./Elements/Textarea.ts"/>
-///<reference path="./Elements/Tfoot.ts"/>
-///<reference path="./Elements/Th.ts"/>
-///<reference path="./Elements/Thead.ts"/>
-///<reference path="./Elements/Time.ts"/>
-///<reference path="./Elements/Title.ts"/>
-///<reference path="./Elements/Tr.ts"/>
-///<reference path="./Elements/Track.ts"/>
-///<reference path="./Elements/U.ts"/>
-///<reference path="./Elements/Ul.ts"/>
-///<reference path="./Elements/Var.ts"/>
-///<reference path="./Elements/Video.ts"/>
-///<reference path="./Elements/Wbr.ts"/>
+///<reference path="../ViewElements/A.ts"/>
+///<reference path="../ViewElements/Abbr.ts"/>
+///<reference path="../ViewElements/Address.ts"/>
+///<reference path="../ViewElements/Area.ts"/>
+///<reference path="../ViewElements/Article.ts"/>
+///<reference path="../ViewElements/Aside.ts"/>
+///<reference path="../ViewElements/Audio.ts"/>
+///<reference path="../ViewElements/B.ts"/>
+///<reference path="../ViewElements/Base.ts"/>
+///<reference path="../ViewElements/Bdi.ts"/>
+///<reference path="../ViewElements/Bdo.ts"/>
+///<reference path="../ViewElements/Blockquote.ts"/>
+///<reference path="../ViewElements/Body.ts"/>
+///<reference path="../ViewElements/Br.ts"/>
+///<reference path="../ViewElements/Button.ts"/>
+///<reference path="../ViewElements/Canvas.ts"/>
+///<reference path="../ViewElements/Caption.ts"/>
+///<reference path="../ViewElements/Cite.ts"/>
+///<reference path="../ViewElements/Code.ts"/>
+///<reference path="../ViewElements/Col.ts"/>
+///<reference path="../ViewElements/ColGroup.ts"/>
+///<reference path="../ViewElements/Datalist.ts"/>
+///<reference path="../ViewElements/Db.ts"/>
+///<reference path="../ViewElements/Del.ts"/>
+///<reference path="../ViewElements/Details.ts"/>
+///<reference path="../ViewElements/Dfn.ts"/>
+///<reference path="../ViewElements/Dialog.ts"/>
+///<reference path="../ViewElements/Div.ts"/>
+///<reference path="../ViewElements/Dl.ts"/>
+///<reference path="../ViewElements/Dt.ts"/>
+///<reference path="../ViewElements/Em.ts"/>
+///<reference path="../ViewElements/Embed.ts"/>
+///<reference path="../ViewElements/Fieldset.ts"/>
+///<reference path="../ViewElements/Figcaption.ts"/>
+///<reference path="../ViewElements/Figure.ts"/>
+///<reference path="../ViewElements/Footer.ts"/>
+///<reference path="../ViewElements/Form.ts"/>
+///<reference path="../ViewElements/H1.ts"/>
+///<reference path="../ViewElements/H2.ts"/>
+///<reference path="../ViewElements/H3.ts"/>
+///<reference path="../ViewElements/H4.ts"/>
+///<reference path="../ViewElements/H5.ts"/>
+///<reference path="../ViewElements/H6.ts"/>
+///<reference path="../ViewElements/Head.ts"/>
+///<reference path="../ViewElements/Header.ts"/>
+///<reference path="../ViewElements/I.ts"/>
+///<reference path="../ViewElements/Iframe.ts"/>
+///<reference path="../ViewElements/Img.ts"/>
+///<reference path="../ViewElements/Input.ts"/>
+///<reference path="../ViewElements/Ins.ts"/>
+///<reference path="../ViewElements/Kbd.ts"/>
+///<reference path="../ViewElements/Keygen.ts"/>
+///<reference path="../ViewElements/Label.ts"/>
+///<reference path="../ViewElements/Leyend.ts"/>
+///<reference path="../ViewElements/Li.ts"/>
+///<reference path="../ViewElements/Link.ts"/>
+///<reference path="../ViewElements/Main.ts"/>
+///<reference path="../ViewElements/Map.ts"/>
+///<reference path="../ViewElements/Menu.ts"/>
+///<reference path="../ViewElements/MenuItem.ts"/>
+///<reference path="../ViewElements/Meta.ts"/>
+///<reference path="../ViewElements/Meter.ts"/>
+///<reference path="../ViewElements/Nav.ts"/>
+///<reference path="../ViewElements/Noscrip.ts"/>
+///<reference path="../ViewElements/Obj.ts"/>
+///<reference path="../ViewElements/Ol.ts"/>
+///<reference path="../ViewElements/Optgroup.ts"/>
+///<reference path="../ViewElements/Option.ts"/>
+///<reference path="../ViewElements/Output.ts"/>
+///<reference path="../ViewElements/P.ts"/>
+///<reference path="../ViewElements/Param.ts"/>
+///<reference path="../ViewElements/Pre.ts"/>
+///<reference path="../ViewElements/Progress.ts"/>
+///<reference path="../ViewElements/Q.ts"/>
+///<reference path="../ViewElements/Rp.ts"/>
+///<reference path="../ViewElements/Rt.ts"/>
+///<reference path="../ViewElements/Ruby.ts"/>
+///<reference path="../ViewElements/S.ts"/>
+///<reference path="../ViewElements/Samp.ts"/>
+///<reference path="../ViewElements/Script.ts"/>
+///<reference path="../ViewElements/Section.ts"/>
+///<reference path="../ViewElements/Select.ts"/>
+///<reference path="../ViewElements/Small.ts"/>
+///<reference path="../ViewElements/Source.ts"/>
+///<reference path="../ViewElements/Span.ts"/>
+///<reference path="../ViewElements/Strong.ts"/>
+///<reference path="../ViewElements/Style.ts"/>
+///<reference path="../ViewElements/Sub.ts"/>
+///<reference path="../ViewElements/Table.ts"/>
+///<reference path="../ViewElements/Tbody.ts"/>
+///<reference path="../ViewElements/Td.ts"/>
+///<reference path="../ViewElements/Textarea.ts"/>
+///<reference path="../ViewElements/Tfoot.ts"/>
+///<reference path="../ViewElements/Th.ts"/>
+///<reference path="../ViewElements/Thead.ts"/>
+///<reference path="../ViewElements/Time.ts"/>
+///<reference path="../ViewElements/Title.ts"/>
+///<reference path="../ViewElements/Tr.ts"/>
+///<reference path="../ViewElements/Track.ts"/>
+///<reference path="../ViewElements/U.ts"/>
+///<reference path="../ViewElements/Ul.ts"/>
+///<reference path="../ViewElements/Var.ts"/>
+///<reference path="../ViewElements/Video.ts"/>
+///<reference path="../ViewElements/Wbr.ts"/>
 var Northwind;
-///<reference path="./Elements/A.ts"/>
-///<reference path="./Elements/Abbr.ts"/>
-///<reference path="./Elements/Address.ts"/>
-///<reference path="./Elements/Area.ts"/>
-///<reference path="./Elements/Article.ts"/>
-///<reference path="./Elements/Aside.ts"/>
-///<reference path="./Elements/Audio.ts"/>
-///<reference path="./Elements/B.ts"/>
-///<reference path="./Elements/Base.ts"/>
-///<reference path="./Elements/Bdi.ts"/>
-///<reference path="./Elements/Bdo.ts"/>
-///<reference path="./Elements/Blockquote.ts"/>
-///<reference path="./Elements/Body.ts"/>
-///<reference path="./Elements/Br.ts"/>
-///<reference path="./Elements/Button.ts"/>
-///<reference path="./Elements/Canvas.ts"/>
-///<reference path="./Elements/Caption.ts"/>
-///<reference path="./Elements/Cite.ts"/>
-///<reference path="./Elements/Code.ts"/>
-///<reference path="./Elements/Col.ts"/>
-///<reference path="./Elements/ColGroup.ts"/>
-///<reference path="./Elements/Datalist.ts"/>
-///<reference path="./Elements/Db.ts"/>
-///<reference path="./Elements/Del.ts"/>
-///<reference path="./Elements/Details.ts"/>
-///<reference path="./Elements/Dfn.ts"/>
-///<reference path="./Elements/Dialog.ts"/>
-///<reference path="./Elements/Div.ts"/>
-///<reference path="./Elements/Dl.ts"/>
-///<reference path="./Elements/Dt.ts"/>
-///<reference path="./Elements/Em.ts"/>
-///<reference path="./Elements/Embed.ts"/>
-///<reference path="./Elements/Fieldset.ts"/>
-///<reference path="./Elements/Figcaption.ts"/>
-///<reference path="./Elements/Figure.ts"/>
-///<reference path="./Elements/Footer.ts"/>
-///<reference path="./Elements/Form.ts"/>
-///<reference path="./Elements/H1.ts"/>
-///<reference path="./Elements/H2.ts"/>
-///<reference path="./Elements/H3.ts"/>
-///<reference path="./Elements/H4.ts"/>
-///<reference path="./Elements/H5.ts"/>
-///<reference path="./Elements/H6.ts"/>
-///<reference path="./Elements/Head.ts"/>
-///<reference path="./Elements/Header.ts"/>
-///<reference path="./Elements/I.ts"/>
-///<reference path="./Elements/Iframe.ts"/>
-///<reference path="./Elements/Img.ts"/>
-///<reference path="./Elements/Input.ts"/>
-///<reference path="./Elements/Ins.ts"/>
-///<reference path="./Elements/Kbd.ts"/>
-///<reference path="./Elements/Keygen.ts"/>
-///<reference path="./Elements/Label.ts"/>
-///<reference path="./Elements/Leyend.ts"/>
-///<reference path="./Elements/Li.ts"/>
-///<reference path="./Elements/Link.ts"/>
-///<reference path="./Elements/Main.ts"/>
-///<reference path="./Elements/Map.ts"/>
-///<reference path="./Elements/Menu.ts"/>
-///<reference path="./Elements/MenuItem.ts"/>
-///<reference path="./Elements/Meta.ts"/>
-///<reference path="./Elements/Meter.ts"/>
-///<reference path="./Elements/Nav.ts"/>
-///<reference path="./Elements/Noscrip.ts"/>
-///<reference path="./Elements/Obj.ts"/>
-///<reference path="./Elements/Ol.ts"/>
-///<reference path="./Elements/Optgroup.ts"/>
-///<reference path="./Elements/Option.ts"/>
-///<reference path="./Elements/Output.ts"/>
-///<reference path="./Elements/P.ts"/>
-///<reference path="./Elements/Param.ts"/>
-///<reference path="./Elements/Pre.ts"/>
-///<reference path="./Elements/Progress.ts"/>
-///<reference path="./Elements/Q.ts"/>
-///<reference path="./Elements/Rp.ts"/>
-///<reference path="./Elements/Rt.ts"/>
-///<reference path="./Elements/Ruby.ts"/>
-///<reference path="./Elements/S.ts"/>
-///<reference path="./Elements/Samp.ts"/>
-///<reference path="./Elements/Script.ts"/>
-///<reference path="./Elements/Section.ts"/>
-///<reference path="./Elements/Select.ts"/>
-///<reference path="./Elements/Small.ts"/>
-///<reference path="./Elements/Source.ts"/>
-///<reference path="./Elements/Span.ts"/>
-///<reference path="./Elements/Strong.ts"/>
-///<reference path="./Elements/Style.ts"/>
-///<reference path="./Elements/Sub.ts"/>
-///<reference path="./Elements/Table.ts"/>
-///<reference path="./Elements/Tbody.ts"/>
-///<reference path="./Elements/Td.ts"/>
-///<reference path="./Elements/Textarea.ts"/>
-///<reference path="./Elements/Tfoot.ts"/>
-///<reference path="./Elements/Th.ts"/>
-///<reference path="./Elements/Thead.ts"/>
-///<reference path="./Elements/Time.ts"/>
-///<reference path="./Elements/Title.ts"/>
-///<reference path="./Elements/Tr.ts"/>
-///<reference path="./Elements/Track.ts"/>
-///<reference path="./Elements/U.ts"/>
-///<reference path="./Elements/Ul.ts"/>
-///<reference path="./Elements/Var.ts"/>
-///<reference path="./Elements/Video.ts"/>
-///<reference path="./Elements/Wbr.ts"/>
+///<reference path="../ViewElements/A.ts"/>
+///<reference path="../ViewElements/Abbr.ts"/>
+///<reference path="../ViewElements/Address.ts"/>
+///<reference path="../ViewElements/Area.ts"/>
+///<reference path="../ViewElements/Article.ts"/>
+///<reference path="../ViewElements/Aside.ts"/>
+///<reference path="../ViewElements/Audio.ts"/>
+///<reference path="../ViewElements/B.ts"/>
+///<reference path="../ViewElements/Base.ts"/>
+///<reference path="../ViewElements/Bdi.ts"/>
+///<reference path="../ViewElements/Bdo.ts"/>
+///<reference path="../ViewElements/Blockquote.ts"/>
+///<reference path="../ViewElements/Body.ts"/>
+///<reference path="../ViewElements/Br.ts"/>
+///<reference path="../ViewElements/Button.ts"/>
+///<reference path="../ViewElements/Canvas.ts"/>
+///<reference path="../ViewElements/Caption.ts"/>
+///<reference path="../ViewElements/Cite.ts"/>
+///<reference path="../ViewElements/Code.ts"/>
+///<reference path="../ViewElements/Col.ts"/>
+///<reference path="../ViewElements/ColGroup.ts"/>
+///<reference path="../ViewElements/Datalist.ts"/>
+///<reference path="../ViewElements/Db.ts"/>
+///<reference path="../ViewElements/Del.ts"/>
+///<reference path="../ViewElements/Details.ts"/>
+///<reference path="../ViewElements/Dfn.ts"/>
+///<reference path="../ViewElements/Dialog.ts"/>
+///<reference path="../ViewElements/Div.ts"/>
+///<reference path="../ViewElements/Dl.ts"/>
+///<reference path="../ViewElements/Dt.ts"/>
+///<reference path="../ViewElements/Em.ts"/>
+///<reference path="../ViewElements/Embed.ts"/>
+///<reference path="../ViewElements/Fieldset.ts"/>
+///<reference path="../ViewElements/Figcaption.ts"/>
+///<reference path="../ViewElements/Figure.ts"/>
+///<reference path="../ViewElements/Footer.ts"/>
+///<reference path="../ViewElements/Form.ts"/>
+///<reference path="../ViewElements/H1.ts"/>
+///<reference path="../ViewElements/H2.ts"/>
+///<reference path="../ViewElements/H3.ts"/>
+///<reference path="../ViewElements/H4.ts"/>
+///<reference path="../ViewElements/H5.ts"/>
+///<reference path="../ViewElements/H6.ts"/>
+///<reference path="../ViewElements/Head.ts"/>
+///<reference path="../ViewElements/Header.ts"/>
+///<reference path="../ViewElements/I.ts"/>
+///<reference path="../ViewElements/Iframe.ts"/>
+///<reference path="../ViewElements/Img.ts"/>
+///<reference path="../ViewElements/Input.ts"/>
+///<reference path="../ViewElements/Ins.ts"/>
+///<reference path="../ViewElements/Kbd.ts"/>
+///<reference path="../ViewElements/Keygen.ts"/>
+///<reference path="../ViewElements/Label.ts"/>
+///<reference path="../ViewElements/Leyend.ts"/>
+///<reference path="../ViewElements/Li.ts"/>
+///<reference path="../ViewElements/Link.ts"/>
+///<reference path="../ViewElements/Main.ts"/>
+///<reference path="../ViewElements/Map.ts"/>
+///<reference path="../ViewElements/Menu.ts"/>
+///<reference path="../ViewElements/MenuItem.ts"/>
+///<reference path="../ViewElements/Meta.ts"/>
+///<reference path="../ViewElements/Meter.ts"/>
+///<reference path="../ViewElements/Nav.ts"/>
+///<reference path="../ViewElements/Noscrip.ts"/>
+///<reference path="../ViewElements/Obj.ts"/>
+///<reference path="../ViewElements/Ol.ts"/>
+///<reference path="../ViewElements/Optgroup.ts"/>
+///<reference path="../ViewElements/Option.ts"/>
+///<reference path="../ViewElements/Output.ts"/>
+///<reference path="../ViewElements/P.ts"/>
+///<reference path="../ViewElements/Param.ts"/>
+///<reference path="../ViewElements/Pre.ts"/>
+///<reference path="../ViewElements/Progress.ts"/>
+///<reference path="../ViewElements/Q.ts"/>
+///<reference path="../ViewElements/Rp.ts"/>
+///<reference path="../ViewElements/Rt.ts"/>
+///<reference path="../ViewElements/Ruby.ts"/>
+///<reference path="../ViewElements/S.ts"/>
+///<reference path="../ViewElements/Samp.ts"/>
+///<reference path="../ViewElements/Script.ts"/>
+///<reference path="../ViewElements/Section.ts"/>
+///<reference path="../ViewElements/Select.ts"/>
+///<reference path="../ViewElements/Small.ts"/>
+///<reference path="../ViewElements/Source.ts"/>
+///<reference path="../ViewElements/Span.ts"/>
+///<reference path="../ViewElements/Strong.ts"/>
+///<reference path="../ViewElements/Style.ts"/>
+///<reference path="../ViewElements/Sub.ts"/>
+///<reference path="../ViewElements/Table.ts"/>
+///<reference path="../ViewElements/Tbody.ts"/>
+///<reference path="../ViewElements/Td.ts"/>
+///<reference path="../ViewElements/Textarea.ts"/>
+///<reference path="../ViewElements/Tfoot.ts"/>
+///<reference path="../ViewElements/Th.ts"/>
+///<reference path="../ViewElements/Thead.ts"/>
+///<reference path="../ViewElements/Time.ts"/>
+///<reference path="../ViewElements/Title.ts"/>
+///<reference path="../ViewElements/Tr.ts"/>
+///<reference path="../ViewElements/Track.ts"/>
+///<reference path="../ViewElements/U.ts"/>
+///<reference path="../ViewElements/Ul.ts"/>
+///<reference path="../ViewElements/Var.ts"/>
+///<reference path="../ViewElements/Video.ts"/>
+///<reference path="../ViewElements/Wbr.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
-        var TagAdapter = (function () {
+        var TagAdapter = /** @class */ (function () {
             /**
              *
              */
@@ -5796,8 +6638,8 @@ var Northwind;
                                 instance = new Northwind.Tag.Wbr();
                                 break;
                             default:
-                                instance = new Northwind.Html.Component();
-                                instance.create(this.element);
+                                //instance = new Northwind.Html.Component();
+                                //instance.create(this.element);
                                 break;
                         }
                         instance.setElement(this.element);
@@ -5816,640 +6658,13 @@ var Northwind;
         Tag.TagAdapter = TagAdapter;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="./Html/TagAdapter.ts"/>
+///<reference path="./Factory/TagAdapter.ts"/>
 var Northwind;
-///<reference path="./Html/TagAdapter.ts"/>
+///<reference path="./Factory/TagAdapter.ts"/>
 (function (Northwind) {
     var Html;
     (function (Html) {
-        /**
-         *
-         * @type
-         */
-        var Component = (function () {
-            /**
-             *
-             * @param
-             * @return
-             */
-            function Component(name, newClone) {
-                if (name === void 0) { name = ""; }
-                if (newClone === void 0) { newClone = false; }
-                /**
-                 *
-                 */
-                this.deny = ["Table", "Td", "Div", "Thead", "Tbody", "Tfoot", "Tr", "Td", "Th", "Label", "Span", "I", "A"];
-                /**
-                 *
-                 * @type
-                 */
-                this.url = "";
-                if (typeof name.nodeName != "undefined") {
-                    this.id = name.getAttribute("id");
-                    this.element = this.init(name.nodeName, this.id);
-                }
-                else if (typeof name.target != "undefined") {
-                    this.element = name.target;
-                }
-                else if (typeof name == "string") {
-                    this.id = name;
-                    this.element = this.init(name, name);
-                }
-                else {
-                    this.id = name;
-                    this.element = this.init(this.getClassName(), name);
-                }
-                return this;
-            }
-            /**
-             *
-             */
-            Component.prototype.initialize = function () {
-            };
-            /**
-             *
-             */
-            Component.prototype.setGlobals = function (globals) {
-                this.globals = globals;
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.getGlobals = function () {
-                return this.globals;
-            };
-            /**
-             *
-             */
-            Component.prototype.getArguments = function (args) {
-                if (typeof args == "object") {
-                    var argsTemp = new Array();
-                    for (var i = 0; i < args.length; i++) {
-                        if (args[i] != "atmpnil" && !(args[i] instanceof Northwind.Mvc.Controller)) {
-                            argsTemp.push(args[i]);
-                        }
-                    }
-                    return argsTemp;
-                }
-                else {
-                    return false;
-                }
-            };
-            /**
-             *
-             */
-            Component.prototype.setId = function (id) {
-                this.attr("id", id);
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.getId = function () {
-                return this.attr("id");
-            };
-            /**
-             *
-             */
-            Component.prototype.setArgs = function (args) {
-                this.args = args;
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.getArgs = function () {
-                return this.args;
-            };
-            /**
-             *
-             */
-            Component.prototype.setElement = function (element) {
-                this.element = element;
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.setRequired = function (req) {
-                this.element.required = req;
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.getRequired = function () {
-                return this.element.required;
-            };
-            /**
-             *
-             */
-            Component.prototype.show = function () {
-                this.element.style.display = "";
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.hide = function () {
-                this.element.style.display = "none";
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.create = function (tag) {
-                this.element = this.init(tag, this.id);
-                return this;
-            };
-            /**
-             * Create html component like jquery object
-             *
-             * @param  {string} element [description]
-             * @param  {string} name    [description]
-             * @return ViewElement
-             */
-            Component.prototype.init = function (element, name) {
-                this.className = element;
-                var docElement = document.createElement(element);
-                if (element === "Button") {
-                    docElement.setAttribute("type", "button");
-                }
-                if (name !== "") {
-                    if (Northwind.Helper.ArrayHelper.inArray(this.deny, element)) {
-                        docElement.setAttribute("name", name);
-                    }
-                    docElement.setAttribute("id", name);
-                }
-                return docElement;
-            };
-            /**
-             *
-             * @return
-             */
-            Component.prototype.getType = function () {
-                return this.className;
-            };
-            /**
-             * Set class
-             * @param  {string} attrClass
-             * @return {this}  [description]
-             */
-            Component.prototype.class = function (attrClass) {
-                this.element.setAttribute("class", attrClass);
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.addClass = function (attrClass) {
-                var strClass = this.element.getAttribute("class");
-                strClass += " " + attrClass;
-                this.element.setAttribute("class", strClass);
-                return this;
-            };
-            /**
-             * Set inner html throught
-             */
-            Component.prototype.setInnerHtml = function (html) {
-                this.element.innerHTML = html;
-                return this.element;
-            };
-            /**
-             *
-             */
-            Component.prototype.getAttribute = function (attr) {
-                return this.element.getAttribute(attr);
-            };
-            /**
-             *
-             * @return {[type]} [description]
-             */
-            Component.prototype.addChild = function (element) {
-                this.element.append(element);
-                return this;
-            };
-            /*
-            public valueListener(fn : Function)
-            {
-                valueListenerNative.bind(this)(fn);
-                return this;
-            }
-            */
-            Component.prototype.destroyEvent = function (event) {
-                var nameEvent = "on" + event;
-                this.element.removeEventListener("click", this.element.nameEvent);
-            };
-            /**
-             *
-             */
-            Component.prototype.removeAttr = function (attr) {
-                this.element.removeAttribute(attr);
-                return this;
-            };
-            /**
-             * [get description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.getElement = function () {
-                return this.element;
-            };
-            /**
-             * Append elements
-             * @param value append
-             * @return this
-             */
-            Component.prototype.append = function (append) {
-                if (Array.isArray(append) || (append instanceof HTMLCollection)) {
-                    for (var key in append) {
-                        this.checkAppendValue(append[key]);
-                    }
-                }
-                else {
-                    this.checkAppendValue(append);
-                }
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.data = function (key, value) {
-                if (value === void 0) { value = false; }
-                if (value) {
-                    this.getElement().data(key, value);
-                }
-                else {
-                    this.getElement().data(key);
-                }
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.checkAppendValue = function (append) {
-                switch (typeof append) {
-                    case "string":
-                        this.element.appendChild(document.createTextNode(append));
-                        break;
-                    case "number":
-                        this.element.appendChild(document.createTextNode(append.toString()));
-                        break;
-                    case "object":
-                        if (append instanceof Northwind.Html.Component) {
-                            this.verifyElement(append.getElement());
-                        }
-                        else {
-                            this.verifyElement(append);
-                        }
-                        break;
-                    default:
-                        break;
-                }
-            };
-            /**
-             *
-             * @param  html [description]
-             * @return
-             */
-            Component.prototype.html = function (html) {
-                if (html === void 0) { html = null; }
-                if (html != null) {
-                    this.removeChildNodes();
-                    this.append(html);
-                    return this;
-                }
-                else {
-                    return this.element.innerHTML;
-                }
-            };
-            /**
-             *
-             */
-            Component.prototype.verifyElement = function (append, type) {
-                if (type === void 0) { type = "append"; }
-                if (this.element instanceof HTMLCollection) {
-                    for (var key in this.element) {
-                        if (typeof this.element[key].nodeType != "undefined") {
-                            if (this.element[key].nodeType == 1) {
-                                this.element[key].appendChild(append);
-                            }
-                        }
-                    }
-                }
-                else {
-                    this.element.appendChild(append);
-                }
-            };
-            /**
-             *
-             */
-            Component.prototype.removeChildNodes = function () {
-                if (this.element instanceof HTMLCollection) {
-                    for (var key in this.element) {
-                        this.removeChilds(this.element[key], this.element[key].childNodes);
-                    }
-                }
-                else {
-                    this.removeChilds(this.element, this.element.childNodes);
-                }
-            };
-            /**
-             *
-             */
-            Component.prototype.removeChilds = function (element, childs) {
-                while (element.firstChild) {
-                    element.removeChild(element.firstChild);
-                }
-            };
-            /**
-             *
-             * @param attr
-             * @return
-             */
-            Component.prototype.attr = function (attr, value) {
-                if (value === void 0) { value = false; }
-                if (typeof attr == "object" && value == false) {
-                    for (var key in attr) {
-                        this.element.setAttribute(key, attr[key]);
-                    }
-                }
-                else if (typeof attr == "string" && value != false) {
-                    this.element.setAttribute(attr, value);
-                }
-                else if (typeof attr == "string" && value == false) {
-                    return this.element.getAttribute(attr);
-                }
-                return this;
-            };
-            /**
-             * [css description]
-             * @param   css [description]
-             * @return
-             */
-            Component.prototype.css = function (css, value) {
-                if (value === void 0) { value = null; }
-                if (typeof css == "object") {
-                    for (var key in css) {
-                        this.element.style[key] = css[key];
-                    }
-                }
-                else if (typeof css == "string" && value != null) {
-                    this.element.style[css] = value;
-                }
-                else if (typeof css == "string" && value == null) {
-                    return this.element.style[css];
-                }
-                return this;
-            };
-            /**
-             *
-             * @param  {[type]} event [description]
-             * @return {[type]}       [description]
-             */
-            Component.prototype.unbind = function (event) {
-                this.element.destroyEvent(event);
-                return this;
-            };
-            /**
-             * [getClassName description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.getClassName = function () {
-                var funcNameRegex = /function (.{1,})\(/;
-                var results = (funcNameRegex).exec(this["constructor"].toString());
-                return (results && results.length > 1) ? results[1] : "";
-            };
-            /**
-             * [validateAndSet description]
-             * @param  {[type]} config [description]
-             * @return {[type]}        [description]
-             */
-            Component.prototype.validateAndSet = function (config) {
-                try {
-                    if (typeof config.name === "undefined") {
-                        throw "The identify is required";
-                    }
-                    else if (typeof config.element === "undefined") {
-                        throw "The type element is required";
-                    }
-                    else if (typeof config.event !== "undefined") {
-                    }
-                }
-                catch (e) {
-                    console.log(e);
-                }
-            };
-            /**
-             * [clone description]
-             * @return {[type]} [description]
-             */
-            Component.prototype.clone = function (newIdentify) {
-                if (newIdentify === void 0) { newIdentify = ""; }
-                var newElement = this.element.clone();
-                return new Northwind.Html.Component(newIdentify, newElement[0]);
-            };
-            /**
-             *
-             * @param  {any = null}        val [description]
-             * @return {[type]}   [description]
-             */
-            Component.prototype.val = function (val) {
-                if (val === void 0) { val = false; }
-                if (val || typeof val == "string") {
-                    this.element.value = val;
-                    this.attr("value", val);
-                    return this;
-                }
-                else {
-                    return this.element.value;
-                }
-            };
-            /**
-             *
-             */
-            Component.prototype.valAsInt = function () {
-                return parseInt(this.val());
-            };
-            /**
-             * zzzz
-             * @param  {any = null}        text [description]
-             * @return {[type]}   [description]
-             */
-            Component.prototype.text = function (text) {
-                if (text === void 0) { text = false; }
-                if (text) {
-                    this.element.innerHtml = text;
-                    return this;
-                }
-                else {
-                    return this.element.innerHtml;
-                }
-            };
-            /**
-             *
-             */
-            Component.prototype.empty = function () {
-                this.removeChildNodes();
-                return this;
-            };
-            /**
-             *
-             */
-            Component.prototype.getChilds = function () {
-                var childNodes = this.element.childNodes;
-                var childs = new Array();
-                for (var key in childNodes) {
-                    if (childNodes[key].nodeType == 1) {
-                        var adapter = new Northwind.Tag.TagAdapter(childNodes[key]);
-                        var tagObject = adapter.get();
-                        tagObject.setDi(this.getDi());
-                        childs.push(tagObject);
-                    }
-                }
-                return childs;
-            };
-            Component.prototype.getSiblings = function () {
-                var siblings = this.getParent().getChilds();
-                if (siblings.length > 0) {
-                    var aux = new Array;
-                    for (var _i = 0, siblings_1 = siblings; _i < siblings_1.length; _i++) {
-                        var item = siblings_1[_i];
-                        if (item.getElement() != this.getElement()) {
-                            aux.push(item);
-                        }
-                    }
-                    return aux;
-                }
-                return false;
-            };
-            Component.prototype.getParent = function () {
-                var parent = this.element.parentElement;
-                if (parent.nodeType == 1) {
-                    var adapter = new Northwind.Tag.TagAdapter(parent);
-                    var tagObject = adapter.get();
-                    tagObject.setDi(this.getDi());
-                    return tagObject;
-                }
-                return false;
-            };
-            /**
-             *
-             */
-            Component.prototype.getAsObject = function () {
-                var childs = this.element.childNodes;
-                var obj = new Array();
-                if (childs instanceof NodeList) {
-                    for (var key in childs) {
-                        if (typeof childs[key].nodeType != "undefined") {
-                            switch (childs[key].nodeType) {
-                                case Node.ELEMENT_NODE:
-                                    var adapter = new Northwind.Tag.TagAdapter(childs[key]);
-                                    var auxElement = adapter.get();
-                                    auxElement.setDi(this.getDi());
-                                    var finalObj = {};
-                                    var auxObject = auxElement.getAsObject();
-                                    finalObj[auxElement.getClassName().toLowerCase()] = auxObject;
-                                    if (auxObject.length > 0) {
-                                        obj.push(finalObj);
-                                    }
-                                    break;
-                                case Node.TEXT_NODE:
-                                    obj.push(childs[key].nodeValue);
-                                    break;
-                            }
-                        }
-                    }
-                }
-                return obj;
-            };
-            /**
-             *
-             */
-            Component.prototype.getAsJson = function () {
-                var objects = this.getAsObject();
-                return JSON.stringify(objects);
-            };
-            /**
-             *
-             */
-            Component.prototype.remove = function (element) {
-                if (element === void 0) { element = false; }
-                if (element) {
-                    this.getElement().removeChild(element);
-                }
-                else {
-                    this.getElement().parentElement.removeChild(this.getElement());
-                }
-            };
-            Component.prototype.getMyId = function () {
-                var str = this.getClassName() + JSON.stringify(this);
-                window.btoa(encodeURIComponent(str));
-            };
-            Component.prototype.getDom = function () {
-                return Northwind.Service.DependencyInjector.get().get("dom");
-            };
-            Component.prototype.getAjax = function () {
-                return Northwind.Service.DependencyInjector.get().get("ajax");
-            };
-            Component.prototype.getEm = function () {
-                return Northwind.Service.DependencyInjector.get().get("em");
-            };
-            Component.prototype.getContainer = function () {
-                return Northwind.Service.DependencyInjector.get().get("container");
-            };
-            /**
-             *
-             * @param name
-             */
-            Component.prototype.getTag = function (tag) {
-                if (tag instanceof Northwind.Html.Component) {
-                    return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
-                }
-                else {
-                    return Northwind.Service.DependencyInjector.get().get("tag");
-                }
-            };
-            /**
-             *
-             */
-            Component.prototype.getUrl = function () {
-                var url = Northwind.Service.DependencyInjector.get().get("url");
-                return url;
-            };
-            /**
-             *
-             * @param tag
-             */
-            Component.prototype.getEvent = function (tag) {
-                if (tag === void 0) { tag = false; }
-                var events = Northwind.Service.DependencyInjector.get().get("event");
-                if (tag instanceof Northwind.Html.Component) {
-                    return events.tag(tag);
-                }
-                else {
-                    return events;
-                }
-            };
-            Component.prototype.getDi = function () {
-                return Northwind.Service.DependencyInjector.get();
-            };
-            return Component;
-        }());
-        /**
-         *
-         */
-        Component.NO_CONTEXT = 1;
-        Html.Component = Component;
-    })(Html = Northwind.Html || (Northwind.Html = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="./TagAdapter.ts"/>
-var Northwind;
-///<reference path="./TagAdapter.ts"/>
-(function (Northwind) {
-    var Html;
-    (function (Html) {
-        var Dom = (function () {
+        var Dom = /** @class */ (function () {
             /**
              *
              * @param element
@@ -6569,12 +6784,7 @@ var Northwind;
              * @param name
              */
             Dom.prototype.getTag = function (tag) {
-                if (tag instanceof Northwind.Html.Component) {
-                    return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
-                }
-                else {
-                    return Northwind.Service.DependencyInjector.get().get("tag");
-                }
+                return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
             };
             /**
              *
@@ -6590,12 +6800,7 @@ var Northwind;
             Dom.prototype.getEvent = function (tag) {
                 if (tag === void 0) { tag = false; }
                 var events = Northwind.Service.DependencyInjector.get().get("event");
-                if (tag instanceof Northwind.Html.Component) {
-                    return events.tag(tag);
-                }
-                else {
-                    return events;
-                }
+                return events.tag(tag);
             };
             Dom.prototype.getDi = function () {
                 return Northwind.Service.DependencyInjector.get();
@@ -6605,321 +6810,349 @@ var Northwind;
         Html.Dom = Dom;
     })(Html = Northwind.Html || (Northwind.Html = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
 (function (Northwind) {
-    var Tag;
-    (function (Tag) {
-        /**
-         * [Input description]
-         * @type {[type]}
-         */
-        var Hidden = (function (_super) {
-            __extends(Hidden, _super);
-            function Hidden() {
-                var _this = _super.call(this) || this;
-                _this.setHidden();
-                return _this;
-            }
-            return Hidden;
-        }(Northwind.Tag.Input));
-        Tag.Hidden = Hidden;
-    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
-var Northwind;
-///<reference path="../../Component.ts"/>
-(function (Northwind) {
-    var Tag;
-    (function (Tag) {
-        /**
-         * [ViewElement description]
-         * @type {[type]}
-         */
-        var Hr = (function (_super) {
-            __extends(Hr, _super);
+    var View;
+    (function (View) {
+        var CssManager = /** @class */ (function () {
             /**
              *
+             * @param element
              */
-            function Hr() {
-                var _this = _super.call(this, "HR") || this;
-                _this.setArgs(_this.getArguments(arguments));
-                _this.initialize();
-                return _this;
+            function CssManager(element) {
+                this.element = element;
             }
-            return Hr;
-        }(Northwind.Html.Component));
-        Tag.Hr = Hr;
-    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+            /**
+             * [css description]
+             * @param   css [description]
+             * @return
+             */
+            CssManager.prototype.css = function (css, value) {
+                if (value === void 0) { value = null; }
+                if (typeof css == "object") {
+                    for (var key in css) {
+                        this.element.style[key] = css[key];
+                    }
+                }
+                else if (typeof css == "string" && value != null) {
+                    this.element.style[css] = value;
+                }
+                else if (typeof css == "string" && value == null) {
+                    return this.element.style[css];
+                }
+                return this;
+            };
+            CssManager.prototype.show = function () {
+                this.css("display", "");
+            };
+            CssManager.prototype.hide = function () {
+                this.css("display", "none");
+            };
+            return CssManager;
+        }());
+        View.CssManager = CssManager;
+    })(View = Northwind.View || (Northwind.View = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
 var Northwind;
-///<reference path="../../Component.ts"/>
 (function (Northwind) {
-    var Tag;
-    (function (Tag) {
-        /**
-         * [ViewElement description]
-         * @type {[type]}
-         */
-        var Summary = (function (_super) {
-            __extends(Summary, _super);
+    var View;
+    (function (View) {
+        var ElementManager = /** @class */ (function () {
+            function ElementManager(element) {
+                this.element = element;
+            }
+            /**
+             * [clone description]
+             * @return {[type]} [description]
+             */
+            ElementManager.prototype.clone = function (newIdentify) {
+                if (newIdentify === void 0) { newIdentify = ""; }
+                var newElement = this.element.clone();
+                return;
+            };
             /**
              *
+             * @param attr
+             * @return
              */
-            function Summary() {
-                var _this = _super.call(this, "SUMMARY") || this;
-                _this.setArgs(_this.getArguments(arguments));
-                _this.initialize();
-                return _this;
-            }
-            return Summary;
-        }(Northwind.Html.Component));
-        Tag.Summary = Summary;
-    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="../../Component.ts"/>
-var Northwind;
-///<reference path="../../Component.ts"/>
-(function (Northwind) {
-    var Tag;
-    (function (Tag) {
-        /**
-         * [ViewElement description]
-         * @type {[type]}
-         */
-        var Sup = (function (_super) {
-            __extends(Sup, _super);
+            ElementManager.prototype.getAttribute = function (attr, value) {
+                if (value === void 0) { value = false; }
+                if (typeof attr == "object" && value == false) {
+                    for (var key in attr) {
+                        this.element.setAttribute(key, attr[key]);
+                    }
+                }
+                else if (typeof attr == "string" && value != false) {
+                    this.element.setAttribute(attr, value);
+                }
+                else if (typeof attr == "string" && value == false) {
+                    return this.element.getAttribute(attr);
+                }
+                return this;
+            };
             /**
              *
+             * @param val
              */
-            function Sup() {
-                var _this = _super.call(this, "SUP") || this;
-                _this.setArgs(_this.getArguments(arguments));
-                _this.initialize();
-                return _this;
-            }
-            return Sup;
-        }(Northwind.Html.Component));
-        Tag.Sup = Sup;
-    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+            ElementManager.prototype.getValue = function (val) {
+                if (val === void 0) { val = false; }
+                if (val || typeof val == "string") {
+                    this.element.value = val;
+                    this.getAttribute("value", val);
+                    return this;
+                }
+                else {
+                    return this.element.value;
+                }
+            };
+            return ElementManager;
+        }());
+        View.ElementManager = ElementManager;
+    })(View = Northwind.View || (Northwind.View = {}));
 })(Northwind || (Northwind = {}));
-///<reference path="./../Component.ts"/>
-///<reference path="./Elements/A.ts"/>
-///<reference path="./Elements/Abbr.ts"/>
-///<reference path="./Elements/Address.ts"/>
-///<reference path="./Elements/Area.ts"/>
-///<reference path="./Elements/Article.ts"/>
-///<reference path="./Elements/Aside.ts"/>
-///<reference path="./Elements/Audio.ts"/>
-///<reference path="./Elements/B.ts"/>
-///<reference path="./Elements/Base.ts"/>
-///<reference path="./Elements/Bdi.ts"/>
-///<reference path="./Elements/Bdo.ts"/>
-///<reference path="./Elements/Blockquote.ts"/>
-///<reference path="./Elements/Body.ts"/>
-///<reference path="./Elements/Br.ts"/>
-///<reference path="./Elements/Button.ts"/>
-///<reference path="./Elements/Canvas.ts"/>
-///<reference path="./Elements/Caption.ts"/>
-///<reference path="./Elements/Cite.ts"/>
-///<reference path="./Elements/Code.ts"/>
-///<reference path="./Elements/Col.ts"/>
-///<reference path="./Elements/ColGroup.ts"/>
-///<reference path="./Elements/Datalist.ts"/>
-///<reference path="./Elements/Db.ts"/>
-///<reference path="./Elements/Del.ts"/>
-///<reference path="./Elements/Details.ts"/>
-///<reference path="./Elements/Dfn.ts"/>
-///<reference path="./Elements/Dialog.ts"/>
-///<reference path="./Elements/Div.ts"/>
-///<reference path="./Elements/Dl.ts"/>
-///<reference path="./Elements/Dt.ts"/>
-///<reference path="./Elements/Em.ts"/>
-///<reference path="./Elements/Embed.ts"/>
-///<reference path="./Elements/Fieldset.ts"/>
-///<reference path="./Elements/Figcaption.ts"/>
-///<reference path="./Elements/Figure.ts"/>
-///<reference path="./Elements/Footer.ts"/>
-///<reference path="./Elements/Form.ts"/>
-///<reference path="./Elements/H1.ts"/>
-///<reference path="./Elements/H2.ts"/>
-///<reference path="./Elements/H3.ts"/>
-///<reference path="./Elements/H4.ts"/>
-///<reference path="./Elements/H5.ts"/>
-///<reference path="./Elements/H6.ts"/>
-///<reference path="./Elements/Head.ts"/>
-///<reference path="./Elements/Header.ts"/>
-///<reference path="./Elements/I.ts"/>
-///<reference path="./Elements/Iframe.ts"/>
-///<reference path="./Elements/Img.ts"/>
-///<reference path="./Elements/Input.ts"/>
-///<reference path="./Elements/Ins.ts"/>
-///<reference path="./Elements/Kbd.ts"/>
-///<reference path="./Elements/Keygen.ts"/>
-///<reference path="./Elements/Label.ts"/>
-///<reference path="./Elements/Leyend.ts"/>
-///<reference path="./Elements/Li.ts"/>
-///<reference path="./Elements/Link.ts"/>
-///<reference path="./Elements/Main.ts"/>
-///<reference path="./Elements/Map.ts"/>
-///<reference path="./Elements/Menu.ts"/>
-///<reference path="./Elements/MenuItem.ts"/>
-///<reference path="./Elements/Meta.ts"/>
-///<reference path="./Elements/Meter.ts"/>
-///<reference path="./Elements/Nav.ts"/>
-///<reference path="./Elements/Noscrip.ts"/>
-///<reference path="./Elements/Obj.ts"/>
-///<reference path="./Elements/Ol.ts"/>
-///<reference path="./Elements/Optgroup.ts"/>
-///<reference path="./Elements/Option.ts"/>
-///<reference path="./Elements/Output.ts"/>
-///<reference path="./Elements/P.ts"/>
-///<reference path="./Elements/Param.ts"/>
-///<reference path="./Elements/Pre.ts"/>
-///<reference path="./Elements/Progress.ts"/>
-///<reference path="./Elements/Q.ts"/>
-///<reference path="./Elements/Rp.ts"/>
-///<reference path="./Elements/Rt.ts"/>
-///<reference path="./Elements/Ruby.ts"/>
-///<reference path="./Elements/S.ts"/>
-///<reference path="./Elements/Samp.ts"/>
-///<reference path="./Elements/Script.ts"/>
-///<reference path="./Elements/Section.ts"/>
-///<reference path="./Elements/Select.ts"/>
-///<reference path="./Elements/Small.ts"/>
-///<reference path="./Elements/Source.ts"/>
-///<reference path="./Elements/Span.ts"/>
-///<reference path="./Elements/Strong.ts"/>
-///<reference path="./Elements/Style.ts"/>
-///<reference path="./Elements/Sub.ts"/>
-///<reference path="./Elements/Table.ts"/>
-///<reference path="./Elements/Tbody.ts"/>
-///<reference path="./Elements/Td.ts"/>
-///<reference path="./Elements/Textarea.ts"/>
-///<reference path="./Elements/Tfoot.ts"/>
-///<reference path="./Elements/Th.ts"/>
-///<reference path="./Elements/Thead.ts"/>
-///<reference path="./Elements/Time.ts"/>
-///<reference path="./Elements/Title.ts"/>
-///<reference path="./Elements/Tr.ts"/>
-///<reference path="./Elements/Track.ts"/>
-///<reference path="./Elements/U.ts"/>
-///<reference path="./Elements/Ul.ts"/>
-///<reference path="./Elements/Var.ts"/>
-///<reference path="./Elements/Video.ts"/>
-///<reference path="./Elements/Wbr.ts"/>
 var Northwind;
-///<reference path="./../Component.ts"/>
-///<reference path="./Elements/A.ts"/>
-///<reference path="./Elements/Abbr.ts"/>
-///<reference path="./Elements/Address.ts"/>
-///<reference path="./Elements/Area.ts"/>
-///<reference path="./Elements/Article.ts"/>
-///<reference path="./Elements/Aside.ts"/>
-///<reference path="./Elements/Audio.ts"/>
-///<reference path="./Elements/B.ts"/>
-///<reference path="./Elements/Base.ts"/>
-///<reference path="./Elements/Bdi.ts"/>
-///<reference path="./Elements/Bdo.ts"/>
-///<reference path="./Elements/Blockquote.ts"/>
-///<reference path="./Elements/Body.ts"/>
-///<reference path="./Elements/Br.ts"/>
-///<reference path="./Elements/Button.ts"/>
-///<reference path="./Elements/Canvas.ts"/>
-///<reference path="./Elements/Caption.ts"/>
-///<reference path="./Elements/Cite.ts"/>
-///<reference path="./Elements/Code.ts"/>
-///<reference path="./Elements/Col.ts"/>
-///<reference path="./Elements/ColGroup.ts"/>
-///<reference path="./Elements/Datalist.ts"/>
-///<reference path="./Elements/Db.ts"/>
-///<reference path="./Elements/Del.ts"/>
-///<reference path="./Elements/Details.ts"/>
-///<reference path="./Elements/Dfn.ts"/>
-///<reference path="./Elements/Dialog.ts"/>
-///<reference path="./Elements/Div.ts"/>
-///<reference path="./Elements/Dl.ts"/>
-///<reference path="./Elements/Dt.ts"/>
-///<reference path="./Elements/Em.ts"/>
-///<reference path="./Elements/Embed.ts"/>
-///<reference path="./Elements/Fieldset.ts"/>
-///<reference path="./Elements/Figcaption.ts"/>
-///<reference path="./Elements/Figure.ts"/>
-///<reference path="./Elements/Footer.ts"/>
-///<reference path="./Elements/Form.ts"/>
-///<reference path="./Elements/H1.ts"/>
-///<reference path="./Elements/H2.ts"/>
-///<reference path="./Elements/H3.ts"/>
-///<reference path="./Elements/H4.ts"/>
-///<reference path="./Elements/H5.ts"/>
-///<reference path="./Elements/H6.ts"/>
-///<reference path="./Elements/Head.ts"/>
-///<reference path="./Elements/Header.ts"/>
-///<reference path="./Elements/I.ts"/>
-///<reference path="./Elements/Iframe.ts"/>
-///<reference path="./Elements/Img.ts"/>
-///<reference path="./Elements/Input.ts"/>
-///<reference path="./Elements/Ins.ts"/>
-///<reference path="./Elements/Kbd.ts"/>
-///<reference path="./Elements/Keygen.ts"/>
-///<reference path="./Elements/Label.ts"/>
-///<reference path="./Elements/Leyend.ts"/>
-///<reference path="./Elements/Li.ts"/>
-///<reference path="./Elements/Link.ts"/>
-///<reference path="./Elements/Main.ts"/>
-///<reference path="./Elements/Map.ts"/>
-///<reference path="./Elements/Menu.ts"/>
-///<reference path="./Elements/MenuItem.ts"/>
-///<reference path="./Elements/Meta.ts"/>
-///<reference path="./Elements/Meter.ts"/>
-///<reference path="./Elements/Nav.ts"/>
-///<reference path="./Elements/Noscrip.ts"/>
-///<reference path="./Elements/Obj.ts"/>
-///<reference path="./Elements/Ol.ts"/>
-///<reference path="./Elements/Optgroup.ts"/>
-///<reference path="./Elements/Option.ts"/>
-///<reference path="./Elements/Output.ts"/>
-///<reference path="./Elements/P.ts"/>
-///<reference path="./Elements/Param.ts"/>
-///<reference path="./Elements/Pre.ts"/>
-///<reference path="./Elements/Progress.ts"/>
-///<reference path="./Elements/Q.ts"/>
-///<reference path="./Elements/Rp.ts"/>
-///<reference path="./Elements/Rt.ts"/>
-///<reference path="./Elements/Ruby.ts"/>
-///<reference path="./Elements/S.ts"/>
-///<reference path="./Elements/Samp.ts"/>
-///<reference path="./Elements/Script.ts"/>
-///<reference path="./Elements/Section.ts"/>
-///<reference path="./Elements/Select.ts"/>
-///<reference path="./Elements/Small.ts"/>
-///<reference path="./Elements/Source.ts"/>
-///<reference path="./Elements/Span.ts"/>
-///<reference path="./Elements/Strong.ts"/>
-///<reference path="./Elements/Style.ts"/>
-///<reference path="./Elements/Sub.ts"/>
-///<reference path="./Elements/Table.ts"/>
-///<reference path="./Elements/Tbody.ts"/>
-///<reference path="./Elements/Td.ts"/>
-///<reference path="./Elements/Textarea.ts"/>
-///<reference path="./Elements/Tfoot.ts"/>
-///<reference path="./Elements/Th.ts"/>
-///<reference path="./Elements/Thead.ts"/>
-///<reference path="./Elements/Time.ts"/>
-///<reference path="./Elements/Title.ts"/>
-///<reference path="./Elements/Tr.ts"/>
-///<reference path="./Elements/Track.ts"/>
-///<reference path="./Elements/U.ts"/>
-///<reference path="./Elements/Ul.ts"/>
-///<reference path="./Elements/Var.ts"/>
-///<reference path="./Elements/Video.ts"/>
-///<reference path="./Elements/Wbr.ts"/>
+(function (Northwind) {
+    var View;
+    (function (View) {
+        var WrapperManager = /** @class */ (function () {
+            function WrapperManager(element) {
+                this.element = element;
+            }
+            return WrapperManager;
+        }());
+        View.WrapperManager = WrapperManager;
+    })(View = Northwind.View || (Northwind.View = {}));
+})(Northwind || (Northwind = {}));
+var Northwind;
+(function (Northwind) {
+    var View;
+    (function (View) {
+        var ParentManager = /** @class */ (function () {
+            /**
+             *
+             * @param element
+             */
+            function ParentManager(element) {
+                this.element = element;
+            }
+            return ParentManager;
+        }());
+        View.ParentManager = ParentManager;
+    })(View = Northwind.View || (Northwind.View = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../ViewElements/A.ts"/>
+///<reference path="../ViewElements/Abbr.ts"/>
+///<reference path="../ViewElements/Address.ts"/>
+///<reference path="../ViewElements/Area.ts"/>
+///<reference path="../ViewElements/Article.ts"/>
+///<reference path="../ViewElements/Aside.ts"/>
+///<reference path="../ViewElements/Audio.ts"/>
+///<reference path="../ViewElements/B.ts"/>
+///<reference path="../ViewElements/Base.ts"/>
+///<reference path="../ViewElements/Bdi.ts"/>
+///<reference path="../ViewElements/Bdo.ts"/>
+///<reference path="../ViewElements/Blockquote.ts"/>
+///<reference path="../ViewElements/Body.ts"/>
+///<reference path="../ViewElements/Br.ts"/>
+///<reference path="../ViewElements/Button.ts"/>
+///<reference path="../ViewElements/Canvas.ts"/>
+///<reference path="../ViewElements/Caption.ts"/>
+///<reference path="../ViewElements/Cite.ts"/>
+///<reference path="../ViewElements/Code.ts"/>
+///<reference path="../ViewElements/Col.ts"/>
+///<reference path="../ViewElements/ColGroup.ts"/>
+///<reference path="../ViewElements/Datalist.ts"/>
+///<reference path="../ViewElements/Db.ts"/>
+///<reference path="../ViewElements/Del.ts"/>
+///<reference path="../ViewElements/Details.ts"/>
+///<reference path="../ViewElements/Dfn.ts"/>
+///<reference path="../ViewElements/Dialog.ts"/>
+///<reference path="../ViewElements/Div.ts"/>
+///<reference path="../ViewElements/Dl.ts"/>
+///<reference path="../ViewElements/Dt.ts"/>
+///<reference path="../ViewElements/Em.ts"/>
+///<reference path="../ViewElements/Embed.ts"/>
+///<reference path="../ViewElements/Fieldset.ts"/>
+///<reference path="../ViewElements/Figcaption.ts"/>
+///<reference path="../ViewElements/Figure.ts"/>
+///<reference path="../ViewElements/Footer.ts"/>
+///<reference path="../ViewElements/Form.ts"/>
+///<reference path="../ViewElements/H1.ts"/>
+///<reference path="../ViewElements/H2.ts"/>
+///<reference path="../ViewElements/H3.ts"/>
+///<reference path="../ViewElements/H4.ts"/>
+///<reference path="../ViewElements/H5.ts"/>
+///<reference path="../ViewElements/H6.ts"/>
+///<reference path="../ViewElements/Head.ts"/>
+///<reference path="../ViewElements/Header.ts"/>
+///<reference path="../ViewElements/I.ts"/>
+///<reference path="../ViewElements/Iframe.ts"/>
+///<reference path="../ViewElements/Img.ts"/>
+///<reference path="../ViewElements/Input.ts"/>
+///<reference path="../ViewElements/Ins.ts"/>
+///<reference path="../ViewElements/Kbd.ts"/>
+///<reference path="../ViewElements/Keygen.ts"/>
+///<reference path="../ViewElements/Label.ts"/>
+///<reference path="../ViewElements/Leyend.ts"/>
+///<reference path="../ViewElements/Li.ts"/>
+///<reference path="../ViewElements/Link.ts"/>
+///<reference path="../ViewElements/Main.ts"/>
+///<reference path="../ViewElements/Map.ts"/>
+///<reference path="../ViewElements/Menu.ts"/>
+///<reference path="../ViewElements/MenuItem.ts"/>
+///<reference path="../ViewElements/Meta.ts"/>
+///<reference path="../ViewElements/Meter.ts"/>
+///<reference path="../ViewElements/Nav.ts"/>
+///<reference path="../ViewElements/Noscrip.ts"/>
+///<reference path="../ViewElements/Obj.ts"/>
+///<reference path="../ViewElements/Ol.ts"/>
+///<reference path="../ViewElements/Optgroup.ts"/>
+///<reference path="../ViewElements/Option.ts"/>
+///<reference path="../ViewElements/Output.ts"/>
+///<reference path="../ViewElements/P.ts"/>
+///<reference path="../ViewElements/Param.ts"/>
+///<reference path="../ViewElements/Pre.ts"/>
+///<reference path="../ViewElements/Progress.ts"/>
+///<reference path="../ViewElements/Q.ts"/>
+///<reference path="../ViewElements/Rp.ts"/>
+///<reference path="../ViewElements/Rt.ts"/>
+///<reference path="../ViewElements/Ruby.ts"/>
+///<reference path="../ViewElements/S.ts"/>
+///<reference path="../ViewElements/Samp.ts"/>
+///<reference path="../ViewElements/Script.ts"/>
+///<reference path="../ViewElements/Section.ts"/>
+///<reference path="../ViewElements/Select.ts"/>
+///<reference path="../ViewElements/Small.ts"/>
+///<reference path="../ViewElements/Source.ts"/>
+///<reference path="../ViewElements/Span.ts"/>
+///<reference path="../ViewElements/Strong.ts"/>
+///<reference path="../ViewElements/Style.ts"/>
+///<reference path="../ViewElements/Sub.ts"/>
+///<reference path="../ViewElements/Table.ts"/>
+///<reference path="../ViewElements/Tbody.ts"/>
+///<reference path="../ViewElements/Td.ts"/>
+///<reference path="../ViewElements/Textarea.ts"/>
+///<reference path="../ViewElements/Tfoot.ts"/>
+///<reference path="../ViewElements/Th.ts"/>
+///<reference path="../ViewElements/Thead.ts"/>
+///<reference path="../ViewElements/Time.ts"/>
+///<reference path="../ViewElements/Title.ts"/>
+///<reference path="../ViewElements/Tr.ts"/>
+///<reference path="../ViewElements/Track.ts"/>
+///<reference path="../ViewElements/U.ts"/>
+///<reference path="../ViewElements/Ul.ts"/>
+///<reference path="../ViewElements/Var.ts"/>
+///<reference path="../ViewElements/Video.ts"/>
+///<reference path="../ViewElements/Wbr.ts"/>
+var Northwind;
+///<reference path="../ViewElements/A.ts"/>
+///<reference path="../ViewElements/Abbr.ts"/>
+///<reference path="../ViewElements/Address.ts"/>
+///<reference path="../ViewElements/Area.ts"/>
+///<reference path="../ViewElements/Article.ts"/>
+///<reference path="../ViewElements/Aside.ts"/>
+///<reference path="../ViewElements/Audio.ts"/>
+///<reference path="../ViewElements/B.ts"/>
+///<reference path="../ViewElements/Base.ts"/>
+///<reference path="../ViewElements/Bdi.ts"/>
+///<reference path="../ViewElements/Bdo.ts"/>
+///<reference path="../ViewElements/Blockquote.ts"/>
+///<reference path="../ViewElements/Body.ts"/>
+///<reference path="../ViewElements/Br.ts"/>
+///<reference path="../ViewElements/Button.ts"/>
+///<reference path="../ViewElements/Canvas.ts"/>
+///<reference path="../ViewElements/Caption.ts"/>
+///<reference path="../ViewElements/Cite.ts"/>
+///<reference path="../ViewElements/Code.ts"/>
+///<reference path="../ViewElements/Col.ts"/>
+///<reference path="../ViewElements/ColGroup.ts"/>
+///<reference path="../ViewElements/Datalist.ts"/>
+///<reference path="../ViewElements/Db.ts"/>
+///<reference path="../ViewElements/Del.ts"/>
+///<reference path="../ViewElements/Details.ts"/>
+///<reference path="../ViewElements/Dfn.ts"/>
+///<reference path="../ViewElements/Dialog.ts"/>
+///<reference path="../ViewElements/Div.ts"/>
+///<reference path="../ViewElements/Dl.ts"/>
+///<reference path="../ViewElements/Dt.ts"/>
+///<reference path="../ViewElements/Em.ts"/>
+///<reference path="../ViewElements/Embed.ts"/>
+///<reference path="../ViewElements/Fieldset.ts"/>
+///<reference path="../ViewElements/Figcaption.ts"/>
+///<reference path="../ViewElements/Figure.ts"/>
+///<reference path="../ViewElements/Footer.ts"/>
+///<reference path="../ViewElements/Form.ts"/>
+///<reference path="../ViewElements/H1.ts"/>
+///<reference path="../ViewElements/H2.ts"/>
+///<reference path="../ViewElements/H3.ts"/>
+///<reference path="../ViewElements/H4.ts"/>
+///<reference path="../ViewElements/H5.ts"/>
+///<reference path="../ViewElements/H6.ts"/>
+///<reference path="../ViewElements/Head.ts"/>
+///<reference path="../ViewElements/Header.ts"/>
+///<reference path="../ViewElements/I.ts"/>
+///<reference path="../ViewElements/Iframe.ts"/>
+///<reference path="../ViewElements/Img.ts"/>
+///<reference path="../ViewElements/Input.ts"/>
+///<reference path="../ViewElements/Ins.ts"/>
+///<reference path="../ViewElements/Kbd.ts"/>
+///<reference path="../ViewElements/Keygen.ts"/>
+///<reference path="../ViewElements/Label.ts"/>
+///<reference path="../ViewElements/Leyend.ts"/>
+///<reference path="../ViewElements/Li.ts"/>
+///<reference path="../ViewElements/Link.ts"/>
+///<reference path="../ViewElements/Main.ts"/>
+///<reference path="../ViewElements/Map.ts"/>
+///<reference path="../ViewElements/Menu.ts"/>
+///<reference path="../ViewElements/MenuItem.ts"/>
+///<reference path="../ViewElements/Meta.ts"/>
+///<reference path="../ViewElements/Meter.ts"/>
+///<reference path="../ViewElements/Nav.ts"/>
+///<reference path="../ViewElements/Noscrip.ts"/>
+///<reference path="../ViewElements/Obj.ts"/>
+///<reference path="../ViewElements/Ol.ts"/>
+///<reference path="../ViewElements/Optgroup.ts"/>
+///<reference path="../ViewElements/Option.ts"/>
+///<reference path="../ViewElements/Output.ts"/>
+///<reference path="../ViewElements/P.ts"/>
+///<reference path="../ViewElements/Param.ts"/>
+///<reference path="../ViewElements/Pre.ts"/>
+///<reference path="../ViewElements/Progress.ts"/>
+///<reference path="../ViewElements/Q.ts"/>
+///<reference path="../ViewElements/Rp.ts"/>
+///<reference path="../ViewElements/Rt.ts"/>
+///<reference path="../ViewElements/Ruby.ts"/>
+///<reference path="../ViewElements/S.ts"/>
+///<reference path="../ViewElements/Samp.ts"/>
+///<reference path="../ViewElements/Script.ts"/>
+///<reference path="../ViewElements/Section.ts"/>
+///<reference path="../ViewElements/Select.ts"/>
+///<reference path="../ViewElements/Small.ts"/>
+///<reference path="../ViewElements/Source.ts"/>
+///<reference path="../ViewElements/Span.ts"/>
+///<reference path="../ViewElements/Strong.ts"/>
+///<reference path="../ViewElements/Style.ts"/>
+///<reference path="../ViewElements/Sub.ts"/>
+///<reference path="../ViewElements/Table.ts"/>
+///<reference path="../ViewElements/Tbody.ts"/>
+///<reference path="../ViewElements/Td.ts"/>
+///<reference path="../ViewElements/Textarea.ts"/>
+///<reference path="../ViewElements/Tfoot.ts"/>
+///<reference path="../ViewElements/Th.ts"/>
+///<reference path="../ViewElements/Thead.ts"/>
+///<reference path="../ViewElements/Time.ts"/>
+///<reference path="../ViewElements/Title.ts"/>
+///<reference path="../ViewElements/Tr.ts"/>
+///<reference path="../ViewElements/Track.ts"/>
+///<reference path="../ViewElements/U.ts"/>
+///<reference path="../ViewElements/Ul.ts"/>
+///<reference path="../ViewElements/Var.ts"/>
+///<reference path="../ViewElements/Video.ts"/>
+///<reference path="../ViewElements/Wbr.ts"/>
 (function (Northwind) {
     var Tag;
     (function (Tag) {
-        var FactoryTag = (function () {
+        var FactoryTag = /** @class */ (function () {
             /**
              *
              */
@@ -7352,8 +7585,8 @@ var Northwind;
                         ;
                         break;
                     default:
-                        instance = new Northwind.Html.Component();
-                        instance.create(tagName);
+                        //instance = new Northwind.Html.Component();
+                        //instance.create(tagName);
                         break;
                 }
                 return instance;
@@ -7363,11 +7596,108 @@ var Northwind;
         Tag.FactoryTag = FactoryTag;
     })(Tag = Northwind.Tag || (Northwind.Tag = {}));
 })(Northwind || (Northwind = {}));
+///<reference path="../Component.ts"/>
+var Northwind;
+///<reference path="../Component.ts"/>
+(function (Northwind) {
+    var Tag;
+    (function (Tag) {
+        /**
+         * [Input description]
+         * @type {[type]}
+         */
+        var Hidden = /** @class */ (function (_super) {
+            __extends(Hidden, _super);
+            function Hidden() {
+                var _this = _super.call(this) || this;
+                _this.setHidden();
+                return _this;
+            }
+            return Hidden;
+        }(Northwind.Tag.Input));
+        Tag.Hidden = Hidden;
+    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../Component.ts"/>
+var Northwind;
+///<reference path="../Component.ts"/>
+(function (Northwind) {
+    var Tag;
+    (function (Tag) {
+        /**
+         * [ViewElement description]
+         * @type {[type]}
+         */
+        var Hr = /** @class */ (function (_super) {
+            __extends(Hr, _super);
+            /**
+             *
+             */
+            function Hr() {
+                var _this = _super.call(this, "HR") || this;
+                _this.initialize();
+                return _this;
+            }
+            return Hr;
+        }(Northwind.Html.Component));
+        Tag.Hr = Hr;
+    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../Component.ts"/>
+var Northwind;
+///<reference path="../Component.ts"/>
+(function (Northwind) {
+    var Tag;
+    (function (Tag) {
+        /**
+         * [ViewElement description]
+         * @type {[type]}
+         */
+        var Summary = /** @class */ (function (_super) {
+            __extends(Summary, _super);
+            /**
+             *
+             */
+            function Summary() {
+                var _this = _super.call(this, "SUMMARY") || this;
+                _this.initialize();
+                return _this;
+            }
+            return Summary;
+        }(Northwind.Html.Component));
+        Tag.Summary = Summary;
+    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
+///<reference path="../Component.ts"/>
+var Northwind;
+///<reference path="../Component.ts"/>
+(function (Northwind) {
+    var Tag;
+    (function (Tag) {
+        /**
+         * [ViewElement description]
+         * @type {[type]}
+         */
+        var Sup = /** @class */ (function (_super) {
+            __extends(Sup, _super);
+            /**
+             *
+             */
+            function Sup() {
+                var _this = _super.call(this, "SUP") || this;
+                _this.initialize();
+                return _this;
+            }
+            return Sup;
+        }(Northwind.Html.Component));
+        Tag.Sup = Sup;
+    })(Tag = Northwind.Tag || (Northwind.Tag = {}));
+})(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
     var Network;
     (function (Network) {
-        var Ajax = (function () {
+        var Ajax = /** @class */ (function () {
             /**
              *
              */
@@ -7572,12 +7902,7 @@ var Northwind;
              * @param name
              */
             Ajax.prototype.getTag = function (tag) {
-                if (tag instanceof Northwind.Html.Component) {
-                    return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
-                }
-                else {
-                    return Northwind.Service.DependencyInjector.get().get("tag");
-                }
+                return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
             };
             /**
              *
@@ -7586,12 +7911,7 @@ var Northwind;
             Ajax.prototype.getEvent = function (tag) {
                 if (tag === void 0) { tag = false; }
                 var events = Northwind.Service.DependencyInjector.get().get("event");
-                if (tag instanceof Northwind.Html.Component) {
-                    return events.tag(tag);
-                }
-                else {
-                    return events;
-                }
+                return events.tag(tag);
             };
             Ajax.prototype.getDi = function () {
                 return Northwind.Service.DependencyInjector.get();
@@ -7605,342 +7925,31 @@ var Northwind;
 (function (Northwind) {
     var Network;
     (function (Network) {
-        var MethodType = (function () {
+        var MethodType = /** @class */ (function () {
             function MethodType() {
             }
+            MethodType.POST = "POST";
+            MethodType.GET = "GET";
+            MethodType.PUT = "PUT";
+            MethodType.DELETE = "DELETE";
             return MethodType;
         }());
-        MethodType.POST = "POST";
-        MethodType.GET = "GET";
-        MethodType.PUT = "PUT";
-        MethodType.DELETE = "DELETE";
         Network.MethodType = MethodType;
     })(Network = Northwind.Network || (Northwind.Network = {}));
 })(Northwind || (Northwind = {}));
 var Northwind;
 (function (Northwind) {
-    var Service;
-    (function (Service) {
-        var Container = (function () {
-            function Container() {
-                this.service = [];
-            }
-            Container.prototype.set = function (serviceName, content) {
-                this.service[serviceName] = content;
-            };
-            Container.prototype.get = function (serviceName) {
-                return this.service[serviceName];
-            };
-            Container.prototype.hasKey = function (serviceName) {
-                if (typeof this.service[serviceName] == "undefined") {
-                    return false;
-                }
-                return true;
-            };
-            Container.prototype.setPersistent = function (serviceName, content) {
-                sessionStorage.setItem(serviceName, content);
-            };
-            Container.prototype.getPersistent = function (serviceName) {
-                return sessionStorage.getItem(serviceName);
-            };
-            return Container;
-        }());
-        Service.Container = Container;
-    })(Service = Northwind.Service || (Northwind.Service = {}));
-})(Northwind || (Northwind = {}));
-///<reference path="./Environment/Scope.ts"/>
-///<reference path="./Environment/Config.ts"/>
-///<reference path="./Helper/ArrayHelper.ts"/>
-///<reference path="./Service/Container.ts"/>
-var Northwind;
-///<reference path="./Environment/Scope.ts"/>
-///<reference path="./Environment/Config.ts"/>
-///<reference path="./Helper/ArrayHelper.ts"/>
-///<reference path="./Service/Container.ts"/>
-(function (Northwind) {
-    var Application = (function () {
-        /**
-         *
-         */
-        function Application() {
-            /**
-             *
-             */
-            this.config = {};
-            /**
-             *
-             */
-            this.try = 0;
-            /**
-             *
-             */
-            this.env = Northwind.Environment.Scope.LOCAL;
-            /**
-             *
-             */
-            this.catchErrors = function () { };
-            /**
-             *
-             */
-            this.domManager = new Northwind.Html.Dom;
-            /**
-             *
-             */
-            this.restricted = new Array;
-            /**
-             *
-             */
-            this.globals = new Array;
-            /**
-             *
-             */
-            this.controllers = false;
-            this.restricted = [
-                "constructor",
-                "initialize",
-                "getById",
-                "getByTag",
-                "getByClass",
-                "getDi",
-                "hasKey",
-                "setPersistent",
-                "getPersistent",
-                "get",
-                "set",
-                "setDi",
-                "getUrl",
-                "setUrl",
-                "getAjax",
-                "setAjax",
-                "getDom",
-                "setDom",
-                "setEm",
-                "getEm",
-                "setEntityManager",
-                "getEntityManager",
-                "setContainer",
-                "getContainer",
-                "setTag",
-                "getTag",
-                "setEvent",
-                "getEvent",
-                "setGlobals",
-                "getGlobals"
-            ];
-            new Northwind.Service.Allocator();
-            window.onbeforeunload = function () {
-                sessionStorage.clear();
-            };
-        }
-        /**
-         *
-         */
-        Application.prototype.setScope = function (env) {
-            this.env = env;
-        };
-        /**
-         *
-         */
-        Application.prototype.setControllers = function (controller) {
-            if (controller === void 0) { controller = false; }
-            this.controllers = controller;
-        };
-        /**
-         *
-         */
-        Application.prototype.setConfig = function (config) {
-            this.config = config.getConfig(this.env);
-        };
-        /**
-         *
-         */
-        Application.prototype.getConfig = function () {
-            return this.config;
-        };
-        /**
-         *
-         */
-        Application.prototype.setGlobals = function (globals) {
-            this.globals = globals;
-            return this;
-        };
-        /**
-         *
-         */
-        Application.prototype.getGlobals = function () {
-            return this.globals;
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveConfig = function () {
-            this.addCharset();
-            var positionArray = new Array();
-            var configData = this.config;
-            for (var key in configData) {
-                switch (key) {
-                    case "urls":
-                        this.resolveUrl(configData[key]);
-                        break;
-                    case "services":
-                        this.resolveServices(configData[key]);
-                        break;
-                }
-            }
-            if (configData.hasOwnProperty("controllers")) {
-                this.resolveControllers(configData["controllers"]);
-            }
-            else {
-                throw "Config must have controllers item attached";
-            }
-        };
-        Application.prototype.addCharset = function () {
-            var header = this.domManager.getByTag("head");
-            header.append(new Northwind.Tag.Meta().attr({
-                "charset": "utf-8"
-            }));
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveUrl = function (urls) {
-            var url = new Northwind.Url.Url();
-            if (Array.isArray(urls)) {
-                for (var key in urls) {
-                    if (typeof urls[key] == "string") {
-                        url.set(key, urls[key]);
-                    }
-                    else {
-                        throw "Url must be string : " + urls[key];
-                    }
-                }
-            }
-            else if (typeof url == "object") {
-                for (var keyUrlFor in urls) {
-                    url.set(keyUrlFor, urls[keyUrlFor]);
-                }
-            }
-            else {
-                throw "Url data unrecognized";
-            }
-            Northwind.Service.DependencyInjector.get().set("url", url);
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveControllers = function (controllers) {
-            if (controllers.length == 0) {
-                throw "You must load your controllers";
-            }
-            if (Array.isArray(controllers)) {
-                var i = 1;
-                for (var key in controllers) {
-                    if (typeof controllers[key] != "undefined") {
-                        if (this.controllers == false) {
-                            var temp = new controllers[key];
-                            this.setControllerInstance(temp);
-                        }
-                        else {
-                            if (Array.isArray(this.controllers)) {
-                                for (var _i = 0, _a = this.controllers; _i < _a.length; _i++) {
-                                    var item = _a[_i];
-                                    var temp = new controllers[key];
-                                    if (item == temp.getClassName()) {
-                                        this.setControllerInstance(temp);
-                                    }
-                                }
-                            }
-                            else if (typeof this.controllers == "string") {
-                                var temp = new controllers[key];
-                                if (temp.getClassName() == this.controllers) {
-                                    this.setControllerInstance(temp);
-                                }
-                            }
-                        }
-                        i++;
-                    }
-                    else {
-                        throw "Config => Controller => 'name' must be initialized with Northwind.Mvc.Controller class";
-                    }
-                }
-            }
-            else {
-                throw "Config => controllers must be array";
-            }
-        };
-        Application.prototype.setControllerInstance = function (temp) {
-            if (temp instanceof Northwind.Mvc.Controller) {
-                console.log(temp.getClassName(), Northwind.Service.DependencyInjector);
-                temp.setGlobals(this.getGlobals());
-                temp.initialize();
-                this.resolvePropertiesController(temp);
-            }
-            else {
-                throw "Controller #" + temp.getClassName() + " must be extend from View.Controller class";
-            }
-        };
-        /**
-         *
-         */
-        Application.prototype.resolvePropertiesController = function (controller) {
-            for (var key in controller) {
-                switch (typeof controller[key]) {
-                    case "function":
-                        if (!Northwind.Helper.ArrayHelper.inArray(this.restricted, key)) {
-                            var component = this.domManager.getById(key);
-                            if (component != false) {
-                                component.setDi(controller.getDi());
-                                if (component) {
-                                    controller[key](component);
-                                }
-                            }
-                        }
-                        break;
-                }
-            }
-        };
-        /**
-         *
-         */
-        Application.prototype.resolveServices = function (service) {
-            new service().initialize(Northwind.Service.DependencyInjector.get());
-        };
-        /**
-         *
-         */
-        Application.prototype.catch = function (fn) {
-            this.catchErrors = fn;
-            return this;
-        };
-        /**
-         *
-         */
-        Application.prototype.start = function () {
-            try {
-                var di = new Northwind.Service.Container;
-                this.resolveConfig();
-            }
-            catch (e) {
-                this.catchErrors(e);
-            }
-        };
-        return Application;
-    }());
-    Northwind.Application = Application;
-})(Northwind || (Northwind = {}));
-var Northwind;
-(function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var ComparisonOperators = (function () {
+        var ComparisonOperators = /** @class */ (function () {
             function ComparisonOperators() {
             }
+            ComparisonOperators.AND = "&&";
+            ComparisonOperators.OR = "||";
+            ComparisonOperators.EQUAL = "==";
+            ComparisonOperators.DIFFERENT = "!=";
             return ComparisonOperators;
         }());
-        ComparisonOperators.AND = "&&";
-        ComparisonOperators.OR = "||";
-        ComparisonOperators.EQUAL = "==";
-        ComparisonOperators.DIFFERENT = "!=";
         Persistence.ComparisonOperators = ComparisonOperators;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
@@ -7948,18 +7957,18 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var DatamapperOperators = (function () {
+        var DatamapperOperators = /** @class */ (function () {
             function DatamapperOperators() {
             }
+            DatamapperOperators.OR = "$or";
+            DatamapperOperators.AND = "$and";
+            DatamapperOperators.SORT = "$sort";
+            DatamapperOperators.IS_NOT = "$isNot";
+            DatamapperOperators.LIMIT = "$limit";
+            DatamapperOperators.COLUMNS = "$columns";
+            DatamapperOperators.CONDITIONAL = "$conditions";
             return DatamapperOperators;
         }());
-        DatamapperOperators.OR = "$or";
-        DatamapperOperators.AND = "$and";
-        DatamapperOperators.SORT = "$sort";
-        DatamapperOperators.IS_NOT = "$isNot";
-        DatamapperOperators.LIMIT = "$limit";
-        DatamapperOperators.COLUMNS = "$columns";
-        DatamapperOperators.CONDITIONAL = "$conditions";
         Persistence.DatamapperOperators = DatamapperOperators;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
@@ -7967,7 +7976,7 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var DataType = (function () {
+        var DataType = /** @class */ (function () {
             function DataType() {
             }
             /**
@@ -7982,18 +7991,18 @@ var Northwind;
                 }
                 return value;
             };
+            DataType.BOOLEAN = 1;
+            DataType.INTEGER = 2;
+            DataType.STRING = 3;
+            DataType.OBJECT = 4;
+            DataType.ARRAY = 5;
+            DataType.CLASS = 6;
+            DataType.BOOLEAN_TYPE = "boolean";
+            DataType.INTEGER_TYPE = "number";
+            DataType.STRING_TYPE = "string";
+            DataType.OBJECT_TYPE = "object";
             return DataType;
         }());
-        DataType.BOOLEAN = 1;
-        DataType.INTEGER = 2;
-        DataType.STRING = 3;
-        DataType.OBJECT = 4;
-        DataType.ARRAY = 5;
-        DataType.CLASS = 6;
-        DataType.BOOLEAN_TYPE = "boolean";
-        DataType.INTEGER_TYPE = "number";
-        DataType.STRING_TYPE = "string";
-        DataType.OBJECT_TYPE = "object";
         Persistence.DataType = DataType;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
@@ -8005,7 +8014,7 @@ var Northwind;
 (function (Northwind) {
     var Reflection;
     (function (Reflection_1) {
-        var Reflection = (function () {
+        var Reflection = /** @class */ (function () {
             function Reflection() {
                 this.methods = new Array();
                 this.attributes = new Array();
@@ -8117,14 +8126,14 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var UnitOfWork = (function () {
+        var UnitOfWork = /** @class */ (function () {
             function UnitOfWork() {
             }
+            UnitOfWork.NEW = 1;
+            UnitOfWork.CREATED = 2;
+            UnitOfWork.DELETED = 3;
             return UnitOfWork;
         }());
-        UnitOfWork.NEW = 1;
-        UnitOfWork.CREATED = 2;
-        UnitOfWork.DELETED = 3;
         Persistence.UnitOfWork = UnitOfWork;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
@@ -8138,7 +8147,7 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var Hydrator = (function () {
+        var Hydrator = /** @class */ (function () {
             function Hydrator() {
             }
             Hydrator.prototype.hydrate = function (model, data) {
@@ -8204,7 +8213,7 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var Filter = (function () {
+        var Filter = /** @class */ (function () {
             function Filter() {
                 this.first = "";
                 this.final = [];
@@ -8417,7 +8426,7 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var EntityManager = (function () {
+        var EntityManager = /** @class */ (function () {
             /**
              * Entity manager is a class
              */
@@ -8816,12 +8825,7 @@ var Northwind;
              * @param name
              */
             EntityManager.prototype.getTag = function (tag) {
-                if (tag instanceof Northwind.Html.Component) {
-                    return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
-                }
-                else {
-                    return Northwind.Service.DependencyInjector.get().get("tag");
-                }
+                return Northwind.Service.DependencyInjector.get().get("tag").tag(tag);
             };
             /**
              *
@@ -8837,12 +8841,7 @@ var Northwind;
             EntityManager.prototype.getEvent = function (tag) {
                 if (tag === void 0) { tag = false; }
                 var events = Northwind.Service.DependencyInjector.get().get("event");
-                if (tag instanceof Northwind.Html.Component) {
-                    return events.tag(tag);
-                }
-                else {
-                    return events;
-                }
+                return events.tag(tag);
             };
             EntityManager.prototype.getDi = function () {
                 return Northwind.Service.DependencyInjector.get();
@@ -8856,7 +8855,7 @@ var Northwind;
 (function (Northwind) {
     var Persistence;
     (function (Persistence) {
-        var Sort = (function () {
+        var Sort = /** @class */ (function () {
             function Sort() {
             }
             Sort.sortByField = function (data, field) {
@@ -8887,10 +8886,10 @@ var Northwind;
                 }
                 return result;
             };
+            Sort.ASC = 1;
+            Sort.DESC = -1;
             return Sort;
         }());
-        Sort.ASC = 1;
-        Sort.DESC = -1;
         Persistence.Sort = Sort;
     })(Persistence = Northwind.Persistence || (Northwind.Persistence = {}));
 })(Northwind || (Northwind = {}));
@@ -8898,7 +8897,7 @@ var Northwind;
 (function (Northwind) {
     var Reflection;
     (function (Reflection) {
-        var Checksum = (function () {
+        var Checksum = /** @class */ (function () {
             /**
              *
              */
@@ -8923,11 +8922,13 @@ var Northwind;
         Reflection.Checksum = Checksum;
     })(Reflection = Northwind.Reflection || (Northwind.Reflection = {}));
 })(Northwind || (Northwind = {}));
+/// <reference path="../Mvc/View/Html/Factory/FactoryTag.ts" />
 var Northwind;
+/// <reference path="../Mvc/View/Html/Factory/FactoryTag.ts" />
 (function (Northwind) {
     var Service;
     (function (Service) {
-        var Allocator = (function () {
+        var Allocator = /** @class */ (function () {
             function Allocator() {
                 Northwind.Service.DependencyInjector.get().set("ajax", new Northwind.Network.Ajax);
                 Northwind.Service.DependencyInjector.get().set("container", new Northwind.Service.Container);
@@ -8945,23 +8946,25 @@ var Northwind;
         Service.Allocator = Allocator;
     })(Service = Northwind.Service || (Northwind.Service = {}));
 })(Northwind || (Northwind = {}));
+///<reference path="./Container.ts" />
 var Northwind;
+///<reference path="./Container.ts" />
 (function (Northwind) {
     var Service;
     (function (Service) {
-        var DependencyInjector = (function () {
-            function DependencyInjector() {
+        var Di = /** @class */ (function () {
+            function Di() {
             }
-            DependencyInjector.getInstance = function () {
+            Di.getInstance = function () {
                 return new Northwind.Service.Container;
             };
-            DependencyInjector.get = function () {
-                return DependencyInjector.di;
+            Di.get = function () {
+                return Di.di;
             };
-            return DependencyInjector;
+            Di.di = new Service.Container;
+            return Di;
         }());
-        DependencyInjector.di = new Service.Container;
-        Service.DependencyInjector = DependencyInjector;
+        Service.Di = Di;
     })(Service = Northwind.Service || (Northwind.Service = {}));
 })(Northwind || (Northwind = {}));
 /// <reference path="../Service/Container.ts" />
@@ -8970,10 +8973,10 @@ var Northwind;
 (function (Northwind) {
     var Url;
     (function (Url_1) {
-        var Url = (function (_super) {
+        var Url = /** @class */ (function (_super) {
             __extends(Url, _super);
             function Url() {
-                return _super.apply(this, arguments) || this;
+                return _super !== null && _super.apply(this, arguments) || this;
             }
             Url.prototype.getQuery = function (url) {
                 if (url === void 0) { url = false; }

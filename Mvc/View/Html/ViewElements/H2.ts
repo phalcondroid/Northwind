@@ -1,0 +1,20 @@
+///<reference path="../Component.ts"/>
+
+namespace Northwind.Tag {
+    /**
+     * [ViewElement description]
+     * @type {[type]}
+     */
+    export class H2 extends Northwind.Html.Component
+    {
+        /**
+         *
+         */
+        public constructor()
+        {
+            super("H2");
+            
+            this.initialize();
+        }
+    }
+}
